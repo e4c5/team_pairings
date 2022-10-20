@@ -25,6 +25,7 @@ router.register('round', views.TournamentRoundViewSet)
 router.register('result', views.ResultViewSet)
 
 urlpatterns = [
+    path('', views.index),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls'))
 ] + router.urls

@@ -8,6 +8,9 @@ from tournament.serializers import (ParticipantSerializer, TournamentSerializer,
 
 # Create your views here.
 
+def index(request):
+    return render(request, 'index.html')
+
 class TournamentViewSet(viewsets.ModelViewSet):
     queryset = models.Tournament.objects.all()
     serializer_class = TournamentSerializer
