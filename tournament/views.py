@@ -3,7 +3,8 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from tournament import models
-from tournament.serializers import ParticipantSerializer, TournamentSerializer, TournamentRoundSerializer
+from tournament.serializers import (ParticipantSerializer, TournamentSerializer, 
+        TournamentRoundSerializer, ResultSerializer)
 
 # Create your views here.
 
@@ -18,5 +19,9 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
 class ParticipantViewSet(viewsets.ModelViewSet):
     queryset = models.Participant.objects.all()
     serializer_class = ParticipantSerializer
-        
+
+class ResultViewSet(viewsets.ModelViewSet):
+    queryset = models.Result.objects.all()
+    serializer_class = ResultSerializer
+
 
