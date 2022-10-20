@@ -1,0 +1,22 @@
+from django.shortcuts import render
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from tournament import models
+from tournament.serializers import ParticipantSerializer, TournamentSerializer, TournamentRoundSerializer
+
+# Create your views here.
+
+class TournamentViewSet(viewsets.ModelViewSet):
+    queryset = models.Tournament.objects.all()
+    serializer_class = TournamentSerializer
+
+class TournamentRoundViewSet(viewsets.ModelViewSet):
+    queryset = models.TournamentRound.objects.all()
+    serializer_class = TournamentRoundSerializer
+
+class ParticipantViewSet(viewsets.ModelViewSet):
+    queryset = models.Participant.objects.all()
+    serializer_class = ParticipantSerializer
+        
+
