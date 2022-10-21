@@ -1,4 +1,6 @@
 //npx babel --watch jsx --out-dir tournament/static/js/ --presets react-app/dev 
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import Button from '@mui/material/Button';
 
 const Bada = () => {
