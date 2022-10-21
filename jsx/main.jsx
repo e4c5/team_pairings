@@ -1,7 +1,8 @@
 //npx babel --watch jsx --out-dir tournament/static/js/ --presets react-app/dev 
+import Button from '@mui/material/Button';
 
 const Bada = () => {
-    return 'Hello from react'
+    return <Button variant="contained">Hello World</Button>
 }
 
 const div = document.getElementById('root')
