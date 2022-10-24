@@ -12,6 +12,15 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
+import {
+    createBrowserRouter,
+    createRoutesFromElements,
+    RouterProvider,
+    Route,
+    Link
+  } from "react-router-dom";
+  
+ 
 
 function getCookie(name) {
     var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -19,18 +28,7 @@ function getCookie(name) {
         return match[2];
     }
 }
-/*
-name = models.CharField(max_length=128)
-played = models.IntegerField(default=0, null=True)
-game_wins = models.FloatField(default=0, null=True)
-round_wins = models.FloatField(default=0, null=True)
-tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
 
-spread = models.IntegerField(default=0, null=True)
-position = models.IntegerField(default=0, null=True)
-offed = models.IntegerField(default=0, null=True)
-seed = models.IntegerField(default=0, null=True)
-*/
 const Participants = (props) => {
     return (
       <TableContainer component={Paper}>
@@ -54,7 +52,7 @@ const Participants = (props) => {
               >
                 <TableCell align="right">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  <Link to={ `${row.id}` }>{row.name} {row.id}</Link>
                 </TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>
                 <TableCell align="right">{row.game_wins}</TableCell>
@@ -118,7 +116,29 @@ const Tournament = () => {
         </div>)
 }
 
+const Rounds = (props) => {
+    return <div>This will be replaced by the round index</div>
+}
+
+const Participant = (props) => {
+    return <div>Hello World</div>
+}
+
+const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<Tournament />}>
+        <Route path="/:id" element={<Participant/>} />
+        <Route element={<Rounds/>}/>
+
+      </Route>
+    )
+);
+
+
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
-root.render(<Tournament/>)
-console.log('main.js 0.01.1')
+root.render(<RouterProvider router={router} />)
+console.log('main.js 0.01.2')
+
+
+
