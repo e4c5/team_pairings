@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as ReactDOM from 'react-dom';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -16,8 +17,10 @@ import {
     createBrowserRouter,
     createRoutesFromElements,
     RouterProvider,
-    Route,
-    Link
+    Route, Routes,
+    Link as RouterLink,
+    BrowserRouter,
+    Outlet
   } from "react-router-dom";
   
  
@@ -52,7 +55,7 @@ const Participants = (props) => {
               >
                 <TableCell align="right">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
-                  <Link to={ `${row.id}` }>{row.name} {row.id}</Link>
+                  <RouterLink to={ `${row.id}` }>{row.name} {row.id}</RouterLink>
                 </TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>
                 <TableCell align="right">{row.game_wins}</TableCell>
@@ -117,28 +120,47 @@ const Tournament = () => {
 }
 
 const Rounds = (props) => {
-    return <div>This will be replaced by the round index</div>
+    const [rounds, setRounds] = React.useState(null)
+    console.log('WTF')
+    useEffect(() => {
+        console.log('User effect', rounds)
+        if(rounds == null) {
+            fetch('/rounds/').then(resp => resp.json()).then(json =>{
+                setRounds(json)
+            })
+        }
+
+    })
+    if(rounds == null) {
+        return <div><Outlet/> dfdfd</div>
+    }
+    else {
+        return (
+            <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                {rounds.map(r => <Button key={r.di}>{r.round_no}</Button>) }
+            </ButtonGroup>
+        )
+    }
 }
 
 const Participant = (props) => {
     return <div>Hello World</div>
 }
 
-const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route path="/" element={<Tournament />}>
-        <Route path="/:id" element={<Participant/>} />
-        <Route element={<Rounds/>}/>
-
-      </Route>
-    )
-);
-
-
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
-root.render(<RouterProvider router={router} />)
-console.log('main.js 0.01.2')
+root.render(
+    <BrowserRouter>
+        <Routes>
+            <Route element={<Rounds/>}>
+            <Route index element={<Tournament />} />
+                
+                <Route path="/:id" element={<Participant/>} />
+            </Route>
+        </Routes>
+    </BrowserRouter>
+)
+console.log('main.js 0.01.5')
 
 
 
