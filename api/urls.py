@@ -14,15 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
-from django.views.generic import RedirectView
-from api import urls
-from tournament import views
+from django.urls import path, include
+from rest_framework import routers
+from api import views
 
-urlpatterns = [
-    path('', views.index),
-    path('api/', include(urls.urlpatterns)),
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-    re_path('^', RedirectView.as_view(url='/'))
-]
+router = routers.SimpleRouter()
+router.register('tournament', views.TournamentViewSet)
+router.register('participant', views.ParticipantViewSet)
+router.register('round', views.TournamentRoundViewSet)
+router.register('result', views.ResultViewSet)
+
+urlpatterns = router.urls

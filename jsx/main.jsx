@@ -12,17 +12,20 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Tooltip from '@mui/material/Tooltip';
+import Link from '@mui/material/Link';
 
 import {
     createBrowserRouter,
     createRoutesFromElements,
     RouterProvider,
+    useParams,
     Route, Routes,
     Link as RouterLink,
     BrowserRouter,
     Outlet
-  } from "react-router-dom";
-  
+} from "react-router-dom";
+ 
  
 
 function getCookie(name) {
@@ -76,7 +79,7 @@ const Tournament = () => {
 
     useEffect(() => {
         if(participants == null) {
-            fetch('/participant/').then(resp => resp.json()).then(json =>{
+            fetch('/api/participant/').then(resp => resp.json()).then(json =>{
                 setParticipants(json)
                 console.log('Updated')
             })
@@ -93,7 +96,7 @@ const Tournament = () => {
     }
 
     const add = e => {
-        fetch('/participant/', 
+        fetch('/api/participant/', 
             { method: 'POST', 'credentials': 'same-origin',
               headers: 
               {
@@ -118,49 +121,75 @@ const Tournament = () => {
             <Button variant="contained" onClick = { e => add(e)}>Add</Button>
         </div>)
 }
+function Round(props) {
+    return 'This is a round'
+}
 
 const Rounds = (props) => {
     const [rounds, setRounds] = React.useState(null)
     console.log('WTF')
     useEffect(() => {
-        console.log('User effect', rounds)
         if(rounds == null) {
-            fetch('/rounds/').then(resp => resp.json()).then(json =>{
+            fetch('/api/round/').then(resp => resp.json()).then(json =>{
                 setRounds(json)
             })
         }
-
     })
+    
     if(rounds == null) {
-        return <div><Outlet/> dfdfd</div>
+        return <div><Outlet/></div>
     }
     else {
         return (
+            <>
+            <Outlet/>
+            <Link to="/" component="RouterLink">S. Thomas Scrabble Bash</Link>
             <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                {rounds.map(r => <Button key={r.di}>{r.round_no}</Button>) }
+                {
+                    rounds.map(r => 
+                        <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'}  key={r.id}>
+                            <Button component={RouterLink} to={'/round/' + r.round_no}>{r.round_no}</Button>
+                        </Tooltip>
+                    ) 
+                }
             </ButtonGroup>
+            </>
         )
     }
 }
 
 const Participant = (props) => {
-    return <div>Hello World</div>
+    const id = useParams();
+    const [participant, setParticipant] = useState()
+
+    useEffect(() => {
+        if(participant == null) {
+            fetch(`/api/participant/${id}`).then(resp=>resp.json()).then(json=>{
+                setParticipant(json)
+            })
+        } 
+    })
+
+    return <div>Hello World </div>
 }
+
+const router = createBrowserRouter(
+    createRoutesFromElements(
+        <Route element={<Rounds/>}>
+            <Route index element={<Tournament />} />
+            <Route path="/:id" element={<Participant/>} />
+            <Route path="/round/:id" element={<Round/>} />
+        </Route>
+    )
+)
 
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
 root.render(
-    <BrowserRouter>
-        <Routes>
-            <Route element={<Rounds/>}>
-            <Route index element={<Tournament />} />
-                
-                <Route path="/:id" element={<Participant/>} />
-            </Route>
-        </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router} />    
 )
-console.log('main.js 0.01.5')
+console.log('main.js 0.01.7')
 
 
 
+ 
