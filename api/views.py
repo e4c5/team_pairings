@@ -15,6 +15,14 @@ class TournamentViewSet(viewsets.ModelViewSet):
     queryset = models.Tournament.objects.all()
     serializer_class = TournamentSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        print('here')
+        instance = self.get_object()
+        instance.editable = instance.rounds.filter(paired=True).count() == 0
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
 class TournamentRoundViewSet(viewsets.ModelViewSet):
     queryset = models.TournamentRound.objects.all()
     serializer_class = TournamentRoundSerializer

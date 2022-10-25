@@ -20,7 +20,8 @@ import {
     createRoutesFromElements,
     RouterProvider,
     useParams,
-    Route, Routes,
+    Route,
+    Routes,
     Link as RouterLink,
     BrowserRouter,
     Outlet
@@ -76,11 +77,18 @@ const Tournament = () => {
     const [name, setName] = React.useState('')
     const [seed, setSeed] = React.useState('')
     const [participants, setParticipants] = React.useState(null)
+    const [tournament, setTournament] = React.useState(null)
 
     useEffect(() => {
         if(participants == null) {
             fetch('/api/participant/').then(resp => resp.json()).then(json =>{
                 setParticipants(json)
+                console.log('Updated')
+            })
+        }
+        if(tournament == null) {
+            fetch('/api/tournament/1/').then(resp => resp.json()).then(json =>{
+                setTournament(json)
                 console.log('Updated')
             })
         }

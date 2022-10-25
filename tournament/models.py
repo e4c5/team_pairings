@@ -89,6 +89,7 @@ class TournamentRound(models.Model):
     pairing_system = models.CharField(max_length=16, choices=PAIRING_CHOICES)
     repeats = models.IntegerField(default=0)
     based_on = models.IntegerField(null=True, blank=True)
+    paired = models.BooleanField(default=False)
 
 
 class Participant(models.Model):
