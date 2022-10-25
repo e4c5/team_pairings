@@ -26,6 +26,7 @@ import {
     BrowserRouter,
     Outlet
 } from "react-router-dom";
+import { Switch } from '@mui/material';
  
  
 
@@ -37,6 +38,8 @@ function getCookie(name) {
 }
 
 const Participants = (props) => {
+    const tourny = props.tournament;
+
     return (
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -57,14 +60,18 @@ const Participants = (props) => {
                 key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell align="right">{ idx + 1}</TableCell>
+                <TableCell align="left">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
                   <RouterLink to={ `${row.id}` }>{row.name} {row.id}</RouterLink>
                 </TableCell>
+                <TableCell align="right">{row.seed}</TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>
                 <TableCell align="right">{row.game_wins}</TableCell>
                 <TableCell align="right">{row.spread}</TableCell>
-                <TableCell align="right">{row.offed}</TableCell>
+                <TableCell align="right">{ (tourny && tourny.is_editable)
+                    ? <Switch checked={row.offed != 0} onChange={ e => props.toggleParticipant(e, idx) }/>
+                    : <Switch checked={row.offed != 0} onChange={ e => props.delParticipant(e, idx) }/> }
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -103,6 +110,30 @@ const Tournament = () => {
         }
     }
 
+    function toggleParticipant(e, idx) {
+        const p = participants[idx];
+        p['offed'] = p.offed == 0 ? 1 : 0;
+        console.log(`/api/participant/${p.id}`)
+        fetch(`/api/participant/${p.id}/`, 
+            { method: 'PUT', 'credentials': 'same-origin',
+              headers: 
+              {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": getCookie("csrftoken")
+              },
+              body: JSON.stringify(p)
+            }).then(resp => resp.json()).then(json => {
+                const old = [...participants]
+                old[idx] = json
+                setParticipants(old)
+        })
+    }
+
+    function delParticipant(e, idx) {
+        console.log('delete');
+    }
+
+
     const add = e => {
         fetch('/api/participant/', 
             { method: 'POST', 'credentials': 'same-origin',
@@ -121,7 +152,9 @@ const Tournament = () => {
 
     return (
         <div>
-            <Participants rows={participants} /> 
+            <Participants rows={participants} tournament={tournament} 
+                delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
+            /> 
             <TextField size='small' placeholder='Name' 
                 value={name} onChange={ e => handleChange(e, 'name')} />
             <TextField size='small' placeholder='seed' type='number'
@@ -135,7 +168,6 @@ function Round(props) {
 
 const Rounds = (props) => {
     const [rounds, setRounds] = React.useState(null)
-    console.log('WTF')
     useEffect(() => {
         if(rounds == null) {
             fetch('/api/round/').then(resp => resp.json()).then(json =>{
@@ -196,7 +228,7 @@ const root = ReactDOM.createRoot(div)
 root.render(
     <RouterProvider router={router} />    
 )
-console.log('main.js 0.01.7')
+console.log('main.js 0.01.8')
 
 
 
