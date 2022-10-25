@@ -113,6 +113,6 @@ class Result(models.Model):
     # only used for team tournaments.
     # the number of games won in the round by the first player
     games_won = models.IntegerField(blank=True, null=True)
-    score1 = models.IntegerField()
-    score2 = models.IntegerField()
+    score1 = models.IntegerField(blank=True, null=True)
+    score2 = models.IntegerField(blank=True, null=True)
     

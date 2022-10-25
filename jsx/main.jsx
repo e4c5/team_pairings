@@ -13,8 +13,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
-import Link from '@mui/material/Link';
-
 import {
     createBrowserRouter,
     createRoutesFromElements,
@@ -26,8 +24,9 @@ import {
     BrowserRouter,
     Outlet
 } from "react-router-dom";
-import { Switch } from '@mui/material';
- 
+
+
+import { Link, Switch } from '@mui/material';
  
 
 function getCookie(name) {
@@ -62,7 +61,7 @@ const Participants = (props) => {
               >
                 <TableCell align="left">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
-                  <RouterLink to={ `${row.id}` }>{row.name} {row.id}</RouterLink>
+                    <Link to={ `${row.id}` } component={RouterLink}>{row.name} {row.id}</Link>
                 </TableCell>
                 <TableCell align="right">{row.seed}</TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>
@@ -162,10 +161,59 @@ const Tournament = () => {
             <Button variant="contained" onClick = { e => add(e)}>Add</Button>
         </div>)
 }
-function Round(props) {
-    return 'This is a round'
-}
 
+function Round(props) {
+    const params = useParams()
+    const [round, setRound] = React.useState(null)
+    const [results, setResults] = React.useState(null)
+
+    useEffect(() => {
+        if(round == null) {
+            fetch(`/api/round/${params.id}/`).then(resp => resp.json()).then(json =>{
+                setRound(json)
+                if(json.pair) {
+                    fetch(`/api/result/?round=${params.id}/`).then(resp=>resp.json()
+                    ).then(json=>{
+                        setResults(json)
+                    })
+                }
+            })
+        }
+    })
+
+    if(round?.paired) {
+        <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Rank</TableCell>
+                    <TableCell align="right">Team 1</TableCell>
+                    <TableCell align="right">W/L</TableCell>
+                    <TableCell align="right">Round Wins</TableCell>
+                    <TableCell align="right">Spread</TableCell>
+                    <TableCell align="right">Team 2</TableCell>
+                    <TableCell align="right">W/L</TableCell>
+                    <TableCell align="right">Round Wins</TableCell>
+                    <TableCell align="right">Spread</TableCell>
+                    
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+
+                </TableBody>
+            </Table>
+        </TableContainer>
+    }
+    else {
+        return (
+            <div>
+                This is a round that has not yet been paired
+                <div><Button>Pair</Button></div>
+            </div>
+        )
+    }
+}
+  
 const Rounds = (props) => {
     const [rounds, setRounds] = React.useState(null)
     useEffect(() => {
@@ -182,13 +230,14 @@ const Rounds = (props) => {
     else {
         return (
             <>
-            <Outlet/>
-            <Link to="/" component="RouterLink">S. Thomas Scrabble Bash</Link>
+            <Outlet rounds={rounds} />
+            <Link to="/" component={RouterLink}>S. Thomas Scrabble Bash</Link>
             <ButtonGroup variant="contained" aria-label="outlined primary button group">
                 {
                     rounds.map(r => 
                         <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'}  key={r.id}>
-                            <Button component={RouterLink} to={'/round/' + r.round_no}>{r.round_no}</Button>
+                            <Button component={RouterLink} 
+                              to={ '/round/' + r.round_no} >{r.round_no}</Button>
                         </Tooltip>
                     ) 
                 }
@@ -228,7 +277,7 @@ const root = ReactDOM.createRoot(div)
 root.render(
     <RouterProvider router={router} />    
 )
-console.log('main.js 0.01.8')
+console.log('main.js 0.01.10')
 
 
 
