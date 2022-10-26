@@ -13,9 +13,10 @@ import {
     createRoutesFromElements,
     RouterProvider,
     useParams,
-    Route,
+    Route, Routes,
     Link as RouterLink,
-    Outlet
+    Outlet,
+    BrowserRouter
 } from "react-router-dom";
 
 import Participants from "./participant.jsx"
@@ -25,7 +26,7 @@ import { Link, Switch, Box } from '@mui/material';
 
  
 
-const Tournament = () => {
+const Tournament = (props) => {
     const params = useParams()
     const [name, setName] = React.useState('')
     const [seed, setSeed] = React.useState('')
@@ -34,17 +35,16 @@ const Tournament = () => {
 
     console.log('Tournament')
     useEffect(() => {
-        if(tournament == null) {
-            fetch(`/api/tournament/${params.id}/`).then(resp => resp.json()).then(json =>{
-                setTournament(json)
-                if(participants == null) {
-                    fetch(`/api/${json.id}/participant/`).then(resp => resp.json()).then(json =>{
+        props.tournaments?.map(t => {
+            if(t.slug == params.slug) {
+                if(tournament != t) {
+                    setTournament(t)
+                    fetch(`/api/${t.id}/participant/`).then(resp => resp.json()).then(json =>{
                         setParticipants(json)
-                        console.log('Updated')
                     })
                 }
-            })
-        }
+            }
+        })    
     })
 
     const handleChange = (e, p) => {
@@ -210,6 +210,22 @@ const Participant = (props) => {
 }
 function Tournaments(props) {
     const id = useParams();
+
+    return (
+        <div>
+            <List>
+            { props.tournaments?.map(t => 
+                <ListItem key={t.id}>
+                    <Link to={"/" + t.slug} component={RouterLink} >{ t.name }</Link>
+                </ListItem>) 
+            }
+            </List>
+            <Outlet/>
+        </div>
+    )
+}
+
+function App() {
     const [tournaments, setTournaments] = useState()
 
     useEffect(() => {
@@ -221,36 +237,24 @@ function Tournaments(props) {
     })
 
     return (
-        <div>
-            <List>
-            { tournaments?.map(t => 
-                <ListItem key={t.id}>
-                    <Link to={"/" + t.slug} component={RouterLink} >{ t.name }</Link>
-                </ListItem>) 
-            }
-            </List>
-            <Outlet/>
-        </div>
+      <BrowserRouter>   
+            <Routes>
+                <Route path="/" element={<Tournaments tournaments={tournaments}/>}>
+                    <Route path="/:slug" element={<Tournament  tournaments={tournaments}/>} />
+                    <Route element={<Rounds/>}>
+                        <Route path="/tournament/:id" element={<Participant/>} />
+                        <Route path="/round/:id" element={<Round/>} />
+                    </Route>
+                </Route>
+            </Routes>
+      </BrowserRouter>
     )
 }
 
-const router = createBrowserRouter(
-    createRoutesFromElements(
-        <Route path="/" element={<Tournaments/>}>
-            <Route path="/:id" element={<Tournament />} />
-            <Route element={<Rounds/>}>
-                <Route path="/tournament/:id" element={<Participant/>} />
-                <Route path="/round/:id" element={<Round/>} />
-            </Route>
-        </Route>
-    )
-)
 
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
-root.render(
-    <RouterProvider router={router} />    
-)
+root.render(<App/>)
 console.log('main.js 0.01.13')
 
 
