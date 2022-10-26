@@ -20,7 +20,7 @@ from api import views
 
 router = routers.SimpleRouter()
 router.register('tournament', views.TournamentViewSet)
-router.register('participant', views.ParticipantViewSet)
+router.register('(?P<tid>\w)/participant', views.ParticipantViewSet, 'participant')
 router.register('round', views.TournamentRoundViewSet)
 router.register('result', views.ResultViewSet)
 

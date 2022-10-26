@@ -1,101 +1,48 @@
 //npx babel --watch jsx --out-dir tournament/static/js/ --presets react-app/dev 
 import React, { useState, useEffect } from 'react';
 import * as ReactDOM from 'react-dom';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Tooltip from '@mui/material/Tooltip';
+
+import { Button, ButtonGroup, TextField }  from '@mui/material';
+import { ListItem, List } from '@mui/material';
+import { Table, TableBody, TableCell,
+         TableContainer, TableHead, TableRow } from '@mui/material';
+import {Paper, Tooltip} from '@mui/material';
+
 import {
     createBrowserRouter,
     createRoutesFromElements,
     RouterProvider,
     useParams,
     Route,
-    Routes,
     Link as RouterLink,
-    BrowserRouter,
     Outlet
 } from "react-router-dom";
 
+import Participants from "./participant.jsx"
+import getCookie from './cookie.js';
 
-import { Link, Switch } from '@mui/material';
+import { Link, Switch, Box } from '@mui/material';
+
  
 
-function getCookie(name) {
-    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    if (match) {
-        return match[2];
-    }
-}
-
-const Participants = (props) => {
-    const tourny = props.tournament;
-
-    return (
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Rank</TableCell>
-              <TableCell align="right">Name</TableCell>
-              <TableCell align="right">Seed</TableCell>
-              <TableCell align="right">Round Wins</TableCell>
-              <TableCell align="right">Game Wins</TableCell>
-              <TableCell align="right">Spread</TableCell>
-              <TableCell align="right">Offed</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {props.rows && props.rows.map((row, idx) => (
-              <TableRow
-                key={row.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="left">{ idx + 1}</TableCell>
-                <TableCell component="th" scope="row">
-                    <Link to={ `${row.id}` } component={RouterLink}>{row.name} {row.id}</Link>
-                </TableCell>
-                <TableCell align="right">{row.seed}</TableCell>
-                <TableCell align="right">{row.round_wins}</TableCell>
-                <TableCell align="right">{row.game_wins}</TableCell>
-                <TableCell align="right">{row.spread}</TableCell>
-                <TableCell align="right">{ (tourny && tourny.is_editable)
-                    ? <Switch checked={row.offed != 0} onChange={ e => props.toggleParticipant(e, idx) }/>
-                    : <Switch checked={row.offed != 0} onChange={ e => props.delParticipant(e, idx) }/> }
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
-  }
-
 const Tournament = () => {
+    const params = useParams()
     const [name, setName] = React.useState('')
     const [seed, setSeed] = React.useState('')
     const [participants, setParticipants] = React.useState(null)
     const [tournament, setTournament] = React.useState(null)
 
+    console.log('Tournament')
     useEffect(() => {
-        if(participants == null) {
-            fetch('/api/participant/').then(resp => resp.json()).then(json =>{
-                setParticipants(json)
-                console.log('Updated')
-            })
-        }
         if(tournament == null) {
-            fetch('/api/tournament/1/').then(resp => resp.json()).then(json =>{
+            fetch(`/api/tournament/${params.id}/`).then(resp => resp.json()).then(json =>{
                 setTournament(json)
-                console.log('Updated')
+                if(participants == null) {
+                    fetch(`/api/${json.id}/participant/`).then(resp => resp.json()).then(json =>{
+                        setParticipants(json)
+                        console.log('Updated')
+                    })
+                }
             })
         }
     })
@@ -248,12 +195,12 @@ const Rounds = (props) => {
 }
 
 const Participant = (props) => {
-    const id = useParams();
+    const params = useParams();
     const [participant, setParticipant] = useState()
 
     useEffect(() => {
         if(participant == null) {
-            fetch(`/api/participant/${id}`).then(resp=>resp.json()).then(json=>{
+            fetch(`/api/participant/${params.id}`).then(resp=>resp.json()).then(json=>{
                 setParticipant(json)
             })
         } 
@@ -261,13 +208,40 @@ const Participant = (props) => {
 
     return <div>Hello World </div>
 }
+function Tournaments(props) {
+    const id = useParams();
+    const [tournaments, setTournaments] = useState()
+
+    useEffect(() => {
+        if(tournaments == null) {
+            fetch(`/api/tournament/`).then(resp=>resp.json()).then(json=>{
+                setTournaments(json)
+            })
+        } 
+    })
+
+    return (
+        <div>
+            <List>
+            { tournaments?.map(t => 
+                <ListItem key={t.id}>
+                    <Link to={"/" + t.slug} component={RouterLink} >{ t.name }</Link>
+                </ListItem>) 
+            }
+            </List>
+            <Outlet/>
+        </div>
+    )
+}
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route element={<Rounds/>}>
-            <Route index element={<Tournament />} />
-            <Route path="/:id" element={<Participant/>} />
-            <Route path="/round/:id" element={<Round/>} />
+        <Route path="/" element={<Tournaments/>}>
+            <Route path="/:id" element={<Tournament />} />
+            <Route element={<Rounds/>}>
+                <Route path="/tournament/:id" element={<Participant/>} />
+                <Route path="/round/:id" element={<Round/>} />
+            </Route>
         </Route>
     )
 )
@@ -277,7 +251,7 @@ const root = ReactDOM.createRoot(div)
 root.render(
     <RouterProvider router={router} />    
 )
-console.log('main.js 0.01.10')
+console.log('main.js 0.01.13')
 
 
 
