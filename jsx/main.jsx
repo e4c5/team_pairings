@@ -33,12 +33,13 @@ const Tournament = (props) => {
     const [participants, setParticipants] = React.useState(null)
     const [tournament, setTournament] = React.useState(null)
 
-    console.log('Tournament')
+    
     useEffect(() => {
         props.tournaments?.map(t => {
             if(t.slug == params.slug) {
                 if(tournament != t) {
                     setTournament(t)
+                    console.log('Tournament fetch participants')
                     fetch(`/api/${t.id}/participant/`).then(resp => resp.json()).then(json =>{
                         setParticipants(json)
                     })
@@ -59,7 +60,7 @@ const Tournament = (props) => {
     function toggleParticipant(e, idx) {
         const p = participants[idx];
         p['offed'] = p.offed == 0 ? 1 : 0;
-        console.log(`/api/participant/${p.id}`)
+        console.log(`/api/${tournament.id}/participant/${p.id}`)
         fetch(`/api/participant/${p.id}/`, 
             { method: 'PUT', 'credentials': 'same-origin',
               headers: 
@@ -81,7 +82,7 @@ const Tournament = (props) => {
 
 
     const add = e => {
-        fetch('/api/participant/', 
+        fetch(`/api/${tournament.id}/participant/`, 
             { method: 'POST', 'credentials': 'same-origin',
               headers: 
               {
@@ -106,6 +107,11 @@ const Tournament = (props) => {
             <TextField size='small' placeholder='seed' type='number'
                 value={seed} onChange={ e => handleChange(e, 'seed')} />
             <Button variant="contained" onClick = { e => add(e)}>Add</Button>
+            <Routes>
+                    <Route path="/tournament/:id" element={<Participant/>} />
+                    <Route path="/round/:id" element={<Round/>} />
+            </Routes>
+            <Rounds/>
         </div>)
 }
 
@@ -114,6 +120,7 @@ function Round(props) {
     const [round, setRound] = React.useState(null)
     const [results, setResults] = React.useState(null)
 
+    console.log('Round')
     useEffect(() => {
         if(round == null) {
             fetch(`/api/round/${params.id}/`).then(resp => resp.json()).then(json =>{
@@ -240,11 +247,7 @@ function App() {
       <BrowserRouter>   
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments}/>}>
-                    <Route path="/:slug" element={<Tournament  tournaments={tournaments}/>} />
-                    <Route element={<Rounds/>}>
-                        <Route path="/tournament/:id" element={<Participant/>} />
-                        <Route path="/round/:id" element={<Round/>} />
-                    </Route>
+                    <Route path="/:slug/*" element={<Tournament  tournaments={tournaments}/>} />
                 </Route>
             </Routes>
       </BrowserRouter>
@@ -255,7 +258,7 @@ function App() {
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
 root.render(<App/>)
-console.log('main.js 0.01.13')
+console.log('main.js 0.01.15')
 
 
 
