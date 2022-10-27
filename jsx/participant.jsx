@@ -28,7 +28,7 @@ import {
 
 import { Link, Switch } from '@mui/material';
 
-export default function Participants(props) {
+export function Participants(props) {
     const tourny = props.tournament;
 
     return (
@@ -71,3 +71,17 @@ export default function Participants(props) {
     );
 }
 
+export function Participant(props) {
+    const params = useParams();
+    const [participant, setParticipant] = useState()
+
+    useEffect(() => {
+        if(participant == null) {
+            fetch(`/api/participant/${params.id}`).then(resp=>resp.json()).then(json=>{
+                setParticipant(json)
+            })
+        } 
+    })
+
+    return <div>Hello World </div>
+}

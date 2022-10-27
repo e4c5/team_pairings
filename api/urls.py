@@ -21,7 +21,7 @@ from api import views
 router = routers.SimpleRouter()
 router.register('tournament', views.TournamentViewSet)
 router.register('(?P<tid>\w)/participant', views.ParticipantViewSet, 'participant')
-router.register('round', views.TournamentRoundViewSet)
-router.register('result', views.ResultViewSet)
+router.register('(?P<tid>\w)/round', views.TournamentRoundViewSet,'round')
+router.register('(?P<rid>\w)/result', views.ResultViewSet, 'result')
 
 urlpatterns = router.urls

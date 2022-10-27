@@ -27,7 +27,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
 
 class TournamentRoundViewSet(viewsets.ModelViewSet):
-    queryset = models.TournamentRound.objects.all()
     serializer_class = TournamentRoundSerializer
 
     @action(detail=True, methods=['post'])
@@ -36,7 +35,11 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
             return Response({'status': 'error', 'message': 'already pairedd'})
         else:
             pass
+
+    def get_queryset(self):
+        return models.TournamentRound.objects.filter(tournament_id = self.kwargs['tid'])
         
+
 class ParticipantViewSet(viewsets.ModelViewSet):
     serializer_class = ParticipantSerializer
 
@@ -45,7 +48,8 @@ class ParticipantViewSet(viewsets.ModelViewSet):
 
 
 class ResultViewSet(viewsets.ModelViewSet):
-    queryset = models.Result.objects.all()
     serializer_class = ResultSerializer
+    def get_queryset(self):
+        return models.Result.objects.filter(round_id = self.kwargs['rid'])
 
 
