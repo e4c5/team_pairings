@@ -28,8 +28,18 @@ class ParticipantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ResultSerializer(serializers.ModelSerializer):
+    first = ParticipantSerializer(read_only=True)
+    second = ParticipantSerializer(read_only=True)
+
     class Meta:
         model = Result
         fields = '__all__'
+
+
+class ResultDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Result
+        fields = '__all__'        
 
 

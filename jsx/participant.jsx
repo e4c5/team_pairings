@@ -53,7 +53,7 @@ export default function Participants(props) {
               >
                 <TableCell align="left">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
-                    <Link to={ `${row.id}` } component={RouterLink}>{row.name} {row.id}</Link>
+                    <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
                 </TableCell>
                 <TableCell align="right">{row.seed}</TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>

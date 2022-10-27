@@ -21,3 +21,4 @@ zyzzyva.sql.gz
 db.sqlite3
 tournament/static/js/main.js
 yarn.lock
+scratch.py

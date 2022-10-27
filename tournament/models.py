@@ -90,7 +90,9 @@ class TournamentRound(models.Model):
     repeats = models.IntegerField(default=0)
     based_on = models.IntegerField(null=True, blank=True)
     paired = models.BooleanField(default=False)
-
+    num_rounds = models.IntegerField()
+    team_size = models.IntegerField()
+    
 
 class Participant(models.Model):
     ''' A player or a team in a tournament'''

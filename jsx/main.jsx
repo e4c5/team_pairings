@@ -108,19 +108,24 @@ const Tournament = (props) => {
                 value={seed} onChange={ e => handleChange(e, 'seed')} />
             <Button variant="contained" onClick = { e => add(e)}>Add</Button>
             <Routes>
-                    <Route path="/tournament/:id" element={<Participant/>} />
-                    <Route path="/round/:id" element={<Round/>} />
+                    <Route path=":id" element={<Participant/>} />
+                    <Route path="round/:id" element={<Round tournament={tournament}/>} />
             </Routes>
             <Rounds/>
         </div>)
 }
 
+
 function Round(props) {
+    /*
+     * A round number is not unique across tournaments, so for communicating
+     * with the api we will always use the round primary key instead. This also avoids
+     * the need to pass  tournament around all over the place.
+     */
     const params = useParams()
     const [round, setRound] = React.useState(null)
     const [results, setResults] = React.useState(null)
 
-    console.log('Round')
     useEffect(() => {
         if(round == null) {
             fetch(`/api/round/${params.id}/`).then(resp => resp.json()).then(json =>{
@@ -135,34 +140,61 @@ function Round(props) {
         }
     })
 
-    if(round?.paired) {
-        <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Rank</TableCell>
-                    <TableCell align="right">Team 1</TableCell>
-                    <TableCell align="right">W/L</TableCell>
-                    <TableCell align="right">Round Wins</TableCell>
-                    <TableCell align="right">Spread</TableCell>
-                    <TableCell align="right">Team 2</TableCell>
-                    <TableCell align="right">W/L</TableCell>
-                    <TableCell align="right">Round Wins</TableCell>
-                    <TableCell align="right">Spread</TableCell>
-                    
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+    function pair() {
+        fetch(`/api/round/${params.id}/pair/`,
+            { method: 'POST', 'credentials': 'same-origin',
+              headers: 
+                {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+            body: JSON.stringify({})
+        }).then(resp => resp.json()).then(json => {
+            console.log('paired')
+        })
+        
+    }
 
-                </TableBody>
-            </Table>
-        </TableContainer>
+    if(round?.paired) {
+        const tournament = props.tournament
+        return(
+            <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableHead>
+                    <TableRow>
+                        <TableCell>Rank</TableCell>
+                        <TableCell align="right">Team 1</TableCell>
+                        <TableCell align="right">W/L</TableCell>
+                        <TableCell align="right">Round Wins</TableCell>
+                        <TableCell align="right">Spread</TableCell>
+                        <TableCell align="right">Team 2</TableCell>
+                        <TableCell align="right">W/L</TableCell>
+                        <TableCell align="right">Round Wins</TableCell>
+                        <TableCell align="right">Spread</TableCell>
+                        
+                    </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        { results.map(r => {
+                            <TableRow key={r.id}>
+                                <TableCell>{ r.first.name }</TableCell>
+                                <TableCell>{ r.games_won } / { tournament.team_size - r.games_won }</TableCell>
+                                <TableCell>{ r.score1 }</TableCell>
+                                <TableCell>{ r.second.name }</TableCell>
+                                <TableCell>{ tournament.team_size - r.games_won } / { r.games_won }</TableCell>
+                                <TableCell>{ r.score1 }</TableCell>
+                            </TableRow>
+                        })}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        )
     }
     else {
         return (
             <div>
                 This is a round that has not yet been paired
-                <div><Button>Pair</Button></div>
+                <div><Button onClick={e => pair(e)}>Pair</Button></div>
             </div>
         )
     }
@@ -183,20 +215,19 @@ const Rounds = (props) => {
     }
     else {
         return (
-            <>
-            <Outlet rounds={rounds} />
-            <Link to="/" component={RouterLink}>S. Thomas Scrabble Bash</Link>
-            <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                {
-                    rounds.map(r => 
-                        <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'}  key={r.id}>
-                            <Button component={RouterLink} 
-                              to={ '/round/' + r.round_no} >{r.round_no}</Button>
-                        </Tooltip>
-                    ) 
-                }
-            </ButtonGroup>
-            </>
+            <Box>
+                <Outlet rounds={rounds} />
+                <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                    {
+                        rounds.map(r => 
+                            <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'}  key={r.id}>
+                                <Button component={RouterLink} 
+                                to={ 'round/' + r.id} >{r.round_no}</Button>
+                            </Tooltip>
+                        ) 
+                    }
+                </ButtonGroup>
+            </Box>
         )
     }
 }
