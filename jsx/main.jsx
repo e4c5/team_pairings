@@ -23,7 +23,6 @@ import {Participant, Participants } from "./participant.jsx"
 import {Tournament, Tournaments } from "./tournament.jsx"
 import {Round, Rounds} from "./round.jsx"
 import getCookie from './cookie.js';
-
 import { Link, Switch, Box } from '@mui/material';
 
  

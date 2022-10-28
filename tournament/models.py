@@ -1,6 +1,9 @@
 import re
-from django.db import models
+from django.db import models, connection
+
 from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -118,3 +121,33 @@ class Result(models.Model):
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
     
+
+@receiver(post_save, sender=Result)
+def update_result(sender, instance, created, **kwargs):
+    print(instance)
+    print(created)
+
+    q = """
+        update tournament_participant set played = a.games + b.games,
+            game_wins = a.games_won + b.games_won, 
+            round_wins = a.rounds_won + b.rounds_won, spread = a.margin + b.margin
+            from (select count(*) as games, coalesce(sum(games_won),0) games_won, 
+                coalesce(sum(CASE when games_won is null THEN 0 
+                                WHEN games_won > 2.5 THEN 1 
+                                WHEN games_won = 2.5 THEN .5 else 0 end), 0) rounds_won,
+                coalesce(sum(score1 - score2),0) margin
+            from tournament_result tr where first_id = {0} and games_won is not null) a,
+            (select count(*) as games, coalesce(sum(5 - games_won),0) games_won, 
+                coalesce(sum(CASE WHEN games_won IS NULL THEN 0 
+                         WHEN games_won < 2.5 THEN 1 
+                         WHEN games_won = 2.5 THEN .5 else 0 END),0) rounds_won,
+                coalesce(sum(score1 - score2),0) margin
+            from tournament_result tr where second_id = {0} and games_won is not null) b
+            where id = {0}"""
+    if not created:
+        if instance.score1 or instance.score2:
+            with connection.cursor() as cursor:
+                print(q.format(instance.first_id))
+                print(q.format(instance.second_id))
+                cursor.execute(q.format(instance.first_id))
+                cursor.execute(q.format(instance.second_id))

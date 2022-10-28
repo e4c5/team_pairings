@@ -108,7 +108,7 @@ export function Tournament(props) {
                     <Route path=":id" element={<Participant/>} />
                     <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
             </Routes>
-            <Rounds rounds={rounds}/>
+            <Rounds rounds={rounds} tournament={tournament}/>
         </div>)
 }
 

@@ -44,7 +44,8 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     serializer_class = ParticipantSerializer
 
     def get_queryset(self):
-        return models.Participant.objects.filter(tournament_id = self.kwargs['tid'])
+        return models.Participant.objects.filter(
+            tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
 
 class ResultViewSet(viewsets.ModelViewSet):
