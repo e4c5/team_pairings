@@ -5,7 +5,7 @@
 import sys, os
 
 from tournament.models import Participant, Result, TournamentRound
-from django.db.models import Sum,Field,Value
+from django.db.models import Q
 
 class Pairing:
     '''
@@ -41,7 +41,7 @@ class Pairing:
 
     def order_players(self, players):
         sorted_players = sorted(players, reverse=True, 
-                key=lambda player: (player['score'],player['spread'], player['rating']))
+                key=lambda player: (player['score'],player['game_wins'], player['spread']))
         return sorted_players
         
     def pair_first_round(self):
@@ -234,25 +234,29 @@ class DbPairing(Pairing):
             ).filter(round__round_no__lt=next_round
             ).select_related('first','second','round')
 
-
-        for pl in Participant.objects.select_related().filter(tournament_id=self.tournament).exclude(offed=True):
+        players = Participant.objects.select_related().filter(tournament_id=self.tournament
+                    ).exclude(offed=True).order_by('round_wins','-game_wins','-spread')
+        for pl in players:
             opponents = []
             spread = 0
             wins = 0
                
             if pl.name != 'Bye':
-                games = qs.filter(first=pl).order_by('-round')
-                if games:
-                    spread = games[0].spread
-                    wins = games[0].wins
-                    opponents = [g.opponent.name for g in games]
-                    
+                games = qs.filter( Q(first=pl) | Q(second=pl)).order_by('-round')
+                opponents = []
+                for game in games:
+                    if game.first.id == pl.id:
+                        opponents.append(game.second)
+                    else:
+                        opponents.append(game.first)
+
                 self.players.append( 
                      { 'name': pl.name,
-                       'spread' : spread,
+                       'spread' : pl.spread,
                        'rating' : pl.seed,
                        'player' : pl,
-                       'score'  : wins,
+                       'game_wins': pl.game_wins,
+                       'score'  : pl.round_wins,
                        'opponents' : opponents
                      }
                 )

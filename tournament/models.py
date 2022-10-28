@@ -124,8 +124,6 @@ class Result(models.Model):
 
 @receiver(post_save, sender=Result)
 def update_result(sender, instance, created, **kwargs):
-    print(instance)
-    print(created)
 
     q = """
         update tournament_participant set played = a.games + b.games,
@@ -147,7 +145,5 @@ def update_result(sender, instance, created, **kwargs):
     if not created:
         if instance.score1 or instance.score2:
             with connection.cursor() as cursor:
-                print(q.format(instance.first_id))
-                print(q.format(instance.second_id))
                 cursor.execute(q.format(instance.first_id))
                 cursor.execute(q.format(instance.second_id))

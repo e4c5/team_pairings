@@ -35,30 +35,41 @@ export function Round(props) {
     const [won, setWon] = React.useState('')
     const [lost, setLost] = React.useState('')
 
+    function fetchResults(round) {
+        if(! round) {
+            return
+        }
+        fetch(`/api/${round.id}/result/`).then(resp => resp.json()
+        ).then(json => {
+            setResults(json)
+            const left = []
+            json.forEach(e =>{
+                if(e.score1 || e.score2) {
+                    //
+                }
+                else { 
+                    left.push(e.first.name)
+                    left.push(e.second.name)
+                }
+            })
+            setNames(left)
+        })
+    }
+
     useEffect(() => {
-        if(round == null) {
-            // round numbers start from 0
-            setRound(props.rounds[params.id -1])
+        
+
+        if(round == null || round.round_no != params.id) {
+            console.log(round, params.id -1)
             
+            // round numbers start from 0
+            fetchResults(props.rounds[params.id -1])
+            setRound(props.rounds[params.id -1])
         }
         else
         {
             if(results == null) {
-                fetch(`/api/${round.id}/result/`).then(resp => resp.json()
-                ).then(json => {
-                    setResults(json)
-                    const left = []
-                    json.forEach(e =>{
-                        if(e.score1 || e.score2) {
-                            //
-                        }
-                        else { 
-                            left.push(e.first.name)
-                            left.push(e.second.name)
-                        }
-                    })
-                    setNames(left)
-                })
+                fetchResults(setRound(props.rounds[params.id -1]))
             }
         }
     })
