@@ -24,7 +24,6 @@ export function Tournament(props) {
     const [tournament, setTournament] = React.useState(null)
     
     useEffect(() => {
-        console.log('Tournaments')
         props.tournaments?.map(t => {
             if(t.slug == params.slug) {
                 if(tournament != t) {
@@ -77,7 +76,6 @@ export function Tournament(props) {
         console.log('delete');
     }
 
-
     const add = e => {
         fetch(`/api/${tournament.id}/participant/`, 
             { method: 'POST', 'credentials': 'same-origin',
@@ -92,6 +90,21 @@ export function Tournament(props) {
                 setSeed(seed + 1)
                 setName('')
             })
+    }
+
+    function updateStandings(result) {
+        const p = participants.map(team => {
+            if(team.id == result.first.id) {
+                return result.first
+            }
+            else if(team.id == result.second.id) {
+                return result.second
+            }
+            else {
+                return team
+            }
+        })
+        setParticipants(p)
     }
 
     return (
@@ -130,4 +143,4 @@ export function Tournaments(props) {
     )
 }
 
-console.log('Tournament 0.01')
+console.log('Tournament 0.01.3')

@@ -35,6 +35,8 @@ export function Round(props) {
     const [won, setWon] = React.useState('')
     const [lost, setLost] = React.useState('')
 
+    console.log(props)
+    
     function fetchResults(round) {
         if(! round) {
             return
@@ -57,11 +59,8 @@ export function Round(props) {
     }
 
     useEffect(() => {
-        
-
         if(round == null || round.round_no != params.id) {
-            console.log(round, params.id -1)
-            
+          
             // round numbers start from 0
             fetchResults(props.rounds[params.id -1])
             setRound(props.rounds[params.id -1])
@@ -114,6 +113,7 @@ export function Round(props) {
             setWon('')
             setScore1('')
             setScore2('')
+            props.updateStandings(json)
         })
     }
 
