@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 import { Button, List, ListItem, TextField }  from '@mui/material';
 import {
-    useParams,
-    Route, Routes,     
-    Outlet,
+    Route,  Routes, 
     Link as RouterLink,
-} from "react-router-dom";
+} from "wouter";
 
 import {Participant, Participants } from "./participant.jsx"
 import {Round, Rounds} from "./round.jsx"
@@ -16,7 +14,6 @@ import { Link, Switch, Box } from '@mui/material';
  
 
 export function Tournament(props) {
-    const params = useParams()
     const [rounds, setRounds] = React.useState(null)
     const [name, setName] = React.useState('')
     const [seed, setSeed] = React.useState('')
@@ -25,7 +22,7 @@ export function Tournament(props) {
     
     useEffect(() => {
         props.tournaments?.map(t => {
-            if(t.slug == params.slug) {
+            if(t.slug == props.params.slug) {
                 if(tournament != t) {
                     /* if the tournament has changed, fetch it's rounds and participants */
                     setTournament(t)
@@ -107,40 +104,47 @@ export function Tournament(props) {
         setParticipants(p)
     }
 
-    return (
-        <div>
+    return (<div> 
             <Participants rows={participants} tournament={tournament} 
-                delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
+                    delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
             /> 
-            <TextField size='small' placeholder='Name' 
-                value={name} onChange={ e => handleChange(e, 'name')} />
-            <TextField size='small' placeholder='seed' type='number'
-                value={seed} onChange={ e => handleChange(e, 'seed')} />
-            <Button variant="contained" onClick = { e => add(e)}>Add</Button>
-            <Routes>
-                    <Route path=":id" element={<Participant/>} />
-                    <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
-            </Routes>
-            <Rounds rounds={rounds} tournament={tournament}/>
         </div>)
+
+    // return (
+    //     <div>
+    //         <Participants rows={participants} tournament={tournament} 
+    //             delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
+    //         /> 
+    //         <TextField size='small' placeholder='Name' 
+    //             value={name} onChange={ e => handleChange(e, 'name')} />
+    //         <TextField size='small' placeholder='seed' type='number'
+    //             value={seed} onChange={ e => handleChange(e, 'seed')} />
+    //         <Button variant="contained" onClick = { e => add(e)}>Add</Button>
+    //         <Routes>
+    //                 <Route path=":id" element={<Participant />} />
+    //                 <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
+    //         </Routes>
+    //         <Rounds rounds={rounds} tournament={tournament}/>
+    //     </div>)
 }
 
 
 export function Tournaments(props) {
-    const id = useParams();
-
     return (
         <div>
+            <Route path="/:slug">
+                { (params) => <Tournament params={params} tournaments={props.tournaments} /> }
+            </Route>
             <List>
             { props.tournaments?.map(t => 
                 <ListItem key={t.id}>
-                    <Link to={"/" + t.slug} component={RouterLink} >{ t.name }</Link>
+                    <Link href={"/" + t.slug} component={RouterLink} >{ t.name }</Link>
                 </ListItem>) 
             }
             </List>
-            <Outlet/>
+            
         </div>
     )
 }
 
-console.log('Tournament 0.01.3')
+console.log('Tournament 0.02.1')

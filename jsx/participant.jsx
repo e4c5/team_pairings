@@ -14,16 +14,12 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
-    useParams,
     Route,
     Routes,
     Link as RouterLink,
     BrowserRouter,
     Outlet
-} from "react-router-dom";
+} from "wouter";
 
 
 import { Link, Switch } from '@mui/material';
@@ -74,8 +70,9 @@ export function Participants(props) {
 export function Participant(props) {
     const params = useParams();
     const [participant, setParticipant] = useState()
-
+    console.log('HERE')
     useEffect(() => {
+        const tourny = props.tourny
         if(participant == null && tourny) {
             fetch(`/api/${tourny.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
                 setParticipant(json)
@@ -85,3 +82,5 @@ export function Participant(props) {
 
     return <div>Hello World </div>
 }
+
+console.log('Participant.jsx 0.01')

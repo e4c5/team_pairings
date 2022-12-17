@@ -9,21 +9,16 @@ import { Table, TableBody, TableCell,
 import {Paper, Tooltip} from '@mui/material';
 
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
-    useParams,
-    Route, Routes,
+    Route,
     Link as RouterLink,
-    Outlet,
-    BrowserRouter
-} from "react-router-dom";
+    Switch, Router
+} from "wouter";
 
 import {Participant, Participants } from "./participant.jsx"
 import {Tournament, Tournaments } from "./tournament.jsx"
 import {Round, Rounds} from "./round.jsx"
 import getCookie from './cookie.js';
-import { Link, Switch, Box } from '@mui/material';
+import { Link,Box } from '@mui/material';
 
  
 function App() {
@@ -38,13 +33,7 @@ function App() {
     })
 
     return (
-      <BrowserRouter>   
-            <Routes>
-                <Route path="/" element={<Tournaments tournaments={tournaments}/>}>
-                    <Route path="/:slug/*" element={<Tournament  tournaments={tournaments}/>} />
-                </Route>
-            </Routes>
-      </BrowserRouter>
+      <Tournaments tournaments={tournaments}/> 
     )
 }
 
