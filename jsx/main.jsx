@@ -14,11 +14,11 @@ import {
     Switch, Router
 } from "wouter";
 
-import {Participant, Participants } from "./participant.jsx"
-import {Tournament, Tournaments } from "./tournament.jsx"
-import {Round, Rounds} from "./round.jsx"
+import { Participant, Participants } from "./participant.jsx"
+import { Tournament, Tournaments } from "./tournament.jsx"
+import { Round, Rounds } from "./round.jsx"
 import getCookie from './cookie.js';
-import { Link,Box } from '@mui/material';
+import { Link, Box } from '@mui/material';
 
  
 function App() {
@@ -33,7 +33,19 @@ function App() {
     })
 
     return (
-      <Tournaments tournaments={tournaments}/> 
+        <div>
+            <Route path="/">
+                <Tournaments tournaments={tournaments}/> 
+            </Route>
+            <Route path="/:slug">
+                { (params) => <Tournament params={params} tournaments={tournaments} /> }
+            </Route>
+            <Route path="/:slug/:id">
+                { (params) => <Participant params={params} tournaments={tournaments} /> }
+            </Route>
+
+        </div>
+      
     )
 }
 

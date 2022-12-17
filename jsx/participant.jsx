@@ -49,7 +49,7 @@ export function Participants(props) {
               >
                 <TableCell align="left">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
-                    <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
+                    <Link href={ `/${tourny.slug}/${row.id}` } component={RouterLink}>{row.name}</Link>
                 </TableCell>
                 <TableCell align="right">{row.seed}</TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>
@@ -68,9 +68,8 @@ export function Participants(props) {
 }
 
 export function Participant(props) {
-    const params = useParams();
     const [participant, setParticipant] = useState()
-    console.log('HERE')
+    console.log('HERE', props.tourny)
     useEffect(() => {
         const tourny = props.tourny
         if(participant == null && tourny) {
@@ -80,7 +79,7 @@ export function Participant(props) {
         } 
     })
 
-    return <div>Hello World </div>
+    return <div>Hello World { props.params.id } </div>
 }
 
-console.log('Participant.jsx 0.01')
+console.log('Participant.jsx 0.01.2')

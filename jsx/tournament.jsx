@@ -104,37 +104,34 @@ export function Tournament(props) {
         setParticipants(p)
     }
 
-    return (<div> 
-            <Participants rows={participants} tournament={tournament} 
-                    delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
-            /> 
-        </div>)
-
-    // return (
-    //     <div>
+    // return (<div> 
     //         <Participants rows={participants} tournament={tournament} 
-    //             delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
+    //                 delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
     //         /> 
-    //         <TextField size='small' placeholder='Name' 
-    //             value={name} onChange={ e => handleChange(e, 'name')} />
-    //         <TextField size='small' placeholder='seed' type='number'
-    //             value={seed} onChange={ e => handleChange(e, 'seed')} />
-    //         <Button variant="contained" onClick = { e => add(e)}>Add</Button>
-    //         <Routes>
-    //                 <Route path=":id" element={<Participant />} />
-    //                 <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
-    //         </Routes>
-    //         <Rounds rounds={rounds} tournament={tournament}/>
     //     </div>)
+
+    return (
+        <div>
+            <Participants rows={participants} tournament={tournament} 
+                delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
+            /> 
+            <TextField size='small' placeholder='Name' 
+                value={name} onChange={ e => handleChange(e, 'name')} />
+            <TextField size='small' placeholder='seed' type='number'
+                value={seed} onChange={ e => handleChange(e, 'seed')} />
+            <Button variant="contained" onClick = { e => add(e)}>Add</Button>
+            {/* <Routes>
+                    <Route path=":id" element={<Participant />} />
+                    <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
+            </Routes> */}
+            {/* <Rounds rounds={rounds} tournament={tournament}/> */}
+        </div>)
 }
 
 
 export function Tournaments(props) {
     return (
         <div>
-            <Route path="/:slug">
-                { (params) => <Tournament params={params} tournaments={props.tournaments} /> }
-            </Route>
             <List>
             { props.tournaments?.map(t => 
                 <ListItem key={t.id}>
