@@ -122,6 +122,7 @@ export function Tournament(props) {
                     <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
             </Routes>
             <Rounds rounds={rounds} tournament={tournament}/>
+
         </div>)
 }
 
@@ -138,7 +139,7 @@ export function Tournaments(props) {
                 </ListItem>) 
             }
             </List>
-            <Outlet/>
+
         </div>
     )
 }

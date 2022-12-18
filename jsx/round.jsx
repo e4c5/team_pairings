@@ -241,13 +241,13 @@ export function Round(props) {
 export function Rounds(props) {
     const rounds = props.rounds
     
-    if(rounds == null) {
-        return <div><Outlet/></div>
+    if(rounds === null) {
+        return <div></div>
     }
     else {
         return (
             <Box>
-                <Outlet rounds={rounds} />
+                
                 <ButtonGroup variant="contained" aria-label="outlined primary button group">
                     {
                         rounds.map(r => 
@@ -263,4 +263,4 @@ export function Rounds(props) {
     }
 }
 
-console.log('Rounds 0.01.7')
+console.log('Rounds 0.01.8')
