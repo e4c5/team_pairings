@@ -41,8 +41,8 @@ function App() {
       <BrowserRouter>   
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments}/>}>
-                    <Route path="/:slug/*" element={<Tournament  tournaments={tournaments}/>} />
                 </Route>
+                <Route path="/:slug/*" element={<Tournament  tournaments={tournaments}/>} />
             </Routes>
       </BrowserRouter>
     )

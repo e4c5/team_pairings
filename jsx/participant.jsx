@@ -14,14 +14,10 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
     useParams,
     Route,
     Routes,
     Link as RouterLink,
-    BrowserRouter,
     Outlet
 } from "react-router-dom";
 
@@ -32,42 +28,45 @@ export function Participants(props) {
     const tourny = props.tournament;
 
     return (
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Rank</TableCell>
-              <TableCell align="right">Name</TableCell>
-              <TableCell align="right">Seed</TableCell>
-              <TableCell align="right">Round Wins</TableCell>
-              <TableCell align="right">Game Wins</TableCell>
-              <TableCell align="right">Spread</TableCell>
-              <TableCell align="right">Offed</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {props.rows && props.rows.map((row, idx) => (
-              <TableRow
-                key={row.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="left">{ idx + 1}</TableCell>
-                <TableCell component="th" scope="row">
-                    <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
-                </TableCell>
-                <TableCell align="right">{row.seed}</TableCell>
-                <TableCell align="right">{row.round_wins}</TableCell>
-                <TableCell align="right">{row.game_wins}</TableCell>
-                <TableCell align="right">{row.spread}</TableCell>
-                <TableCell align="right">{ (tourny && tourny.is_editable)
-                    ? <Switch checked={row.offed != 0} onChange={ e => props.toggleParticipant(e, idx) }/>
-                    : <Switch checked={row.offed != 0} onChange={ e => props.delParticipant(e, idx) }/> }
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        <div>
+            <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                    <TableRow>
+                    <TableCell>Rank</TableCell>
+                    <TableCell align="right">Name</TableCell>
+                    <TableCell align="right">Seed</TableCell>
+                    <TableCell align="right">Round Wins</TableCell>
+                    <TableCell align="right">Game Wins</TableCell>
+                    <TableCell align="right">Spread</TableCell>
+                    <TableCell align="right">Offed</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {props.rows && props.rows.map((row, idx) => (
+                    <TableRow
+                        key={row.id}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                        <TableCell align="left">{ idx + 1}</TableCell>
+                        <TableCell component="th" scope="row">
+                            <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
+                        </TableCell>
+                        <TableCell align="right">{row.seed}</TableCell>
+                        <TableCell align="right">{row.round_wins}</TableCell>
+                        <TableCell align="right">{row.game_wins}</TableCell>
+                        <TableCell align="right">{row.spread}</TableCell>
+                        <TableCell align="right">{ (tourny && tourny.is_editable)
+                            ? <Switch checked={row.offed != 0} onChange={ e => props.toggleParticipant(e, idx) }/>
+                            : <Switch checked={row.offed != 0} onChange={ e => props.delParticipant(e, idx) }/> }
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            </TableContainer>
+            <Outlet/>
+        </div>
     );
 }
 
@@ -75,13 +74,13 @@ export function Participant(props) {
     const params = useParams();
     const [participant, setParticipant] = useState()
 
-    useEffect(() => {
-        if(participant == null && tourny) {
-            fetch(`/api/${tourny.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
-                setParticipant(json)
-            })
-        } 
-    })
+    // useEffect(() => {
+    //     if(participant == null && tourny) {
+    //         fetch(`/api/${tourny.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
+    //             setParticipant(json)
+    //         })
+    //     } 
+    // })
 
     return <div>Hello World </div>
 }
