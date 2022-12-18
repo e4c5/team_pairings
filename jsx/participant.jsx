@@ -49,7 +49,7 @@ export function Participants(props) {
               >
                 <TableCell align="left">{ idx + 1}</TableCell>
                 <TableCell component="th" scope="row">
-                    <Link href={ `/${tourny.slug}/${row.id}` } component={RouterLink}>{row.name}</Link>
+                    <Link href={ `/${row.id}` } component={RouterLink}>{row.name}</Link>
                 </TableCell>
                 <TableCell align="right">{row.seed}</TableCell>
                 <TableCell align="right">{row.round_wins}</TableCell>
