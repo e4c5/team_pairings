@@ -4,7 +4,6 @@ import { Button, List, ListItem, TextField }  from '@mui/material';
 import {
     useParams,
     Route, Routes,     
-    Outlet,
     Link as RouterLink,
 } from "react-router-dom";
 
@@ -109,11 +108,6 @@ export function Tournament(props) {
 
     return (
         <div>
-            <Routes>
-                    <Route path=":id" element={<Participant/>} />
-                    <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
-            </Routes>
-            
                 <Participants rows={participants} tournament={tournament} 
                     delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
                 /> 

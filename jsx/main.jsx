@@ -9,13 +9,8 @@ import { Table, TableBody, TableCell,
 import {Paper, Tooltip} from '@mui/material';
 
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
-    useParams,
     Route, Routes,
     Link as RouterLink,
-    Outlet,
     BrowserRouter
 } from "react-router-dom";
 
@@ -28,6 +23,8 @@ import { Link, Switch, Box } from '@mui/material';
  
 function App() {
     const [tournaments, setTournaments] = useState()
+    const [tournament, setTournament] = useState({})
+    const [rounds, setRounds] = useState({})
 
     useEffect(() => {
         if(tournaments == null) {
@@ -41,7 +38,11 @@ function App() {
       <BrowserRouter>   
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
-                <Route path="/:slug/*" element={<Tournament  tournaments={tournaments}/>} />
+                <Route path="/:slug" >
+                    <Route path="" element={<Tournament  tournaments={tournaments}/>} />
+                    <Route path=":id" element={<Participant/>} />
+                    <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
+                </Route>
             </Routes>
       </BrowserRouter>
     )

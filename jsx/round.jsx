@@ -14,7 +14,6 @@ import {Paper, Tooltip, Grid} from '@mui/material';
 import {
     useParams,
     Link as RouterLink,
-    Outlet,
 } from "react-router-dom";
 
 import getCookie from './cookie.js';
