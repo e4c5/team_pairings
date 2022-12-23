@@ -16,32 +16,30 @@ import { Link, Switch, Box } from '@mui/material';
 
 export function Tournament(props) {
     const params = useParams()
-    const [rounds, setRounds] = React.useState(null)
     const [name, setName] = React.useState('')
     const [seed, setSeed] = React.useState('')
-    const [participants, setParticipants] = React.useState(null)
-    const [tournament, setTournament] = React.useState(null)
     
     useEffect(() => {
+        const tournament = props.tournament;
+
         props.tournaments?.map(t => {
             if(t.slug == params.slug) {
-                if(tournament != t) {
+                if(tournament !== t) {
+                    console.log('update')
                     /* if the tournament has changed, fetch it's rounds and participants */
-                    setTournament(t)
-                    
                     fetch(`/api/${t.id}/participant/`).then(resp => resp.json()).then(json =>{
-                        setParticipants(json)
+                        console.log('setting participans to ', json)
+                        props.setParticipants(json)
                     })
-                    console.log('Fetching sounds')
+                    props.setTournament(t)
+
                     fetch(`/api/${t.id}/round/`).then(resp => resp.json()).then(json =>{
-                        console.log('rounds set to ')
-                        console.log('json')
-                        setRounds(json)
+                        props.setRounds(json)
                     })
                 }
             }
         })    
-    })
+    }, [props.tournament])
 
     const handleChange = (e, p) => {
         if(p == 'name') {
@@ -53,9 +51,9 @@ export function Tournament(props) {
     }
 
     function toggleParticipant(e, idx) {
-        const p = participants[idx];
+        const p = props.participants[idx];
         p['offed'] = p.offed == 0 ? 1 : 0;
-        console.log(`/api/${tournament.id}/participant/${p.id}`)
+        console.log(`/api/${props.tournament.id}/participant/${p.id}`)
         fetch(`/api/participant/${p.id}/`, 
             { method: 'PUT', 'credentials': 'same-origin',
               headers: 
@@ -65,9 +63,9 @@ export function Tournament(props) {
               },
               body: JSON.stringify(p)
             }).then(resp => resp.json()).then(json => {
-                const old = [...participants]
+                const old = [...props.participants]
                 old[idx] = json
-                setParticipants(old)
+                props.setParticipants(old)
         })
     }
 
@@ -76,7 +74,7 @@ export function Tournament(props) {
     }
 
     const add = e => {
-        fetch(`/api/${tournament.id}/participant/`, 
+        fetch(`/api/${props.tournament.id}/participant/`, 
             { method: 'POST', 'credentials': 'same-origin',
               headers: 
               {
@@ -85,14 +83,14 @@ export function Tournament(props) {
               },
               body: JSON.stringify({ tournament: 1, name: name, seed: seed})
             }).then(resp => resp.json()).then(json => {
-                setParticipants([...participants, json])
+                props.setParticipants([...props.participants, json])
                 setSeed(seed + 1)
                 setName('')
             })
     }
 
     function updateStandings(result) {
-        const p = participants.map(team => {
+        const p = props.participants.map(team => {
             if(team.id == result.first.id) {
                 return result.first
             }
@@ -103,12 +101,12 @@ export function Tournament(props) {
                 return team
             }
         })
-        setParticipants(p)
+        props.setParticipants(p)
     }
 
     return (
         <div>
-                <Participants rows={participants} tournament={tournament} 
+                <Participants rows={props.participants} tournament={props.tournament} 
                     delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
                 /> 
                 <TextField size='small' placeholder='Name' 
@@ -116,7 +114,7 @@ export function Tournament(props) {
                 <TextField size='small' placeholder='seed' type='number'
                     value={seed} onChange={ e => handleChange(e, 'seed')} />
                 <Button variant="contained" onClick = { e => add(e)}>Add</Button>
-                <Rounds rounds={rounds} tournament={tournament}/>
+                <Rounds rounds={props.rounds} tournament={props.tournament}/>
             
         </div>)
 }
@@ -139,4 +137,4 @@ export function Tournaments(props) {
     )
 }
 
-console.log('Tournament 0.01.4')
+console.log('Tournament 0.02')

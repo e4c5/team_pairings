@@ -249,7 +249,7 @@ export function Rounds(props) {
                 
                 <ButtonGroup variant="contained" aria-label="outlined primary button group">
                     {
-                        rounds.map(r => 
+                        rounds?.map(r => 
                             <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'}  key={r.id}>
                                 <Button component={RouterLink} 
                                 to={ 'round/' + r.round_no} >{r.round_no}</Button>

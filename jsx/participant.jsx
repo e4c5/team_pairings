@@ -13,16 +13,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
+
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
     useParams,
-    Route,
-    Routes,
     Link as RouterLink,
-    BrowserRouter,
-    Outlet
 } from "react-router-dom";
 
 
@@ -32,8 +26,7 @@ export function Participants(props) {
     const tourny = props.tournament;
 
     return (
-        <>
-      <TableContainer component={Paper}>
+       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -47,7 +40,7 @@ export function Participants(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {props.rows && props.rows.map((row, idx) => (
+            {props.rows.map((row, idx) => (
               <TableRow
                 key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -69,8 +62,7 @@ export function Participants(props) {
           </TableBody>
         </Table>
       </TableContainer>
-      </>
-    );
+     );
 }
 
 export function Participant(props) {

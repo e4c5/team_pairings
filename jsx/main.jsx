@@ -24,7 +24,8 @@ import { Link, Switch, Box } from '@mui/material';
 function App() {
     const [tournaments, setTournaments] = useState()
     const [tournament, setTournament] = useState({})
-    const [rounds, setRounds] = useState({})
+    const [participants, setParticipants] = useState([])
+    const [rounds, setRounds] = useState([])
 
     useEffect(() => {
         if(tournaments == null) {
@@ -39,7 +40,14 @@ function App() {
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
                 <Route path="/:slug" >
-                    <Route path="" element={<Tournament  tournaments={tournaments}/>} />
+                    <Route path="" 
+                        element={<Tournament tournaments={tournaments} rounds={rounds}
+                                setTournament={setTournament} setRounds={setRounds} 
+                                setParticipants={setParticipants} participants={participants}
+                            />
+                        } 
+                    />
+
                     <Route path=":id" element={<Participant/>} />
                     <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
                 </Route>
@@ -52,7 +60,7 @@ function App() {
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
 root.render(<App/>)
-console.log('main.js 0.02')
+console.log('main.js 0.02.1')
 
 
 
