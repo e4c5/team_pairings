@@ -109,20 +109,21 @@ export function Tournament(props) {
 
     return (
         <div>
-            <Participants rows={participants} tournament={tournament} 
-                delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
-            /> 
-            <TextField size='small' placeholder='Name' 
-                value={name} onChange={ e => handleChange(e, 'name')} />
-            <TextField size='small' placeholder='seed' type='number'
-                value={seed} onChange={ e => handleChange(e, 'seed')} />
-            <Button variant="contained" onClick = { e => add(e)}>Add</Button>
             <Routes>
                     <Route path=":id" element={<Participant/>} />
                     <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
             </Routes>
-            <Rounds rounds={rounds} tournament={tournament}/>
-
+            
+                <Participants rows={participants} tournament={tournament} 
+                    delParticipant={ delParticipant } toggleParticipant = { toggleParticipant}
+                /> 
+                <TextField size='small' placeholder='Name' 
+                    value={name} onChange={ e => handleChange(e, 'name')} />
+                <TextField size='small' placeholder='seed' type='number'
+                    value={seed} onChange={ e => handleChange(e, 'seed')} />
+                <Button variant="contained" onClick = { e => add(e)}>Add</Button>
+                <Rounds rounds={rounds} tournament={tournament}/>
+            
         </div>)
 }
 
@@ -144,4 +145,4 @@ export function Tournaments(props) {
     )
 }
 
-console.log('Tournament 0.01.3')
+console.log('Tournament 0.01.4')

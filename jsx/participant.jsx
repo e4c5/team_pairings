@@ -32,6 +32,7 @@ export function Participants(props) {
     const tourny = props.tournament;
 
     return (
+        <>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
@@ -68,6 +69,7 @@ export function Participants(props) {
           </TableBody>
         </Table>
       </TableContainer>
+      </>
     );
 }
 
