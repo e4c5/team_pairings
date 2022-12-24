@@ -69,13 +69,14 @@ export function Participant(props) {
     const params = useParams();
     const [participant, setParticipant] = useState()
 
-    // useEffect(() => {
-    //     if(participant == null && tourny) {
-    //         fetch(`/api/${tourny.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
-    //             setParticipant(json)
-    //         })
-    //     } 
-    // })
+    useEffect(() => {
+        if(participant == null && props.tournament) {
+            fetch(`/api/${props.tournament.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
+                setParticipant(json)
+                console.log(json)
+            })
+        } 
+    })
 
     return <div>Hello World </div>
 }

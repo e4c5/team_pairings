@@ -43,7 +43,7 @@ export default function App() {
                         } 
                     />
 
-                    <Route path=":id" element={<Participant/>} />
+                    <Route path=":id" element={<Participant tournament={tournament}/>} />
                     <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
                 </Route>
             </Routes>

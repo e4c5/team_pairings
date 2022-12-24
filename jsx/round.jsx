@@ -34,8 +34,6 @@ export function Round(props) {
     const [won, setWon] = React.useState('')
     const [lost, setLost] = React.useState('')
 
-    console.log(props)
-    
     function fetchResults(round) {
         if(! round) {
             return
