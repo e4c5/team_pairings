@@ -12,12 +12,21 @@ class Tournament(models.Model):
     ''' A tournament can sometimes have many sections, they can be rated or unrated.
     But one thing for sure they will have at least two players
     '''
+    BY_TEAM = 'T'
+    BY_PLAYER = 'P'
+    DATA_ENTRY_CHOICES = ((BY_TEAM, 'By Team'), (BY_PLAYER, 'By Player'))
+
     start_date = models.TextField()
     name = models.TextField()
     rated = models.IntegerField(default=True)
     slug = models.TextField(unique=True, blank=True)
+
     # team size is not null when a team tournament
     team_size = models.IntegerField(blank=True, null=True)
+
+    # do we add up the team scores and enter that or do we enter them
+    # player by player?
+    entry_mode = models.CharField(choices=DATA_ENTRY_CHOICES, default=BY_TEAM, max_length=1)
 
     @classmethod    
     def tournament_slug(self, name):
@@ -77,6 +86,7 @@ class Tournament(models.Model):
 
 
 class TournamentRound(models.Model):
+    """Represents a tournament round configuration"""
     ROUND_ROBIN = "ROUND_ROBIN"
     SWISS = "SWISS"
     KOTH = "KOTH"
@@ -91,6 +101,9 @@ class TournamentRound(models.Model):
     spread_cap = models.IntegerField(null=True, blank=True)
     pairing_system = models.CharField(max_length=16, choices=PAIRING_CHOICES)
     repeats = models.IntegerField(default=0)
+
+    # when we make the pairing for this round, which result do we use
+    # for pairing?
     based_on = models.IntegerField(null=True, blank=True)
     paired = models.BooleanField(default=False)
     num_rounds = models.IntegerField()
@@ -112,6 +125,7 @@ class Participant(models.Model):
 
    
 class Result(models.Model):
+    """A round result"""
     round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT)
     first = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='first')   
     second = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='second')   
@@ -121,6 +135,26 @@ class Result(models.Model):
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
     
+
+class TeamMember(models.Model):
+    """In a team tournament, this represents a team member"""
+    team = models.ForeignKey(Participant, on_delete=models.PROTECT)   
+    board = models.IntegerField()
+    name = models.CharField(max_length=128)
+
+
+class BoardResult(models.Model):
+    """A result for an individual board in a tournament"""
+    round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT)
+    team1 = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='team1')   
+    team2 = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='team2')   
+    board = models.IntegerField()
+    score1 = models.IntegerField()
+    score2 = models.IntegerField()
+
+    class Meta:
+        unique_together = ['round','team1','team2','board']
+
 
 @receiver(post_save, sender=Result)
 def update_result(sender, instance, created, **kwargs):
