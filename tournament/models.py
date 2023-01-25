@@ -71,7 +71,7 @@ class Tournament(models.Model):
         That is the round that is in progress. None if the tournament has concluded. 
         '''
         try:
-            if self.rounds.all()[0].roundresult_set.count() > 0:
+            if self.rounds.all()[0].results.count() > 0:
                 rnd = self.rounds.filter(roundresult__score_for=None).order_by('-round_no')[0]
                 return rnd.round_no
             return 0
@@ -126,7 +126,7 @@ class Participant(models.Model):
    
 class Result(models.Model):
     """A round result"""
-    round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT)
+    round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name='results')
     first = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='first')   
     second = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='second')   
     # only used for team tournaments.

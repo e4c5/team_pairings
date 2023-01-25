@@ -20,6 +20,27 @@ class BasicTests(APITestCase):
         user.set_password('12345')
         user.save()
 
+
+    def test_create(self):
+        t = models.Tournament.get_by_name('Richmond shoWdOwn U20',start_date='2023-01-01')
+        self.assertEqual(2, models.Tournament.objects.count())
+
+        t = models.Tournament.get_by_name('THIS WILL BE MADE', start_date='2023-01-01')
+        self.assertEquals(t.get_absolute_url(), '/tournament/this-will-be-made/')
+        self.assertEqual(3, models.Tournament.objects.count())
+        self.assertEqual(t.num_rounds, 0)
+
+
+    def test_current_round(self):
+        for i in range(5):
+            models.TournamentRound.objects.create(
+                tournament=self.t1, round_no=i+1,
+                pairing_system='SWISS',repeats=0,based_on=i,
+                num_rounds=5, team_size=5
+            )
+        self.assertEqual(0, self.t1.current_round)
+
+
     def test_list(self):
         '''Test that the team list is created correctly'''
         response = self.client.get('/api/tournament/',format='json')
