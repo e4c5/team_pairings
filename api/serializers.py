@@ -5,7 +5,6 @@ class TournamentSerializer(serializers.ModelSerializer):
     is_editable = serializers.SerializerMethodField()
 
     def get_is_editable(self, obj):
-        print(obj)
         if hasattr(obj, 'editable'):
             return obj.editable
         return True

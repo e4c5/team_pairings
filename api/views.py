@@ -1,14 +1,12 @@
-from pyexpat import model
 from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+
 from tournament import models
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
         TournamentRoundSerializer, ResultSerializer)
-import tournament
-
-# Create your views here.
 
 def index(request):
     return render(request, 'index.html')
