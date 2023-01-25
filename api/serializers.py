@@ -24,7 +24,11 @@ class TournamentRoundSerializer(serializers.ModelSerializer):
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
-        fields = '__all__'
+        fields = [
+            'name', 'played','game_wins','round_wins','spread',
+            'position','offed','seed'
+        ]
+    
 
 class ResultSerializer(serializers.ModelSerializer):
     first = ParticipantSerializer(read_only=True)

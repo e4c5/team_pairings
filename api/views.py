@@ -12,6 +12,7 @@ def index(request):
     return render(request, 'index.html')
 
 class TournamentViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = models.Tournament.objects.all()
     serializer_class = TournamentSerializer
 
@@ -21,7 +22,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
         instance.editable = instance.rounds.filter(paired=True).count() == 0
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
-
 
 
 class TournamentRoundViewSet(viewsets.ModelViewSet):
@@ -39,7 +39,11 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         
 
 class ParticipantViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ParticipantSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(tournament_id=self.kwargs['tid'])
 
     def get_queryset(self):
         return models.Participant.objects.filter(
@@ -47,6 +51,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
 
 
 class ResultViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ResultSerializer
     def get_queryset(self):
         return models.Result.objects.filter(round_id = self.kwargs['rid'])
