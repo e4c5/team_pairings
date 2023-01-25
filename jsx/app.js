@@ -3,20 +3,16 @@ import React, { useState, useEffect } from 'react';
 
 import {
     Route, Routes,
-    Link as RouterLink,
     BrowserRouter
 } from "react-router-dom";
 
 import {Participant, Participants } from "./participant.jsx"
 import {Tournament, Tournaments } from "./tournament.jsx"
 import {Round, Rounds} from "./round.jsx"
-
+import { TournamentProvider } from './context.jsx';
  
 export default function App() {
     const [tournaments, setTournaments] = useState()
-    const [tournament, setTournament] = useState({})
-    const [participants, setParticipants] = useState([])
-    const [rounds, setRounds] = useState([])
 
     function fetchTournaments() {
         fetch(`/api/tournament/`).then(resp=>resp.json()).then(json=>{
@@ -32,21 +28,19 @@ export default function App() {
 
     return (
       <BrowserRouter>   
+        <TournamentProvider>
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
                 <Route path="/:slug" >
                     <Route path="" 
-                        element={<Tournament tournaments={tournaments} rounds={rounds}
-                                setTournament={setTournament} setRounds={setRounds} 
-                                setParticipants={setParticipants} participants={participants}
-                            />
-                        } 
+                        element={ <Tournament tournaments={tournaments} /> } 
                     />
 
-                    <Route path=":id" element={<Participant tournament={tournament}/>} />
-                    <Route path="round/:id" element={<Round tournament={tournament} rounds={rounds}/>} />
+                    <Route path=":id" element={<Participant />} />
+                    <Route path="round/:id" element={<Round />} />
                 </Route>
             </Routes>
+        </TournamentProvider>
       </BrowserRouter>
     )
 }

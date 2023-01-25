@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 
 const TournamentContext = createContext(null)
 const TournamentDispatchContext = createContext(null)
@@ -79,6 +79,11 @@ function tournamentReducer(state, action) {
             })
             return {...state, rounds: r}
 
+        
+        case 'reset':
+        case 'replace':
+            console.log(action.value)
+            return {...action.value}
         
         default: {
             throw Error('Unknown action: ' + action.type);

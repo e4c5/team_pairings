@@ -1,10 +1,5 @@
 //npx babel --watch jsx --out-dir tournament/static/js/ --presets react-app/dev 
 import React, { useState, useEffect } from 'react';
-import * as ReactDOM from 'react-dom';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,18 +7,40 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Tooltip from '@mui/material/Tooltip';
 
 import {
     useParams,
     Link as RouterLink,
 } from "react-router-dom";
 
-
 import { Link, Switch } from '@mui/material';
+import { useTournament, useTournamentDispatch } from './context.jsx';
+import getCookie from './cookie.js';
 
 export function Participants(props) {
-    const tourny = props.tournament;
+    const tournament = useTournament();
+    const dispatch = useTournamentDispatch()
+
+    function toggleParticipant(e, idx) {
+        const p = tournament.participants[idx];
+        p['offed'] = p.offed == 0 ? 1 : 0;
+        console.log(`/api/${tournament.id}/participant/${p.id}`)
+        fetch(`/api/participant/${p.id}/`, 
+            { method: 'PUT', 'credentials': 'same-origin',
+              headers: 
+              {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": getCookie("csrftoken")
+              },
+              body: JSON.stringify(p)
+        }).then(resp => resp.json()).then(json => {
+            dispatch({type: 'editParticipant', json})
+        })
+    }
+
+    function delParticipant(e, idx) {
+        console.log('delete');
+    }
 
     return (
        <TableContainer component={Paper}>
@@ -40,7 +57,7 @@ export function Participants(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {props.rows.map((row, idx) => (
+            { tournament?.participants?.map((row, idx) => (
               <TableRow
                 key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -53,9 +70,9 @@ export function Participants(props) {
                 <TableCell align="right">{row.round_wins}</TableCell>
                 <TableCell align="right">{row.game_wins}</TableCell>
                 <TableCell align="right">{row.spread}</TableCell>
-                <TableCell align="right">{ (tourny && tourny.is_editable)
-                    ? <Switch checked={row.offed != 0} onChange={ e => props.toggleParticipant(e, idx) }/>
-                    : <Switch checked={row.offed != 0} onChange={ e => props.delParticipant(e, idx) }/> }
+                <TableCell align="right">{ (tournament && tournament.is_editable)
+                    ? <Switch checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
+                    : <Switch checked={row.offed != 0} onChange={ e => delParticipant(e, idx) }/> }
                 </TableCell>
               </TableRow>
             ))}
