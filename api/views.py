@@ -1,4 +1,8 @@
+import json
+
 from django.shortcuts import render
+from django.db import connection
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,11 +21,28 @@ class TournamentViewSet(viewsets.ModelViewSet):
     serializer_class = TournamentSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        print('here')
-        instance = self.get_object()
-        instance.editable = instance.rounds.filter(paired=True).count() == 0
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        query = """
+       select json_object('id',id, 'start_date', start_date, 'rated', rated,'slug', slug, 'team_size', team_size, 
+       'participants', (select json_group_array(
+				json_object('id', id, 'name', name, 'played', played, 'game_wins',game_wins,
+					'spread', spread, 'position', "position", 'offed', offed, 'seed', 'seed'
+				)
+			) from tournament_participant tp where tournament_id = %s) 
+		,
+		'rounds', (select json_group_array(
+				json_object('id', id, 'round_no', round_no, 'spread_cap', spread_cap, 'repeats', repeats,
+					'based_on', based_on, 'tournament_id', "tournament_id", 'paired', paired, 
+					'num_rounds', num_rounds, 'team_size', team_size
+				)
+			) from tournament_tournamentround tt where tournament_id = %s) 
+		)
+        from tournament_tournament tt where id = %s
+        """
+
+        with connection.cursor() as cursor:
+            print(kwargs)
+            cursor.execute(query, [kwargs['pk'], kwargs['pk'], kwargs['pk']])
+            return Response( json.loads(cursor.fetchone()[0]))
 
 
 class TournamentRoundViewSet(viewsets.ModelViewSet):

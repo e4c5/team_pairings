@@ -46,3 +46,18 @@ class ResultDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'        
 
 
+
+class TournamentSerializer(serializers.ModelSerializer):
+    is_editable = serializers.SerializerMethodField()
+
+    def get_is_editable(self, obj):
+        if hasattr(obj, 'editable'):
+            return obj.editable
+        return True
+
+
+    class Meta:
+        model = Tournament
+        fields = ['id', 'start_date','name','rated','slug', 'is_editable']
+
+    
