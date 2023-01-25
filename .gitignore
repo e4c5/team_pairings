@@ -19,6 +19,7 @@ questions.csv
 zyzzyva.sql.gz
 .vscode
 db.sqlite3
+pairing-db.sqlite3
 tournament/static/js/main.js
 yarn.lock
 scratch.py

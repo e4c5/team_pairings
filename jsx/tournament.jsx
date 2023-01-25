@@ -13,7 +13,6 @@ import getCookie from './cookie.js';
 
 import { Link, Switch, Box } from '@mui/material';
  
-
 export function Tournament(props) {
     const params = useParams()
     const [name, setName] = React.useState('')

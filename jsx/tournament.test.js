@@ -1,12 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-import React from "react";
-import { unmountComponentAtNode } from "react-dom";
-import { act } from "react-dom/test-utils";
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom'
-
 //import { render, screen } from '@testing-library/react';
 import App from './app';
 

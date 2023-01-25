@@ -89,8 +89,8 @@ export function Round(props) {
         fetch(`/api/${round.id}/result/${resultId}/`, { method: 'PUT', 'credentials': 'same-origin',
             headers: 
             {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": getCookie("csrftoken")
+                'Content-Type': 'application/json',
+                "X-CSRFToken": getCookie("csrftoken")
             },
             body: JSON.stringify({ score1: score1, score2: score2, games_won: won, round: round.id})
         }).then(resp=>resp.json()).then(json=>{
