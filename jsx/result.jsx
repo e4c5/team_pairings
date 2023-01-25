@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button }  from '@mui/material';
-
 import EditIcon from '@mui/icons-material/Edit';
+import { TableCell, TableRow } from '@mui/material';
+import { useTournament, useTournamentDispatch } from './context.jsx';
 
-import { Table, TableBody, TableCell,
-         TableContainer, TableHead, TableRow } from '@mui/material';
-
-export default function Result({r, tournament, index, editScore}) {
+export default function Result({r, index, editScore}) {
     const editable = document.getElementById('editable')
+    const dispatch = useTournamentDispatch()
+    const tournament = useTournament()
 
     function resultIn() {
         if(editable) {

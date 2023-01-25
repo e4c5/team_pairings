@@ -26,16 +26,16 @@ import Result from './result.jsx';
 
 export function Round(props) {
     const params = useParams()
-    const [round, setRound] = React.useState(null)
-    const [results, setResults] = React.useState(null)
-    const [names, setNames] = React.useState([])
-    const [resultId, setResultId] = React.useState(0)
-    const [first, setFirst] = React.useState({})
-    const [second, setSecond] = React.useState({})
-    const [score1, setScore1] = React.useState('')
-    const [score2, setScore2] = React.useState('')
-    const [won, setWon] = React.useState('')
-    const [lost, setLost] = React.useState('')
+    const [round, setRound] = useState(null)
+    const [results, setResults] = useState(null)
+    const [names, setNames] = useState([])
+    const [resultId, setResultId] = useState(0)
+    const [first, setFirst] = useState({})
+    const [second, setSecond] = useState({})
+    const [score1, setScore1] = useState('')
+    const [score2, setScore2] = useState('')
+    const [won, setWon] = useState('')
+    const [lost, setLost] = useState('')
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
 
@@ -222,7 +222,7 @@ export function Round(props) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {results.map((r, idx) => <Result key={r.id} r={r} tournament={tournament}
+                            {results.map((r, idx) => <Result key={r.id} r={r} 
                                 index={idx} editScore={editScore} />)}
                         </TableBody>
                     </Table>
@@ -245,25 +245,22 @@ export function Rounds(props) {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
 
-    if (tournament?.rounds === null) {
-        return <div></div>
-    }
-    else {
-        return (
-            <Box>
-                <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                    {
-                        tournament?.rounds?.map(r =>
-                            <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'} key={r.id}>
-                                <Button component={RouterLink}
-                                    to={'round/' + r.round_no} >{r.round_no}</Button>
-                            </Tooltip>
-                        )
-                    }
-                </ButtonGroup>
-            </Box>
-        )
-    }
+    console.log(tournament?.rounds)
+    return (
+        <Box>
+            <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                {
+                    tournament?.rounds?.map(r =>
+                        <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'} key={r.id}>
+                            <Button component={RouterLink}
+                                to={'round/' + r.round_no} >{r.round_no}</Button>
+                        </Tooltip>
+                    )
+                }
+            </ButtonGroup>
+        </Box>
+    )
+    
 }
 
 console.log('Rounds 0.01.8')
