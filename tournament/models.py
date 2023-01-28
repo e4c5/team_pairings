@@ -127,20 +127,33 @@ class Participant(models.Model):
 class Result(models.Model):
     """A round result"""
     round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name='results')
-    first = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='first')   
-    second = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='second')   
+    # the fact that this is called p1 does not mean this player goes first
+    p1 = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='p1')   
+    # p2 doesn't mean going second
+    p2 = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='p2')   
+
+    # The starting player, a non null entry means that player identified
+    # goes first. Null means they toss for it. 
+    starting = models.ForeignKey(Participant, null=True, blank=True,
+        on_delete=models.PROTECT, related_name='starting')   
+
     # only used for team tournaments.
     # the number of games won in the round by the first player
     games_won = models.IntegerField(blank=True, null=True)
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
     
+    class Meta:
+        unique_together = ['round','p1','p2']
+
 
 class TeamMember(models.Model):
     """In a team tournament, this represents a team member"""
     team = models.ForeignKey(Participant, on_delete=models.PROTECT)   
     board = models.IntegerField()
     name = models.CharField(max_length=128)
+    wins = models.FloatField()
+    spread = models.IntegerField()
 
 
 class BoardResult(models.Model):
