@@ -22,4 +22,6 @@ db.sqlite3
 pairing-db.sqlite3
 tournament/static/js/main.js
 yarn.lock
-scratch.pyenv.sh
+scratch.py
+team_pair/settings_local.py
+
