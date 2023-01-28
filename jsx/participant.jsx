@@ -85,10 +85,11 @@ export function Participants(props) {
 export function Participant(props) {
     const params = useParams();
     const [participant, setParticipant] = useState()
+    const tournament = useTournament()
 
     useEffect(() => {
-        if(participant == null && props.tournament) {
-            fetch(`/api/${props.tournament.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
+        if(participant == null && tournament) {
+            fetch(`/api/${tournament.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
                 setParticipant(json)
                 console.log(json)
             })

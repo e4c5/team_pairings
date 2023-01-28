@@ -25,6 +25,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
        select json_object('id',id, 'start_date', start_date, 'rated', rated,'slug', slug, 'team_size', team_size, 
        'participants', (select json_group_array(
 				json_object('id', id, 'name', name, 'played', played, 'game_wins',game_wins,
+                    'round_wins',round_wins,
 					'spread', spread, 'position', "position", 'offed', offed, 'seed', 'seed'
 				)
 			) from tournament_participant tp where tournament_id = %s) 

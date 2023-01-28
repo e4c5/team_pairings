@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 import {
     Route, Routes,
-    BrowserRouter
+    BrowserRouter, useNavigate
 } from "react-router-dom";
 
 import {Participant, Participants } from "./participant.jsx"
@@ -13,6 +13,7 @@ import { TournamentProvider } from './context.jsx';
  
 export default function App() {
     const [tournaments, setTournaments] = useState()
+    const navigate = useNavigate()
 
     function fetchTournaments() {
         fetch(`/api/tournament/`).then(resp=>resp.json()).then(json=>{
@@ -21,13 +22,23 @@ export default function App() {
     }
 
     useEffect(() => {
+        document.title = 'Sri Lanka Scrabble Pairing App'
         if(tournaments == null) {
             fetchTournaments()
         } 
-    })
+    },[])
+
+    useEffect(() => {
+        if(tournaments != null) {
+            const path = document.getElementById('frm')
+            if (path?.innerText.length > 1) {
+                navigate(path.innerText)
+            }
+        }
+    }, [tournaments])
 
     return (
-      <BrowserRouter>   
+      
         <TournamentProvider>
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
@@ -41,6 +52,6 @@ export default function App() {
                 </Route>
             </Routes>
         </TournamentProvider>
-      </BrowserRouter>
+      
     )
 }
