@@ -28,6 +28,8 @@ class Tournament(models.Model):
     # player by player?
     entry_mode = models.CharField(choices=DATA_ENTRY_CHOICES, default=BY_TEAM, max_length=1)
 
+    num_rounds = models.IntegerField()
+
     @classmethod    
     def tournament_slug(self, name):
         ''' Slugify tournament names so that we can use them in links '''
@@ -43,9 +45,7 @@ class Tournament(models.Model):
             tourney = Tournament.objects.get(slug=slug)
     
         except :
-            tourney = Tournament.objects.create(name=tournament_name,
-                                 rated=rated, start_date=start_date,
-                                 slug=Tournament.tournament_slug(tournament_name))
+            return None
 
         return tourney        
 
@@ -54,14 +54,6 @@ class Tournament(models.Model):
     
     def get_absolute_url(self):
         return "/tournament/{0}/".format(self.slug)
-    
-    @property
-    def num_rounds(self):
-        '''
-        Returns the number of rounds in the tournament
-        '''
-        return self.rounds.count()
-    
     
     @property
     def current_round(self):
@@ -106,8 +98,6 @@ class TournamentRound(models.Model):
     # for pairing?
     based_on = models.IntegerField(null=True, blank=True)
     paired = models.BooleanField(default=False)
-    num_rounds = models.IntegerField()
-    team_size = models.IntegerField()
     
 
 class Participant(models.Model):
@@ -194,3 +184,12 @@ def update_result(sender, instance, created, **kwargs):
             with connection.cursor() as cursor:
                 cursor.execute(q.format(instance.first_id))
                 cursor.execute(q.format(instance.second_id))
+
+
+@receiver(post_save, sender=Tournament)
+def setup_tournament(sender, instance, created, **kwargs):
+    if created and instance.num_rounds > 0:
+        for i in range(1, instance.num_rounds + 1):
+            TournamentRound.objects.create(tournament=instance, round_no=i,
+                    pairing_system=TournamentRound.SWISS, repeats=0,
+                    based_on=i - 1)
