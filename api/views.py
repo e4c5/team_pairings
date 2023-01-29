@@ -21,29 +21,21 @@ class TournamentViewSet(viewsets.ModelViewSet):
     serializer_class = TournamentSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        query = """
-       select json_object('id',id, 'start_date', start_date, 'rated', rated,'slug', slug, 'team_size', team_size, 
-       'participants', (select json_group_array(
-				json_object('id', id, 'name', name, 'played', played, 'game_wins',game_wins,
-                    'round_wins',round_wins,
-					'spread', spread, 'position', "position", 'offed', offed, 'seed', 'seed'
-				)
-			) from tournament_participant tp where tournament_id = %s) 
-		,
-		'rounds', (select json_group_array(
-				json_object('id', id, 'round_no', round_no, 'spread_cap', spread_cap, 'repeats', repeats,
-					'based_on', based_on, 'tournament_id', "tournament_id", 'paired', paired, 
-					'num_rounds', num_rounds, 'team_size', team_size
-				)
-			) from tournament_tournamentround tt where tournament_id = %s) 
-		)
-        from tournament_tournament tt where id = %s
-        """
+        # funnily enough if you use to_jsonb in the outermost query below
+        # psycopg2 gives you a string instead of a dic
+        query = """select to_json(f) from (
+            select tt.*, 	
+                (select jsonb_agg(to_jsonb(parties)) 
+                from tournament_participant parties where tournament_id = tt.id) participants,
+                (select jsonb_agg(to_jsonb(rounds)) 
+                from tournament_tournamentround rounds where tournament_id = tt.id) rounds
+            from tournament_tournament tt where id = %s 	   
+        ) f """
 
         with connection.cursor() as cursor:
             print(kwargs)
-            cursor.execute(query, [kwargs['pk'], kwargs['pk'], kwargs['pk']])
-            return Response( json.loads(cursor.fetchone()[0]))
+            cursor.execute(query, [kwargs['pk']])
+            return Response( cursor.fetchone()[0])
 
 
 class TournamentRoundViewSet(viewsets.ModelViewSet):
