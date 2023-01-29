@@ -39,7 +39,7 @@ export function Tournament(props) {
     }
 
     const add = e => {
-        fetch(`/api/${props.tournament.id}/participant/`, 
+        fetch(`/api/tournament/${tournament.id}/participant/`, 
             { method: 'POST', 'credentials': 'same-origin',
               headers: 
               {
@@ -48,7 +48,8 @@ export function Tournament(props) {
               },
               body: JSON.stringify({ tournament: 1, name: name, seed: seed})
             }).then(resp => resp.json()).then(json => {
-                props.setParticipants([...props.participants, json])
+                dispatch({type: "addParticipant", participant: json})
+                
                 setSeed(seed + 1)
                 setName('')
             })

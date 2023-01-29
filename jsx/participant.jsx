@@ -7,6 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { Button }  from '@mui/material';
 
 import {
     useParams,
@@ -21,11 +22,17 @@ export function Participants(props) {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
 
+    /**
+     * Switch the on / off state of a participant.
+     * @param {*} e 
+     * @param {*} idx 
+     * @param {*} toggle 
+     */
     function toggleParticipant(e, idx) {
         const p = tournament.participants[idx];
         p['offed'] = p.offed == 0 ? 1 : 0;
-        console.log(`/api/${tournament.id}/participant/${p.id}`)
-        fetch(`/api/participant/${p.id}/`, 
+
+        fetch(`/api/tournament/${tournament.id}/participant/${p.id}/`, 
             { method: 'PUT', 'credentials': 'same-origin',
               headers: 
               {
@@ -33,13 +40,29 @@ export function Participants(props) {
                 "X-CSRFToken": getCookie("csrftoken")
               },
               body: JSON.stringify(p)
-        }).then(resp => resp.json()).then(json => {
-            dispatch({type: 'editParticipant', json})
-        })
+        }).then(resp => resp.json()).then(json => dispatch({type: 'editParticipant', participant: json}))
     }
 
-    function delParticipant(e, idx) {
-        console.log('delete');
+    /**
+     * Deletes the participant only possible if no games played
+     * @param {*} e 
+     * @param {*} idx 
+     */
+    function deleteParticipant(e, idx) {
+        const p = tournament.participants[idx];
+        fetch(`/api/tournament/${tournament.id}/participant/${p.id}/`, 
+            { method: "DELETE", 'credentials': 'same-origin',
+              headers: 
+              {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": getCookie("csrftoken")
+              },
+              body: JSON.stringify(p)
+        }).then(resp => {
+             if(resp.ok) {
+                dispatch({type: 'deleteParticipant', participant: p})
+            }
+        })
     }
 
     return (
@@ -53,7 +76,7 @@ export function Participants(props) {
               <TableCell align="right">Round Wins</TableCell>
               <TableCell align="right">Game Wins</TableCell>
               <TableCell align="right">Spread</TableCell>
-              <TableCell align="right">Offed</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -70,9 +93,9 @@ export function Participants(props) {
                 <TableCell align="right">{row.round_wins}</TableCell>
                 <TableCell align="right">{row.game_wins}</TableCell>
                 <TableCell align="right">{row.spread}</TableCell>
-                <TableCell align="right">{ (tournament && tournament.is_editable)
-                    ? <Switch checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
-                    : <Switch checked={row.offed != 0} onChange={ e => delParticipant(e, idx) }/> }
+                <TableCell align="right">
+                    <Switch checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
+                    <Button variant="contained" onClick = { e => deleteParticipant(e, idx)}>Del</Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -89,7 +112,7 @@ export function Participant(props) {
 
     useEffect(() => {
         if(participant == null && tournament) {
-            fetch(`/api/${tournament.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
+            fetch(`/api/tournament/${tournament.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
                 setParticipant(json)
                 console.log(json)
             })

@@ -29,10 +29,13 @@ export function useTournamentDispatch() {
 function tournamentReducer(state, action) {
     switch (action.type) {
         case 'addParticipant': {
-            const p = [...state.participants, action.value]
+            if(state.participants === null) {
+                return {...state, participants: [action.participant]}
+            }
+            const p = [...state.participants, action.participant]
             return {...state, participants: p}
         }
-        case 'editParticipant':
+        case 'editParticipant': {
             const p = state.participants.map(p => {
                 if(p.id == action.participant.id) {
                     return action.participant
@@ -40,7 +43,15 @@ function tournamentReducer(state, action) {
                 return p
             })
             return {...state, participants: p}
-
+        }
+        case 'deleteParticipant': {
+            if(state.participants === null) {
+                return state
+            }
+            const p = state.participants.filter(p => p.id != action.participant.id)
+            return {...state, participants: p}
+        }
+        
         case 'changed': {
             return state.map(t => {
                 if (t.id === action.task.id) {
