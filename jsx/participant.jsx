@@ -20,7 +20,9 @@ import getCookie from './cookie.js';
 
 export function Participants(props) {
     const tournament = useTournament();
-    const dispatch = useTournamentDispatch()
+    const dispatch = useTournamentDispatch();
+    
+    const auth = document.getElementById('hh') && document.getElementById('hh').value
 
     /**
      * Switch the on / off state of a participant.
@@ -71,12 +73,12 @@ export function Participants(props) {
           <TableHead>
             <TableRow>
               <TableCell>Rank</TableCell>
-              <TableCell align="right">Name</TableCell>
+              <TableCell align="left">Name</TableCell>
               <TableCell align="right">Seed</TableCell>
               <TableCell align="right">Round Wins</TableCell>
               <TableCell align="right">Game Wins</TableCell>
               <TableCell align="right">Spread</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              { auth && <TableCell align="right">Actions</TableCell> }
             </TableRow>
           </TableHead>
           <TableBody>
@@ -93,10 +95,12 @@ export function Participants(props) {
                 <TableCell align="right">{row.round_wins}</TableCell>
                 <TableCell align="right">{row.game_wins}</TableCell>
                 <TableCell align="right">{row.spread}</TableCell>
-                <TableCell align="right">
-                    <Switch checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
-                    <Button variant="contained" onClick = { e => deleteParticipant(e, idx)}>Del</Button>
-                </TableCell>
+                {auth && 
+                    <TableCell align="right">
+                        <Switch checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
+                        <Button variant="contained" onClick = { e => deleteParticipant(e, idx)}>Del</Button>
+                    </TableCell>
+                }
               </TableRow>
             ))}
           </TableBody>

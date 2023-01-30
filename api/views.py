@@ -33,7 +33,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
         ) f """
 
         with connection.cursor() as cursor:
-            print(kwargs)
             cursor.execute(query, [kwargs['pk']])
             return Response( cursor.fetchone()[0])
 
