@@ -11,7 +11,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from tournament.models import Tournament, Participant
-# Create your tests here.
 
 class TestParticipants(StaticLiveServerTestCase):
     @classmethod
@@ -21,6 +20,7 @@ class TestParticipants(StaticLiveServerTestCase):
         cls.selenium.maximize_window()
         
     def login(self):
+        """Some actions you need to be logged in"""
         self.selenium.refresh()
         self.get_url('/accounts/login/')
     
@@ -31,10 +31,8 @@ class TestParticipants(StaticLiveServerTestCase):
         
         self.selenium.find_element(By.CSS_SELECTOR,".primaryAction").click()
         
-            
 
     def setUp(self):
-        # @todo, change to normal login
         super().setUp()
         u = User(username='admin',is_superuser=True)
         u.set_password('12345')
@@ -49,6 +47,7 @@ class TestParticipants(StaticLiveServerTestCase):
 
 
     def test_no_forms(self):
+        """For not authenticated users the edit/create forms would not show up"""
         driver = self.selenium
         self.get_url('/')
         
@@ -66,7 +65,7 @@ class TestParticipants(StaticLiveServerTestCase):
         self.assertIsNotNone(e)
 
 
-    def test_tournament(self):
+    def test_add_delete_participants(self):
         driver = self.selenium
         self.login()
         self.get_url('/')
@@ -83,6 +82,7 @@ class TestParticipants(StaticLiveServerTestCase):
 
         
     def delete_participants(self):
+        """Helper method to delete all participants by clicking del"""
         driver = self.selenium
         buttons = driver.find_elements(By.XPATH, '//button[text()="Del"]')
         for button in reversed(buttons):
@@ -90,6 +90,7 @@ class TestParticipants(StaticLiveServerTestCase):
 
 
     def add_participants(self):
+        """Helper method to load participants in a file by filling forms"""
         driver = self.selenium
         with open('api/tests/data/teams.csv') as fp:
             name = WebDriverWait(driver, 5, 0.2).until(
@@ -105,6 +106,6 @@ class TestParticipants(StaticLiveServerTestCase):
                 seed.send_keys(line[1])
                 btn.click()
                 time.sleep(0.1)
-                
+            
             
 

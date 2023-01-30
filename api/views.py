@@ -11,18 +11,20 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from tournament import models
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
         TournamentRoundSerializer, ResultSerializer)
+from api.swiss import DbPairing
 
 def index(request):
     return render(request, 'index.html')
 
 class TournamentViewSet(viewsets.ModelViewSet):
+    """CRUD for tournaments"""
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = models.Tournament.objects.all()
     serializer_class = TournamentSerializer
 
     def retrieve(self, request, *args, **kwargs):
         # funnily enough if you use to_jsonb in the outermost query below
-        # psycopg2 gives you a string instead of a dic
+        # psycopg2 gives you a string instead of a dict
         query = """select to_json(f) from (
             select tt.*, 	
                 (select jsonb_agg(to_jsonb(parties)) 
@@ -41,11 +43,11 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
     serializer_class = TournamentRoundSerializer
 
     @action(detail=True, methods=['post'])
-    def pair(self, request, pk=None):
+    def pair(self, request, tid, pk=None):
         if models.Result.objects.filter(round=pk).exists():
             return Response({'status': 'error', 'message': 'already pairedd'})
         else:
-            pass
+            p = DbPairing(models.TournamentRound.objects.get(pk=pk))
 
     def get_queryset(self):
         return models.TournamentRound.objects.filter(tournament_id = self.kwargs['tid'])

@@ -3,7 +3,7 @@ import { Button }  from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { TableCell, TableRow } from '@mui/material';
 import { useTournament, useTournamentDispatch } from './context.jsx';
-
+  
 export default function Result({r, index, editScore}) {
     const editable = document.getElementById('editable')
     const dispatch = useTournamentDispatch()
@@ -15,10 +15,10 @@ export default function Result({r, index, editScore}) {
         }
         return (
             <TableRow>
-                <TableCell sx={{border:1}} >{ r.first.name }</TableCell>
+                <TableCell sx={{border:1}} >{ r.p1.name }</TableCell>
                 <TableCell align="right" sx={{border:1}} >{ r.games_won } - { tournament.team_size - r.games_won }</TableCell>
                 <TableCell align="right" sx={{border:1}} >{ r.score1 }</TableCell>
-                <TableCell sx={{border:1}} >{ r.second.name }</TableCell>
+                <TableCell sx={{border:1}} >{ r.p2.name }</TableCell>
                 <TableCell align="right" sx={{border:1}} >{ tournament.team_size - r.games_won } - { r.games_won }</TableCell>
                 <TableCell align="right" sx={{border:1}} >{ r.score2 }</TableCell>
                 <TableCell align="right" sx={{border:1}} >
@@ -31,10 +31,10 @@ export default function Result({r, index, editScore}) {
     function resultOut() {
         return (
             <TableRow>
-                <TableCell sx={{border:1}} >{ r.first.name }</TableCell>
+                <TableCell sx={{border:1}} >{ r.p1.name }</TableCell>
                 <TableCell sx={{border:1}} ></TableCell>
                 <TableCell sx={{border:1}} ></TableCell>
-                <TableCell sx={{border:1}} >{ r.second.name }</TableCell>
+                <TableCell sx={{border:1}} >{ r.p2.name }</TableCell>
                 <TableCell sx={{border:1}} ></TableCell>
                 <TableCell sx={{border:1}} ></TableCell>
                 <TableCell sx={{border:1}} ></TableCell>

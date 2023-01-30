@@ -1,15 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
-from tournament.models import Participant
-from api import swiss
+from tournament.models import Participant, Tournament
+from tournament.tools import add_players
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        file = '/tmp/u15.txt'
-        with open(file) as fp:
-            for i, line in enumerate(fp):
-                Participant.objects.create(tournament_id=2, name=line.strip(),
-                    seed=(i + 1) * 100)
+        t = Tournament.get_by_name("richmond scrabble showdown u20",'')
+        add_players("api/tests/data/teams.csv", t)
+
 
 
         

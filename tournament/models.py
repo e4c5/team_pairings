@@ -115,7 +115,11 @@ class Participant(models.Model):
 
    
 class Result(models.Model):
-    """A round result"""
+    """A round result.
+    
+    If you make any changes here, double check the update_result function which 
+    is a signal for post_save
+    """
     round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name='results')
     # the fact that this is called p1 does not mean this player goes first
     p1 = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='p1')   
@@ -171,19 +175,19 @@ def update_result(sender, instance, created, **kwargs):
                                 WHEN games_won > 2.5 THEN 1 
                                 WHEN games_won = 2.5 THEN .5 else 0 end), 0) rounds_won,
                 coalesce(sum(score1 - score2),0) margin
-            from tournament_result tr where first_id = {0} and games_won is not null) a,
+            from tournament_result tr where p1_id = {0} and games_won is not null) a,
             (select count(*) as games, coalesce(sum(5 - games_won),0) games_won, 
                 coalesce(sum(CASE WHEN games_won IS NULL THEN 0 
                          WHEN games_won < 2.5 THEN 1 
                          WHEN games_won = 2.5 THEN .5 else 0 END),0) rounds_won,
                 coalesce(sum(score1 - score2),0) margin
-            from tournament_result tr where second_id = {0} and games_won is not null) b
+            from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
     if not created:
         if instance.score1 or instance.score2:
             with connection.cursor() as cursor:
-                cursor.execute(q.format(instance.first_id))
-                cursor.execute(q.format(instance.second_id))
+                cursor.execute(q.format(instance.p1_id))
+                cursor.execute(q.format(instance.p2_id))
 
 
 @receiver(post_save, sender=Tournament)

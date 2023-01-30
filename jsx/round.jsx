@@ -30,8 +30,8 @@ export function Round(props) {
     const [results, setResults] = useState(null)
     const [names, setNames] = useState([])
     const [resultId, setResultId] = useState(0)
-    const [first, setFirst] = useState({})
-    const [second, setSecond] = useState({})
+    const [p1, setP1] = useState({})
+    const [p2, setP2] = useState({})
     const [score1, setScore1] = useState('')
     const [score2, setScore2] = useState('')
     const [won, setWon] = useState('')
@@ -43,7 +43,7 @@ export function Round(props) {
         if (!round) {
             return
         }
-        fetch(`/api/${round.id}/result/`).then(resp => resp.json()
+        fetch(`/api/tournament/${tournament.id}/${round.id}/result/`).then(resp => resp.json()
         ).then(json => {
             setResults(json)
             const left = []
@@ -52,8 +52,8 @@ export function Round(props) {
                     //
                 }
                 else {
-                    left.push(e.first.name)
-                    left.push(e.second.name)
+                    left.push(e.p1.name)
+                    left.push(e.p2.name)
                 }
             })
             setNames(left)
@@ -61,28 +61,30 @@ export function Round(props) {
     }
 
     useEffect(() => {
+        console.log('EFFECT', round, tournament)
         if (round == null || round.round_no != params.id) {
-
-            // round numbers start from 0
-            fetchResults(tournament.rounds[params.id - 1])
-            setRound(tournament.rounds[params.id - 1])
+            if(tournament) {
+                // round numbers start from 0
+                fetchResults(tournament.rounds[params.id - 1])
+                setRound(tournament.rounds[params.id - 1])
+            }
         }
         else {
             if (results == null) {
                 fetchResults(setRound(tournament.rounds[params.id - 1]))
             }
         }
-    })
+    },[tournament, round])
 
     function pair() {
-        fetch(`/api/round/${params.id}/pair/`,
+        fetch(`/api/tournament/${tournament.id}/round/${params.id}/pair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
                 {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
-                },
+                }, 
                 body: JSON.stringify({})
             }).then(resp => resp.json()).then(json => {
                 console.log('paired')
@@ -102,7 +104,7 @@ export function Round(props) {
         }).then(resp => resp.json()).then(json => {
             const res = [...results];
             for (let i = 0; i < res.length; i++) {
-                if (results[i].first.name == first.name) {
+                if (results[i].p1.name == p1.name) {
                     res[i].score1 = score1;
                     res[i].score2 = score2;
                     res[i].games_won = won;
@@ -110,9 +112,9 @@ export function Round(props) {
                     break;
                 }
             }
-            setNames(names.filter(name => name != first.name && name != second.name))
-            setFirst({})
-            setSecond({})
+            setNames(names.filter(name => name != p1.name && name != p2.name))
+            setP1({})
+            setP2({})
             setWon('')
             setScore1('')
             setScore2('')
@@ -121,7 +123,7 @@ export function Round(props) {
     }
 
     function handleChange(e, name) {
-        console.log(name)
+
         if (name == 'score1') {
             setScore1(e.target.value)
         }
@@ -137,14 +139,14 @@ export function Round(props) {
     function changeName(e, name) {
 
         results.forEach(result => {
-            if (name == result.first.name) {
-                setFirst(result.first)
-                setSecond(result.second)
+            if (name == result.p1.name) {
+                setP1(result.p1)
+                setP2(result.p2)
                 setResultId(result.id)
             }
-            if (name == result.second.name) {
-                setFirst(result.second)
-                setSecond(result.first)
+            if (name == result.p2.name) {
+                setP1(result.p2)
+                setP2(result.p1)
                 setResultId(result.id)
             }
 
@@ -153,10 +155,10 @@ export function Round(props) {
 
     function editScore(e, index) {
         const result = results[index]
-        setFirst(result.first)
-        setSecond(result.second)
+        setP1(result.p1)
+        setP2(result.p2)
         setResultId(result.id)
-        setNames([result.first.name, result.second.name])
+        setNames([result.p1.name, result.p2.name])
         setScore1(result.score1)
         setScore2(result.score2)
         setWon(result.games_won)
@@ -170,7 +172,7 @@ export function Round(props) {
                     <Grid container>
                         <Grid item xs>
                             <Autocomplete options={names} freeSolo disableClearable
-                                size='small' value={first?.name ? first.name : ''}
+                                size='small' value={p1?.name ? p1.name : ''}
                                 onChange={(e, newvalue) => changeName(e, newvalue)}
                                 renderInput={(params) => (
                                     <TextField
@@ -192,7 +194,7 @@ export function Round(props) {
                                 onChange={e => handleChange(e, 'score1')} type='number' />
                         </Grid>
                         <Grid item xs>
-                            <TextField value={second?.name ? second.name : ""} placeholder="Opponent"
+                            <TextField value={p2?.name ? p2.name : ""} placeholder="Opponent"
                                 size='small' onChange={e => { console.log('changed') }} />
                         </Grid>
                         <Grid item xs>

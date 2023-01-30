@@ -32,8 +32,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
     
 
 class ResultSerializer(serializers.ModelSerializer):
-    first = ParticipantSerializer(read_only=True)
-    second = ParticipantSerializer(read_only=True)
+    p1 = ParticipantSerializer(read_only=True)
+    p2 = ParticipantSerializer(read_only=True)
 
     class Meta:
         model = Result
