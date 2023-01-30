@@ -61,7 +61,7 @@ export function Round(props) {
     }
 
     useEffect(() => {
-        console.log('EFFECT', round, tournament)
+
         if (round == null || round.round_no != params.id) {
             if(tournament) {
                 // round numbers start from 0
@@ -93,7 +93,7 @@ export function Round(props) {
     }
 
     function addScore(e) {
-        fetch(`/api/${round.id}/result/${resultId}/`, {
+        fetch(`/api/tournament/${tournament.id}/${round.id}/result/${resultId}/`, {
             method: 'PUT', 'credentials': 'same-origin',
             headers:
             {
@@ -132,7 +132,7 @@ export function Round(props) {
         }
         if (name == 'won') {
             setWon(e.target.value)
-            setLost(props.tournament.team_size - e.target.value)
+            setLost(tournament.team_size - e.target.value)
         }
     }
 
@@ -165,7 +165,7 @@ export function Round(props) {
     }
 
     if (round?.paired && results) {
-        const tournament = props.tournament
+        
         return (
             <>
                 {names && names.length && (

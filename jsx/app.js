@@ -46,6 +46,15 @@ export default function App() {
         if(tournaments != null) {
             const path = document.getElementById('frm')
             if (path?.innerText.length > 1) {
+                const parts = path.innerText.split('/')
+                if(parts.length > 1) {
+                    if(parts[0] === "") {
+                        navigate(`/${parts[1]}`)
+                    }
+                    else {
+                        navigate(`/${parts[0]}`)
+                    }
+                }
                 navigate(path.innerText)
             }
         }

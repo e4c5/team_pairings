@@ -27,7 +27,7 @@ export function Tournament(props) {
                 }
             })    
         }
-    }, [props.tournament])
+    }, [props.tournaments])
 
     const handleChange = (e, p) => {
         if(p == 'name') {
