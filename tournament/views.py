@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 
 def index(request):
-    print('SESSION', request.session.get('from'))
-    frm = request.session.get('from')
+    frm = request.session.get('from', '')
     request.session['from'] = ''
     request.session.save()
 

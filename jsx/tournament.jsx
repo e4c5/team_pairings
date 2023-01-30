@@ -73,11 +73,14 @@ export function Tournament(props) {
     return (
         <div>
             <Participants /> 
-            <TextField size='small' placeholder='Name' 
+            <TextField size='small' placeholder='Name' data-test-id='name'
                 value={name} onChange={ e => handleChange(e, 'name')} />
-            <TextField size='small' placeholder='seed' type='number'
+            <TextField size='small' placeholder='seed' 
+                type='number' data-test-id='seed'
                 value={seed} onChange={ e => handleChange(e, 'seed')} />
-            <Button variant="contained" onClick = { e => add(e)}>Add</Button>
+            <Button variant="contained" onClick = { e => add(e)} data-test-id='add'>
+                Add
+            </Button>
             <Rounds/>
         </div>
     )
