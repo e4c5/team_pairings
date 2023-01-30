@@ -11,6 +11,20 @@ import {Tournament, Tournaments } from "./tournament.jsx"
 import {Round, Rounds} from "./round.jsx"
 import { TournamentProvider } from './context.jsx';
  
+/**
+ * The main entry.
+ * 
+ * This project is read only for non authenticated users and read/write for
+ * logged in users. We implement it strictly in the backend. All end points
+ * will return forbidden http status codes for PUT, PATH, DELETE and POST.
+ * 
+ * So how does react find out if the user is authenticated or not, well 
+ * there are lots of different ways but it was chosen that a hidden html field
+ * is the solution here. It doesn't matter that a user will be able to attack
+ * the page through the developer tools and add such a hidden field, all he
+ * will manage to achieve is to see a few HTML forms that he cannot use.
+ * @returns 
+ */
 export default function App() {
     const [tournaments, setTournaments] = useState()
     const navigate = useNavigate()
