@@ -9,7 +9,7 @@ import { useTournament, useTournamentDispatch } from './context.jsx';
 export function Tournament(props) {
     const params = useParams()
     const [name, setName] = useState('')
-    const [seed, setSeed] = useState('')
+    const [rating, setrating] = useState('')
     const dispatch = useTournamentDispatch()
     const tournament = useTournament()
 
@@ -32,7 +32,7 @@ export function Tournament(props) {
             setName(e.target.value) 
         }
         else {
-            setSeed(e.target.value)
+            setrating(e.target.value)
         }
     }
 
@@ -45,10 +45,10 @@ export function Tournament(props) {
                 'Content-Type': 'application/json',
                 "X-CSRFToken": getCookie("csrftoken")
               },
-              body: JSON.stringify({ tournament: 1, name: name, seed: seed})
+              body: JSON.stringify({ tournament: 1, name: name, rating: rating})
             }).then(resp =>{ 
                 ok = resp.ok;
-                setSeed('')
+                setrating('')
                 setName('')
                 return resp.json()
             }).then(json => {
@@ -83,9 +83,9 @@ export function Tournament(props) {
                             value={name} onChange={ e => handleChange(e, 'name')} />
                     </div>
                     <div className='col'>
-                        <input className='form-control' placeholder='seed' 
-                            type='number' data-test-id='seed'
-                            value={seed} onChange={ e => handleChange(e, 'seed')} />
+                        <input className='form-control' placeholder='rating' 
+                            type='number' data-test-id='rating'
+                            value={rating} onChange={ e => handleChange(e, 'rating')} />
                     </div>
                     <div className='col'>
                         <button className='btn btn-secondary' onClick = { e => add(e)} data-test-id='add'>

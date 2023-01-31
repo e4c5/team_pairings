@@ -262,7 +262,7 @@ class DbPairing(Pairing):
                 self.players.append(
                     {'name': pl.name,
                      'spread': pl.spread,
-                     'rating': pl.seed,
+                     'rating': pl.rating,
                      'player': pl,
                      'game_wins': pl.game_wins,
                      'score': pl.round_wins,

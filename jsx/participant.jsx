@@ -69,7 +69,7 @@ export function Participants(props) {
             <tr>
               <td>Rank</td>
               <td className="text-left">Name</td>
-              <td className="text-right">Seed</td>
+              <td className="text-right">rating</td>
               <td className="text-right">Round Wins</td>
               <td className="text-right">Game Wins</td>
               <td className="text-right">Spread</td>
@@ -86,7 +86,7 @@ export function Participants(props) {
                 <td component="th" scope="row">
                     <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
                 </td>
-                <td className="text-right">{row.seed}</td>
+                <td className="text-right">{row.rating}</td>
                 <td className="text-right">{row.round_wins}</td>
                 <td className="text-right">{row.game_wins}</td>
                 <td className="text-right">{row.spread}</td>

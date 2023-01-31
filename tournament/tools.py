@@ -9,7 +9,7 @@ def add_participants(tournament, use_faker=False, count=0, filename=""):
         for _ in range(count):
             Participant.objects.create(tournament=tournament, 
                 name=fake.city() + " Scrabble Club",
-                seed=fake.random_int(0, 1000))
+                rating=fake.random_int(0, 1000))
 
     else:
         with open(filename) as fp:
@@ -17,7 +17,7 @@ def add_participants(tournament, use_faker=False, count=0, filename=""):
 
             for line in reader:
                 Participant.objects.create(tournament=tournament, name=line[0],
-                    seed=line[1])
+                    rating=line[1])
 
 
 def add_team_members(tournament):

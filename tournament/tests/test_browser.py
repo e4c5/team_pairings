@@ -84,7 +84,7 @@ class TestParticipants(StaticLiveServerTestCase):
     def delete_participants(self):
         """Helper method to delete all participants by clicking del"""
         driver = self.selenium
-        buttons = driver.find_elements(By.XPATH, '//button[text()="Del"]')
+        buttons = driver.find_elements(By.CLASS_NAME, 'bi-x-circle')
         for button in reversed(buttons):
             button.click()
 
@@ -94,16 +94,16 @@ class TestParticipants(StaticLiveServerTestCase):
         driver = self.selenium
         with open('api/tests/data/teams.csv') as fp:
             name = WebDriverWait(driver, 5, 0.2).until(
-                EC.presence_of_element_located((By.ID,':r0:'))
+                EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-test-id=name]'))
             )
 
-            seed = driver.find_element(By.ID,':r1:')
+            rating = driver.find_element(By.CSS_SELECTOR,'input[data-test-id=rating]')
             btn = driver.find_element(By.CSS_SELECTOR,'button[data-test-id=add]')
 
             reader = csv.reader(fp)
             for line in reader:
                 name.send_keys(line[0])
-                seed.send_keys(line[1])
+                rating.send_keys(line[1])
                 btn.click()
                 time.sleep(0.1)
             

@@ -27,7 +27,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name', 'played','game_wins','round_wins','spread',
-            'position','offed','seed'
+            'position','offed','rating'
         ]
     
 

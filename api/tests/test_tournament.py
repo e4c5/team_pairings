@@ -62,7 +62,7 @@ class BasicTests(APITestCase):
             reader = csv.reader(fp)
             for line in reader:
                 resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
-                    {"name": line[0], "seed":  line[1]})
+                    {"name": line[0], "rating":  line[1]})
                 self.assertEqual(201, resp.status_code)
             
             resp = self.client.get(f'/api/tournament/{self.t1.id}/participant/')

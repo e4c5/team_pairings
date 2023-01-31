@@ -111,7 +111,7 @@ class Participant(models.Model):
     spread = models.IntegerField(default=0, null=True)
     position = models.IntegerField(default=0, null=True)
     offed = models.IntegerField(default=0, null=True)
-    seed = models.IntegerField(default=0, null=True)
+    rating = models.IntegerField(default=0, null=True)
 
    
 class Result(models.Model):
