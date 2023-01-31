@@ -60,7 +60,7 @@ export function Participants(props) {
     }
 
     function isStarted() {
-        return tournament.rounds[0].is_paired
+        return tournament.rounds[0].paired
     }
     return (
        
@@ -131,21 +131,27 @@ export function Participant(props) {
         return (
             <div>
                 <h2>{participant.name}</h2>
-                <div className='row'>
-                    <div className='col'>Board</div>
-                    <div className='col'>Player</div>
-                    <div className='col'>Wins</div>
-                    <div className='col'>Margin</div>
-                </div>
-                { participant.members.map(p => (
-                    <div className='row' key={p.id}>
-                        <div className='col'>{p.board}</div>
-                        <div className='col'>{p.name}</div>
-                        <div className='col'>{p.wins}</div>
-                        <div className='col'>{p.spread}</div>
-                    </div>
-                    )
-                )}
+                <table className='table'>
+                    <thead>
+                        <tr>
+                            <th>Board</th>
+                            <th>Player</th>
+                            <th>Wins</th>
+                            <th>Margin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { participant.members.map(p => (
+                            <tr key={p.id}>
+                                <td>{p.board}</td>
+                                <td>{p.name}</td>
+                                <td>{p.wins}</td>
+                                <td>{p.spread}</td>
+                            </tr>
+                            )
+                        )}
+                    </tbody>
+                </table>
             </div>
         )
     }

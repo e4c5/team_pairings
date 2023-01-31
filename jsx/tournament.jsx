@@ -8,8 +8,8 @@ import { useTournament, useTournamentDispatch } from './context.jsx';
 
 export function Tournament(props) {
     const params = useParams()
-    const [name, setName] = useState('')
-    const [rating, setrating] = useState('')
+    const [name, setName] = useState({value: '', error: ''})
+    const [rating, setRating] = useState({value: '', error: ''})
     const dispatch = useTournamentDispatch()
     const tournament = useTournament()
 
@@ -29,10 +29,10 @@ export function Tournament(props) {
 
     const handleChange = (e, p) => {
         if(p == 'name') {
-            setName(e.target.value) 
+            setName({...name, value: e.target.value }) 
         }
         else {
-            setrating(e.target.value)
+            setRating({...rating, value: e.target.value})
         }
     }
 
@@ -48,12 +48,18 @@ export function Tournament(props) {
               body: JSON.stringify({ tournament: 1, name: name, rating: rating})
             }).then(resp =>{ 
                 ok = resp.ok;
-                setrating('')
-                setName('')
+                if(ok) {
+                    setRating({...rating, value: ''})
+                    setName({...name, value: ''})
+                }
                 return resp.json()
             }).then(json => {
                 if(ok) {
                     dispatch({type: "addParticipant", participant: json})
+                }
+                else {
+                    setRating({...rating, error: json.rating ? json.rating[0] : ''})
+                    setName({...name, error: json.name ? json.name[0] : ''})
                 }
             })
     }
@@ -79,13 +85,21 @@ export function Tournament(props) {
                 
                 <div className='row align-middle'>
                     <div className='col'>
-                        <input className='form-control' placeholder='Name' data-test-id='name'
-                            value={name} onChange={ e => handleChange(e, 'name')} />
+                        <input className={ `form-control ${name.error ? 'is-invalid' : ''}` } 
+                            placeholder='Name' data-test-id='name'
+                            value={name.value} onChange={ e => handleChange(e, 'name')} />
+                        <div className='invalid-feedback'>
+                            {name.error}
+                        </div>
                     </div>
                     <div className='col'>
-                        <input className='form-control' placeholder='rating' 
+                        <input className={ `form-control ${rating.error ? 'is-invalid' : ''}` } 
+                            placeholder='rating' 
                             type='number' data-test-id='rating'
-                            value={rating} onChange={ e => handleChange(e, 'rating')} />
+                            value={rating.value} onChange={ e => handleChange(e, 'rating')} />
+                        <div className='invalid-feedback'>
+                            {rating.error}
+                        </div>
                     </div>
                     <div className='col'>
                         <button className='btn btn-secondary' onClick = { e => add(e)} data-test-id='add'>

@@ -211,12 +211,14 @@ export function Round(props) {
         const result = results[index]
         dispatch({
             type: 'replace',
-            p1: result.p1, p2: result.p2,
-            resultId: result.id, pending: [],
-            score1: result.score1,
-            score2: result.score2,
-            won: result.games_won,
-            lost: tournament.team_size - result.games_won
+            value: {
+                p1: result.p1, p2: result.p2,
+                resultId: result.id, pending: [],
+                score1: result.score1,
+                score2: result.score2,
+                won: result.games_won,
+                lost: tournament.team_size - result.games_won
+            }
         })
     }
 
@@ -232,7 +234,7 @@ export function Round(props) {
                     <div className='row'>
                         <div className='col'>
                             <Autocomplete
-                                suggestions={current.pending}
+                                suggestions={current.pending} placeHolder='name'
                                 value={current.p1?.name || current.name}
                                 onChange={e => handleChange(e, 'name')}
                                 onSelect={ (e, suggestion) => handleChange(e, 'name', suggestion)}
@@ -262,7 +264,9 @@ export function Round(props) {
                                 onChange={e => handleChange(e, 'score2')} />
                         </div>
                         <div className='col'>
-                            <button className='btn btn-primary' onClick={e => addScore()}>Add score</button>
+                            <button className='btn btn-primary' onClick={e => addScore()}>
+                                <i className='bi-plus' ></i>
+                            </button>
                         </div>
                     </div>
 
