@@ -36,7 +36,8 @@ export function Tournament(props) {
         }
     }
 
-    const add = e => {
+    function add(e) {
+        let ok = true;
         fetch(`/api/tournament/${tournament.id}/participant/`, 
             { method: 'POST', 'credentials': 'same-origin',
               headers: 
@@ -45,12 +46,16 @@ export function Tournament(props) {
                 "X-CSRFToken": getCookie("csrftoken")
               },
               body: JSON.stringify({ tournament: 1, name: name, seed: seed})
-            }).then(resp => resp.json()).then(json => {
-                dispatch({type: "addParticipant", participant: json})
+            }).then(resp =>{ 
+                ok = resp.ok;
+                setSeed('')
+                setName('')
+                return resp.json()
+            }).then(json => {
+                if(ok) {
+                    dispatch({type: "addParticipant", participant: json})
+                }
             })
-        setSeed('')
-        setName('')
-
     }
 
     function updateStandings(result) {
@@ -70,16 +75,24 @@ export function Tournament(props) {
 
     function addParticipant() {
         if(document.getElementById('hh') && document.getElementById('hh').value) {
-            return (<>
-                <input size='small' placeholder='Name' data-test-id='name'
-                    value={name} onChange={ e => handleChange(e, 'name')} />
-                <input size='small' placeholder='seed' 
-                    type='number' data-test-id='seed'
-                    value={seed} onChange={ e => handleChange(e, 'seed')} />
-                <button className='btn btn-primary' onClick = { e => add(e)} data-test-id='add'>
-                    Add
-                </button>
-            </>);
+            return (
+                
+                <div className='row align-middle'>
+                    <div className='col'>
+                        <input className='form-control' placeholder='Name' data-test-id='name'
+                            value={name} onChange={ e => handleChange(e, 'name')} />
+                    </div>
+                    <div className='col'>
+                        <input className='form-control' placeholder='seed' 
+                            type='number' data-test-id='seed'
+                            value={seed} onChange={ e => handleChange(e, 'seed')} />
+                    </div>
+                    <div className='col'>
+                        <button className='btn btn-secondary' onClick = { e => add(e)} data-test-id='add'>
+                            <i className='bi-plus' ></i>
+                        </button>
+                    </div>
+                </div>);
         }
         return null;
     }
@@ -99,9 +112,11 @@ export function Tournaments(props) {
 
     return (
         <div>
-            <ul>
+            <h1>Sri Lanka Scrabble Tournament Manager</h1>
+
+            <ul className='list-group'>
             { props.tournaments?.map(t => 
-                <li key={t.id}>
+                <li className='list-group-item' key={t.id}>
                     <Link to={"/" + t.slug} >{ t.name }</Link>
                 </li>) 
             }

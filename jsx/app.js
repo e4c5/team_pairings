@@ -44,7 +44,6 @@ export default function App() {
     },[])
 
     useEffect(() => {
-        console.log(dispatch)
         if(tournaments != null) {
             const path = document.getElementById('frm')
             if (path?.innerText.length > 1) {

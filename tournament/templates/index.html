@@ -1,5 +1,5 @@
 {% load static %}
-<html theme="dark">
+<html theme="dark" data-bs-theme="dark">
 
 <head>
     <title>Sri Lanka Scrable Tournament Manager</title>
@@ -9,12 +9,14 @@
 </head>
 
 <body>
+  <div class="container">
     <div id="root"></div>
     <div id="editable"></div>
     <div id="frm" style="display: none">{{from}}</div>
     {% if request.user.is_authenticated %}
     <input type="hidden" name="hh" id="hh" value="true" />
     {% endif %}
+  </div>
 </body>
 
 <script src="{% static  'bundle.js' %}" type="module"></script>

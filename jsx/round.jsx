@@ -305,7 +305,8 @@ export function Rounds(props) {
     const dispatch = useTournamentDispatch()
 
     return (
-        <div>
+        <div className='row'>
+            <div className='col'><h3>Rounds: </h3></div>
             <div className='btn-group' aria-label="outlined primary button group">
                 {
                     tournament?.rounds?.map(r =>
