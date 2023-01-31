@@ -19,7 +19,7 @@ class BasicTests(APITestCase):
         user = User.objects.create(username='testuser')
         user.set_password('12345')
         user.save()
-
+        models.Director.objects.create(tournament=self.t1, user=user)
 
     def test_create(self):
         # creating a new tournament creates as many rounds as needed automatically

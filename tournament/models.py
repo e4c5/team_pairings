@@ -1,6 +1,6 @@
 import re
 from django.db import models, connection
-
+from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -94,11 +94,16 @@ class TournamentRound(models.Model):
     pairing_system = models.CharField(max_length=16, choices=PAIRING_CHOICES)
     repeats = models.IntegerField(default=0)
 
-    # when we make the pairing for this round, which result do we use
+    # when we make the pairing for this round, which result do we use 
     # for pairing?
     based_on = models.IntegerField(null=True, blank=True)
     paired = models.BooleanField(default=False)
     
+
+class Director(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
 
 class Participant(models.Model):
     ''' A player or a team in a tournament'''

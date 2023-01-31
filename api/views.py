@@ -6,15 +6,17 @@ from django.db import connection
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from tournament import models
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
         TournamentRoundSerializer, ResultSerializer)
 from api.swiss import DbPairing
+from api.permissions import IsAuthenticatedOrReadOnly
+
 
 def index(request):
     return render(request, 'index.html')
+
 
 class TournamentViewSet(viewsets.ModelViewSet):
     """CRUD for tournaments"""

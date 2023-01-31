@@ -45,7 +45,7 @@ export function Tournament(props) {
                 'Content-Type': 'application/json',
                 "X-CSRFToken": getCookie("csrftoken")
               },
-              body: JSON.stringify({ tournament: 1, name: name, rating: rating})
+              body: JSON.stringify({ tournament: 1, name: name.value, rating: rating.value})
             }).then(resp =>{ 
                 ok = resp.ok;
                 if(ok) {
