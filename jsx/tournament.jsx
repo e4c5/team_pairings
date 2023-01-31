@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-import { Button, List, ListItem, TextField }  from '@mui/material';
-import { useParams, Link as RouterLink } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import getCookie from './cookie.js';
-import { Link } from '@mui/material';
 import { Participants } from './participant.jsx';
 import { Rounds } from './round.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
@@ -16,7 +14,7 @@ export function Tournament(props) {
     const tournament = useTournament()
 
     useEffect(() => {
-        
+        console.log(params.slug)
         if(tournament === null || tournament.slug != params.slug) {
             props.tournaments?.map(t => {
                 if(t.slug == params.slug) {
@@ -73,14 +71,14 @@ export function Tournament(props) {
     function addParticipant() {
         if(document.getElementById('hh') && document.getElementById('hh').value) {
             return (<>
-                <TextField size='small' placeholder='Name' data-test-id='name'
+                <input size='small' placeholder='Name' data-test-id='name'
                     value={name} onChange={ e => handleChange(e, 'name')} />
-                <TextField size='small' placeholder='seed' 
+                <input size='small' placeholder='seed' 
                     type='number' data-test-id='seed'
                     value={seed} onChange={ e => handleChange(e, 'seed')} />
-                <Button variant="contained" onClick = { e => add(e)} data-test-id='add'>
+                <button className='btn btn-primary' onClick = { e => add(e)} data-test-id='add'>
                     Add
-                </Button>
+                </button>
             </>);
         }
         return null;
@@ -101,13 +99,13 @@ export function Tournaments(props) {
 
     return (
         <div>
-            <List>
+            <ul>
             { props.tournaments?.map(t => 
-                <ListItem key={t.id}>
-                    <Link to={"/" + t.slug} component={RouterLink} >{ t.name }</Link>
-                </ListItem>) 
+                <li key={t.id}>
+                    <Link to={"/" + t.slug} >{ t.name }</Link>
+                </li>) 
             }
-            </List>
+            </ul>
 
         </div>
     )

@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Button }  from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import { TableCell, TableRow } from '@mui/material';
 import { useTournament, useTournamentDispatch } from './context.jsx';
   
 export default function Result({r, index, editScore}) {
@@ -14,31 +11,31 @@ export default function Result({r, index, editScore}) {
 
         }
         return (
-            <TableRow>
-                <TableCell sx={{border:1}} >{ r.p1.name }</TableCell>
-                <TableCell align="right" sx={{border:1}} >{ r.games_won } - { tournament.team_size - r.games_won }</TableCell>
-                <TableCell align="right" sx={{border:1}} >{ r.score1 }</TableCell>
-                <TableCell sx={{border:1}} >{ r.p2.name }</TableCell>
-                <TableCell align="right" sx={{border:1}} >{ tournament.team_size - r.games_won } - { r.games_won }</TableCell>
-                <TableCell align="right" sx={{border:1}} >{ r.score2 }</TableCell>
-                <TableCell align="right" sx={{border:1}} >
-                        <Button onClick={e => editScore(e, index)}><EditIcon/></Button>
-                </TableCell>
-            </TableRow>
+            <tr>
+                <td sx={{border:1}} >{ r.p1.name }</td>
+                <td className="text-right" sx={{border:1}} >{ r.games_won } - { tournament.team_size - r.games_won }</td>
+                <td className="text-right" sx={{border:1}} >{ r.score1 }</td>
+                <td sx={{border:1}} >{ r.p2.name }</td>
+                <td className="text-right" sx={{border:1}} >{ tournament.team_size - r.games_won } - { r.games_won }</td>
+                <td className="text-right" sx={{border:1}} >{ r.score2 }</td>
+                <td className="text-right" sx={{border:1}} >
+                        <button className='btn btn-primary' onClick={e => editScore(e, index)}>Edit</button>
+                </td>
+            </tr>
         )
     }
 
     function resultOut() {
         return (
-            <TableRow>
-                <TableCell sx={{border:1}} >{ r.p1.name }</TableCell>
-                <TableCell sx={{border:1}} ></TableCell>
-                <TableCell sx={{border:1}} ></TableCell>
-                <TableCell sx={{border:1}} >{ r.p2.name }</TableCell>
-                <TableCell sx={{border:1}} ></TableCell>
-                <TableCell sx={{border:1}} ></TableCell>
-                <TableCell sx={{border:1}} ></TableCell>
-            </TableRow>
+            <tr>
+                <td sx={{border:1}} >{ r.p1.name }</td>
+                <td sx={{border:1}} ></td>
+                <td sx={{border:1}} ></td>
+                <td sx={{border:1}} >{ r.p2.name }</td>
+                <td sx={{border:1}} ></td>
+                <td sx={{border:1}} ></td>
+                <td sx={{border:1}} ></td>
+            </tr>
         )
     }
 

@@ -1,29 +1,20 @@
 import React, { useState, useEffect } from 'react';
-
-import {
-    Button, ButtonGroup, TextField,
-    Autocomplete, Box,
-} from '@mui/material';
-
-import {
-    Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow
-} from '@mui/material';
-
-import { Paper, Tooltip, Grid } from '@mui/material';
-
-
-import {
-    useParams,
-    Link as RouterLink,
-} from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import getCookie from './cookie.js';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import Result from './result.jsx';
+import { Autocomplete } from './autocomplete.jsx';
 
-
-
+/**
+ * A tournament round. 
+ * if the round has ben paired will have set of results but no scores
+ * 
+ * When completed the round will have set of results with each one
+ * containing a score
+ * @param {*} props 
+ * @returns 
+ */
 export function Round(props) {
     const params = useParams()
     const [round, setRound] = useState(null)
@@ -164,71 +155,69 @@ export function Round(props) {
         setWon(result.games_won)
     }
 
+    function autoCompleteCheck(name, txt) {
+        return name.toLowerCase().indexOf(txt) > -1
+    }
+
     if (round?.paired && results) {
         
         return (
             <>
                 {names && names.length && (
-                    <Grid container>
-                        <Grid item xs>
-                            <Autocomplete options={names} freeSolo disableClearable
-                                size='small' value={p1?.name ? p1.name : ''}
+                    <div className='row'>
+                        <div className='col'>
+                            <Autocomplete suggestions={names} value={p1?.name ? p1.name : ''}
                                 onChange={(e, newvalue) => changeName(e, newvalue)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params} placeholder="Team Name"
-                                        label="Team Name"
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            type: 'search',
-                                        }}
-                                    />
-                                )} />
-                        </Grid>
-                        <Grid item xs>
-                            <TextField value={won} placeholder="Games won" size='small'
+                                check={autoCompleteCheck}
+                                />
+                        </div>
+                        <div className='col'>
+                            <input value={won} placeholder="Games won" className='form-control'
                                 onChange={e => handleChange(e, 'won')} />
-                        </Grid>
-                        <Grid item xs>
-                            <TextField value={score1} placeholder="Score for team1" size='small'
+                        </div>
+                        <div className='col'>
+                            <input value={score1} placeholder="Score for team1"  className='form-control'
                                 onChange={e => handleChange(e, 'score1')} type='number' />
-                        </Grid>
-                        <Grid item xs>
-                            <TextField value={p2?.name ? p2.name : ""} placeholder="Opponent"
+                        </div>
+                        <div className='col'>
+                            <input value={p2?.name ? p2.name : ""} placeholder="Opponent"
+                                className='form-control'
                                 size='small' onChange={e => { console.log('changed') }} />
-                        </Grid>
-                        <Grid item xs>
-                            <TextField value={lost} placeholder="Games won" disabled type='number' size='small' />
-                        </Grid>
-                        <Grid item xs>
-                            <TextField value={score2} placeholder="Score for team2" size='small' type='number'
+                        </div>
+                        <div className='col'>
+                            <input value={lost} placeholder="Games won" disabled type='number' 
+                                className='form-control' />
+                        </div>
+                        <div className='col'>
+                            <input value={score2} placeholder="Score for team2" 
+                                 className='form-control' type='number'
                                 onChange={e => handleChange(e, 'score2')} />
-                        </Grid>
-                        <Grid item xs>
-                            <Button variant='submit' onClick={e => addScore()}>Add score</Button>
-                        </Grid>
-                    </Grid>
+                        </div>
+                        <div className='col'>
+                            <button className='btn btn-primary' onClick={e => addScore()}>Add score</button>
+                        </div>
+                    </div>
 
                 )}
-                <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell sx={{ border: 1 }} align="left">Team 1</TableCell>
-                                <TableCell sx={{ border: 1 }} align="right">Wins</TableCell>
-                                <TableCell sx={{ border: 1 }} align="right">Total Score</TableCell>
-                                <TableCell sx={{ border: 1 }} align="left">Team 2</TableCell>
-                                <TableCell sx={{ border: 1 }} align="right">Wins</TableCell>
-                                <TableCell sx={{ border: 1 }} align="right">Total Score</TableCell>
-                                <TableCell sx={{ border: 1 }} align="right"></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
+                
+                    <table className='table table-striped table-dark table-bordered'>
+                        <thead>
+                            <tr>
+                                <td sx={{ border: 1 }} align="left">Team 1</td>
+                                <td sx={{ border: 1 }} align="right">Wins</td>
+                                <td sx={{ border: 1 }} align="right">Total Score</td>
+                                <td sx={{ border: 1 }} align="left">Team 2</td>
+                                <td sx={{ border: 1 }} align="right">Wins</td>
+                                <td sx={{ border: 1 }} align="right">Total Score</td>
+                                <td sx={{ border: 1 }} align="right"></td>
+                            </tr>
+                        </thead>
+                        <tbody>
                             {results.map((r, idx) => <Result key={r.id} r={r} 
                                 index={idx} editScore={editScore} />)}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                        </tbody>
+                    </table>
+                
             </>
 
         )
@@ -237,7 +226,7 @@ export function Round(props) {
         return (
             <div>
                 This is a round that has not yet been paired
-                <div><Button variant='contained' onClick={e => pair(e)}>Pair</Button></div>
+                <div><button className='btn btn-primary' onClick={e => pair(e)}>Pair</button></div>
             </div>
         )
     }
@@ -247,20 +236,16 @@ export function Rounds(props) {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
 
-    console.log(tournament?.rounds)
     return (
-        <Box>
-            <ButtonGroup variant="contained" aria-label="outlined primary button group">
+        <div>
+            <div className='btn-group' aria-label="outlined primary button group">
                 {
-                    tournament?.rounds?.map(r =>
-                        <Tooltip title={r.pairing_system + ' based on ' + r.based_on + ' with ' + r.repeats + ' repeats'} key={r.id}>
-                            <Button component={RouterLink}
-                                to={'round/' + r.round_no} >{r.round_no}</Button>
-                        </Tooltip>
-                    )
+                    tournament?.rounds?.map(r => 
+                            <Link to={'round/' + r.round_no} key={r.round_no}>
+                                <button className='btn btn-primary'>{r.round_no}</button></Link>)
                 }
-            </ButtonGroup>
-        </Box>
+            </div>
+        </div>
     )
 }
 

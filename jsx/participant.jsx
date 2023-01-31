@@ -1,13 +1,5 @@
 //npx babel --watch jsx --out-dir tournament/static/js/ --presets react-app/dev 
 import React, { useState, useEffect } from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { Button }  from '@mui/material';
 
 import {
     useParams,
@@ -68,44 +60,45 @@ export function Participants(props) {
     }
 
     return (
-       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Rank</TableCell>
-              <TableCell align="left">Name</TableCell>
-              <TableCell align="right">Seed</TableCell>
-              <TableCell align="right">Round Wins</TableCell>
-              <TableCell align="right">Game Wins</TableCell>
-              <TableCell align="right">Spread</TableCell>
-              { auth && <TableCell align="right">Actions</TableCell> }
-            </TableRow>
-          </TableHead>
-          <TableBody>
+       
+        <table className='table table-striped'>
+          <thead>
+            <tr>
+              <td>Rank</td>
+              <td className="text-left">Name</td>
+              <td className="text-right">Seed</td>
+              <td className="text-right">Round Wins</td>
+              <td className="text-right">Game Wins</td>
+              <td className="text-right">Spread</td>
+              { auth && <td className="text-right">Actions</td> }
+            </tr>
+          </thead>
+          <tbody>
             { tournament?.participants?.map((row, idx) => (
-              <TableRow
+              <tr
                 key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell align="left">{ idx + 1}</TableCell>
-                <TableCell component="th" scope="row">
+                <td className="text-left">{ idx + 1}</td>
+                <td component="th" scope="row">
                     <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
-                </TableCell>
-                <TableCell align="right">{row.seed}</TableCell>
-                <TableCell align="right">{row.round_wins}</TableCell>
-                <TableCell align="right">{row.game_wins}</TableCell>
-                <TableCell align="right">{row.spread}</TableCell>
+                </td>
+                <td className="text-right">{row.seed}</td>
+                <td className="text-right">{row.round_wins}</td>
+                <td className="text-right">{row.game_wins}</td>
+                <td className="text-right">{row.spread}</td>
                 {auth && 
-                    <TableCell align="right">
-                        <Switch checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
-                        <Button variant="contained" onClick = { e => deleteParticipant(e, idx)}>Del</Button>
-                    </TableCell>
+                    <td className="text-right">
+                        <input className="form-check-input mt-0" type="radio"
+                             checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
+                        <button className='btn btn-danger' onClick = { e => deleteParticipant(e, idx)}>Del</button>
+                    </td>
                 }
-              </TableRow>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      
      );
 }
 
@@ -128,7 +121,7 @@ export function Participant(props) {
             <div>
                 <h2>{participant.name}</h2>
                 <div className='row'>
-                    <div className='row'>Board</div>
+                    <div className='col'>Board</div>
                     <div className='col'>Player</div>
                     <div className='col'>Wins</div>
                     <div className='col'>Margin</div>
@@ -136,6 +129,9 @@ export function Participant(props) {
                 { participant.members.map(p => (
                     <div className='row' key={p.id}>
                         <div className='col'>{p.board}</div>
+                        <div className='col'>{p.name}</div>
+                        <div className='col'>{p.wins}</div>
+                        <div className='col'>{p.spread}</div>
                     </div>
                     )
                 )}

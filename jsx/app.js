@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react';
 
 import {
     Route, Routes,
-    BrowserRouter, useNavigate
+    useNavigate
 } from "react-router-dom";
 
 import {Participant, Participants } from "./participant.jsx"
 import {Tournament, Tournaments } from "./tournament.jsx"
 import {Round, Rounds} from "./round.jsx"
-import { TournamentProvider } from './context.jsx';
+import { TournamentProvider, useTournamentDispatch } from './context.jsx';
  
 /**
  * The main entry.
@@ -27,6 +27,7 @@ import { TournamentProvider } from './context.jsx';
  */
 export default function App() {
     const [tournaments, setTournaments] = useState()
+    const dispatch = useTournamentDispatch();
     const navigate = useNavigate()
 
     function fetchTournaments() {
@@ -43,17 +44,21 @@ export default function App() {
     },[])
 
     useEffect(() => {
+        console.log(dispatch)
         if(tournaments != null) {
             const path = document.getElementById('frm')
             if (path?.innerText.length > 1) {
                 const parts = path.innerText.split('/')
                 if(parts.length > 1) {
-                    if(parts[0] === "") {
-                        navigate(`/${parts[1]}`)
-                    }
-                    else {
-                        navigate(`/${parts[0]}`)
-                    }
+                    const slug = parts[0] === "" ? parts[1] : parts[0];
+                    tournaments?.map(t => {
+                        if(t.slug == slug) {
+                            fetch(`/api/tournament/${t.id}/`).then(resp=>resp.json()
+                            ).then(json=>{
+                                dispatch({type: 'replace', value: json})                
+                            })
+                        }
+                    })   
                 }
                 navigate(path.innerText)
             }
@@ -61,20 +66,16 @@ export default function App() {
     }, [tournaments])
 
     return (
-      
-        <TournamentProvider>
-            <Routes>
-                <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
-                <Route path="/:slug" >
-                    <Route path="" 
-                        element={ <Tournament tournaments={tournaments} /> } 
-                    />
+        <Routes>
+            <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
+            <Route path="/:slug" >
+                <Route path="" 
+                    element={ <Tournament tournaments={tournaments} /> } 
+                />
 
-                    <Route path=":id" element={<Participant />} />
-                    <Route path="round/:id" element={<Round />} />
-                </Route>
-            </Routes>
-        </TournamentProvider>
-      
+                <Route path=":id" element={<Participant />} />
+                <Route path="round/:id" element={<Round />} />
+            </Route>
+        </Routes>
     )
 }
