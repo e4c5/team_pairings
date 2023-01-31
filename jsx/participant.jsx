@@ -59,9 +59,12 @@ export function Participants(props) {
         })
     }
 
+    function isStarted() {
+        return tournament.rounds[0].is_paired
+    }
     return (
        
-        <table className='table table-striped'>
+        <table className='table table-striped align-middle table-bordered table-dark'>
           <thead>
             <tr>
               <td>Rank</td>
@@ -89,9 +92,17 @@ export function Participants(props) {
                 <td className="text-right">{row.spread}</td>
                 {auth && 
                     <td className="text-right">
-                        <input className="form-check-input mt-0" type="radio"
-                             checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
-                        <button className='btn btn-danger' onClick = { e => deleteParticipant(e, idx)}>Del</button>
+                        <div className='d-inline-flex'>
+                            <div className='form-check form-switch'>
+                                <input className="form-check-input" type="checkbox"
+                                    checked={row.offed != 0} onChange={ e => toggleParticipant(e, idx) }/>
+                            </div>
+                            { !isStarted() &&
+                                <div className='form-col'>
+                                    <i className='bi-x-circle' onClick = { e => deleteParticipant(e, idx)}></i>
+                                </div>
+                            }
+                        </div>
                     </td>
                 }
               </tr>
