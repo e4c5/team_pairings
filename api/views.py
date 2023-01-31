@@ -57,6 +57,22 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ParticipantSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        ''''Retrieve all information about participant'''
+
+        query = """select to_json(f) from (
+                        select tp.*, 
+                            (select jsonb_agg(to_jsonb(tm)) from tournament_teammember tm
+                            where team_id = tp.id) members,
+                            (select jsonb_agg(to_jsonb(tr)) from tournament_result tr
+                            where p1_id = tp.id or p2_id = tp.id) results
+                        from tournament_participant tp where tp.id = %s
+                    ) f	 """
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, [kwargs['pk']])
+            return Response( cursor.fetchone()[0])
+
     def perform_create(self, serializer):
         serializer.save(tournament_id=self.kwargs['tid'])
 

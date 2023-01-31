@@ -121,7 +121,26 @@ export function Participant(props) {
                 console.log(json)
             })
         } 
-    })
+    },[tournament, participant])
 
-    return <div>Hello World </div>
+    if(participant) {
+        return (
+            <div>
+                <h2>{participant.name}</h2>
+                <div className='row'>
+                    <div className='row'>Board</div>
+                    <div className='col'>Player</div>
+                    <div className='col'>Wins</div>
+                    <div className='col'>Margin</div>
+                </div>
+                { participant.members.map(p => (
+                    <div className='row' key={p.id}>
+                        <div className='col'>{p.board}</div>
+                    </div>
+                    )
+                )}
+            </div>
+        )
+    }
+    return <div></div>
 }
