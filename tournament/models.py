@@ -166,13 +166,15 @@ class Result(models.Model):
     score2 = models.IntegerField(blank=True, null=True)
     
     def __str__(self):
+        if self.score1:
+            return f"{self.p1.name} {self.score1} vs {self.p2.name} {self.score2}"
         return f"{self.p1.name} vs {self.p2.name}"
 
     class Meta:
         unique_together = ['round','p1','p2']
         constraints = [
             models.CheckConstraint(
-                check=models.Q(p1_id=models.F('p2_id')),
+                check=models.Q(p1_id__lt=models.F('p2_id')),
                 name='p1p2_check'
             ),
         ]
@@ -199,10 +201,12 @@ class BoardResult(models.Model):
         unique_together = ['round','team1','team2','board']
 
 @receiver(pre_save, sender=Result)
-def result_presave(sender, instance, created, **kwargs):
-    if not instance.pk:
-        if instance.p1.id > instance.p2.id:
-            instance.p1, instance.p2 = instance.p2, instance.p1
+def result_presave(sender, instance, **kwargs):
+    if instance.p1 and instance.p1.id > instance.p2.id:
+        instance.p1, instance.p2 = instance.p2, instance.p1 
+        if instance.games_won:
+            instance.score1, instance.score2 = instance.score2, instance.score1
+            instance.games_won = instance.round.tournament.num_rounds - instance.games_won
 
 
 

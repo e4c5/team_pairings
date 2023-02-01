@@ -6,7 +6,7 @@ from tournament.models import Tournament, TournamentRound, Participant, Director
 # Register your models here.
 
 class TournamentAdmin(admin.ModelAdmin):
-    list_display = ['id','name']
+    list_display = ['id','name','num_rounds','entry_mode']
 
 class RoundAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'round_no','spread_cap','pairing_system',

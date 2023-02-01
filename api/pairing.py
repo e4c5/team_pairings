@@ -15,7 +15,18 @@ class Pairing:
         ''' Creates swiss pairing for the given round
         Arguments: 
             rnd: a TournamentRound instance.
+        Throws: value error if this round cannot be paired
         '''
+
+        if rnd.based_on > 0:
+            prev = TournamentRound.objects.filter(tournament=rnd.tournament
+                    ).get(round_no=rnd.based_on)
+            results = Result.objects.filter(round=prev)
+            if results.count() < Participant.objects.filter(tournament=rnd.tournament).count() / 2:
+                raise ValueError(f"round {rnd.based_on} needs to be completed")
+            if results.filter(score1=None).exists():
+                raise ValueError(f"round {rnd.based_on} needs to be completed")
+
         self.pairs = []
         self.tournament = rnd.tournament
         self.players = []

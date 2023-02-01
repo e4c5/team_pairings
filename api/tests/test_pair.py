@@ -6,6 +6,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from tournament.models import Tournament, Participant, TournamentRound, Director, Result
+from tournament.tools import add_participants
+
 from api import swiss
 
 class BasicTests(APITestCase):
@@ -67,7 +69,7 @@ class BasicTests(APITestCase):
         self.assertEqual(res.count(), 0)
         
 
-    def test_simplest(self):
+    def test_simple_swiss(self):
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         sp = swiss.SwissPairing(rnd)
         # no participants
@@ -87,3 +89,49 @@ class BasicTests(APITestCase):
         self.assertEqual(res.count(), 1)
         self.assertEqual(res[0].p1.id, p1.id)
         self.assertEqual(res[0].p2.id, bye.id)
+
+
+    def test_two_player(self):
+        add_participants(self.t1, True, 4)
+
+        rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+
+        # round 2 cannot be paired now without round 1 being pairedd
+        self.assertRaises(ValueError, swiss.SwissPairing, rnd2)
+
+        sp = swiss.SwissPairing(rnd1)
+        sp.make_it()
+        sp.save()
+
+        results = Result.objects.all()
+        self.assertEqual(2, results.count())
+
+        # round 2 cannot still be paired results are not yet in
+        self.assertRaises(ValueError, swiss.SwissPairing, rnd2)
+
+        results = Result.objects.all()
+        r1, r2 = results[0], results[1]
+
+        r1.score1 = 1000
+        r1.score2 = 500
+        r1.games_won = 4
+        r1.save()
+        
+        r2.score1 = 900
+        r2.score2 = 500
+        r2.games_won = 3
+        r2.save()
+
+        self.assertEquals(1, Result.objects.filter(score1=1000).count())
+        # round2 can now be paired.
+        sp = swiss.SwissPairing(rnd2)
+        sp.make_it()
+        sp.save()
+
+        self.assertEqual(4, results.count())
+
+
+        
+
+
