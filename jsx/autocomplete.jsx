@@ -24,12 +24,12 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
 			);
             
 			const rect = e.target.getBoundingClientRect();
-            console.log(e.top, e.height)
+            
 			setState({
 				activeSuggestion: 0,
 				filteredSuggestions,
 				showSuggestions: true,
-				styles: { top: e.top + e.height + 10, left: e.left}
+				styles: { top: rect.top + rect.height + 10, left: e.left}
 			});
 		}
 		
@@ -49,24 +49,28 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
 		const { activeSuggestion, filteredSuggestions } = state;
 
 		if (e.keyCode === 13) {
-			setState({
+            console.log('ENTER')
+
+			setState({...state, 
 				activeSuggestion: 0,
 				showSuggestions: false,
 			});
-			onSelect(filteredSuggestions[activeSuggestion])
+			onSelect(e, filteredSuggestions[activeSuggestion])
 			
-		} else if (e.keyCode === 38) {
+		} else if (e.keyCode === 38) { // UP
+            console.log('UP?')
 			if (activeSuggestion === 0) {
 				return;
 			}
 
-			setState({ activeSuggestion: activeSuggestion - 1 });
-		} else if (e.keyCode === 40) {
+			setState({ ...state, activeSuggestion: activeSuggestion - 1 });
+		} else if (e.keyCode === 40) { // DOWN
+            console.log('DOWN')
 			if (activeSuggestion - 1 === filteredSuggestions.length) {
 				return;
 			}
 
-			setState({ activeSuggestion: activeSuggestion + 1 });
+			setState({ ...state, activeSuggestion: activeSuggestion + 1 });
 		}
 	};
 
@@ -96,11 +100,11 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
             suggestionsListComponent = null;
         }
     }
-
+    console.log('AUTO,', value)
     return (
             <React.Fragment>
                 <input 	type="text"	className='form-control'
-                    placeHolder={placeHolder}
+                    placeholder={placeHolder}
                     onChange={onTyped}	onKeyDown={onKeyDown} value={value} />
                 {suggestionsListComponent}
             </React.Fragment>

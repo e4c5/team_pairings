@@ -12,13 +12,13 @@ export default function Result({r, index, editScore}) {
         }
         return (
             <tr>
-                <td sx={{border:1}} >{ r.p1.name }</td>
-                <td className="text-right" sx={{border:1}} >{ r.games_won } - { tournament.team_size - r.games_won }</td>
-                <td className="text-right" sx={{border:1}} >{ r.score1 }</td>
-                <td sx={{border:1}} >{ r.p2.name }</td>
-                <td className="text-right" sx={{border:1}} >{ tournament.team_size - r.games_won } - { r.games_won }</td>
-                <td className="text-right" sx={{border:1}} >{ r.score2 }</td>
-                <td className="text-right" sx={{border:1}} >
+                <td >{ r.p1.name }</td>
+                <td className="text-right" >{ r.games_won } - { tournament.team_size - r.games_won }</td>
+                <td className="text-right" >{ r.score1 }</td>
+                <td>{ r.p2.name }</td>
+                <td className="text-right">{ tournament.team_size - r.games_won } - { r.games_won }</td>
+                <td className="text-right">{ r.score2 }</td>
+                <td className="text-right">
                     <button className='btn btn-primary' onClick={e => editScore(e, index)}>
                         <i className='bi-pencil' ></i>
                     </button>
@@ -30,13 +30,13 @@ export default function Result({r, index, editScore}) {
     function resultOut() {
         return (
             <tr>
-                <td sx={{border:1}} >{ r.p1.name }</td>
-                <td sx={{border:1}} ></td>
-                <td sx={{border:1}} ></td>
-                <td sx={{border:1}} >{ r.p2.name }</td>
-                <td sx={{border:1}} ></td>
-                <td sx={{border:1}} ></td>
-                <td sx={{border:1}} ></td>
+                <td>{ r.p1.name }</td>
+                <td></td>
+                <td></td>
+                <td>{ r.p2.name }</td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
         )
     }
