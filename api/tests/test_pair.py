@@ -70,5 +70,20 @@ class BasicTests(APITestCase):
     def test_simplest(self):
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         sp = swiss.SwissPairing(rnd)
-        sp.make_it()
+        # no participants
+        self.assertRaises(ValueError, sp.make_it)
 
+        # odd number with no bye
+        sp = swiss.SwissPairing(rnd)
+        p1 = Participant.objects.create(tournament=self.t1, name='bada', rating=1)
+        self.assertRaises(ValueError, sp.make_it)
+
+        # one player with a bye should work
+        bye = Participant.objects.create(tournament=self.t1, name='Bye', rating=2)
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+        res = Result.objects.all()
+        self.assertEqual(res.count(), 1)
+        self.assertEqual(res[0].p1.id, p1.id)
+        self.assertEqual(res[0].p2.id, bye.id)

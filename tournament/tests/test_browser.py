@@ -10,7 +10,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from tournament.models import Tournament, Participant
+from tournament.models import Tournament, Participant, Director
 
 class TestParticipants(StaticLiveServerTestCase):
     @classmethod
@@ -34,6 +34,8 @@ class TestParticipants(StaticLiveServerTestCase):
 
     def setUp(self):
         super().setUp()
+        User.objects.all().delete()
+        Tournament.objects.all().delete()
         u = User(username='admin',is_superuser=True)
         u.set_password('12345')
         u.save()
@@ -41,7 +43,7 @@ class TestParticipants(StaticLiveServerTestCase):
         self.t1 = Tournament.objects.create(name='Richmond Showdown U20', start_date='2023-02-25',
             rated=False, team_size=5, entry_mode='T', num_rounds=5)
 
-
+        Director.objects.create(tournament=self.t1, user=u)
     def get_url(self, relative_path):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))
 
@@ -75,6 +77,7 @@ class TestParticipants(StaticLiveServerTestCase):
         ).click()
 
         self.add_participants()
+        time.sleep(0.2)
         self.assertEquals(18, Participant.objects.count())
         self.delete_participants()
         time.sleep(0.2)

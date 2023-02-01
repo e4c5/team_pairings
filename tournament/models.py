@@ -2,7 +2,7 @@ import re
 from django.db import models, connection
 from django.contrib.auth.models import User
 from django.utils.text import slugify
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 # Create your models here.
@@ -99,6 +99,17 @@ class TournamentRound(models.Model):
     based_on = models.IntegerField(null=True, blank=True)
     paired = models.BooleanField(default=False)
     
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(based_on__lt=models.F('round_no')),
+                name='based_on_check'
+            ),
+            models.CheckConstraint(
+                check=models.Q(round_no__gt=0),
+                name='round_no_check'
+            )
+        ]
 
 class Director(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
@@ -117,6 +128,18 @@ class Participant(models.Model):
     position = models.IntegerField(default=0, null=True)
     offed = models.IntegerField(default=0, null=True)
     rating = models.IntegerField(default=0, null=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(game_wins__gte=0),
+                name='wins_check'
+            ),
+            models.CheckConstraint(
+                check=models.Q(round_wins__gte=0),
+                name='round_win_check'
+            )
+        ]
 
    
 class Result(models.Model):
@@ -144,10 +167,15 @@ class Result(models.Model):
     
     def __str__(self):
         return f"{self.p1.name} vs {self.p2.name}"
-        
+
     class Meta:
         unique_together = ['round','p1','p2']
-
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(p1_id=models.F('p2_id')),
+                name='p1p2_check'
+            ),
+        ]
 
 class TeamMember(models.Model):
     """In a team tournament, this represents a team member"""
@@ -169,6 +197,13 @@ class BoardResult(models.Model):
 
     class Meta:
         unique_together = ['round','team1','team2','board']
+
+@receiver(pre_save, sender=Result)
+def result_presave(sender, instance, created, **kwargs):
+    if not instance.pk:
+        if instance.p1.id > instance.p2.id:
+            instance.p1, instance.p2 = instance.p2, instance.p1
+
 
 
 @receiver(post_save, sender=Result)
