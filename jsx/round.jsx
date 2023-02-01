@@ -56,6 +56,7 @@ function reducer(state, action) {
  */
 export function Round(props) {
     const params = useParams()
+    const [error, setError] = useState('')
     const [current, dispatch] = useReducer(reducer, {})
     const [round, setRound] = useState(null)
     const [results, setResults] = useState(null)
@@ -92,25 +93,36 @@ export function Round(props) {
         fetch(`/api/tournament/${tournament.id}/${round.id}/result/`).then(resp => resp.json()
         ).then(json => {
             setResults(json)
-            const names = []
-            json.forEach(e => {
-                if (e.score1 || e.score2) {
-                    //
-                }
-                else {
-                    names.push(e.p1.name)
-                    names.push(e.p2.name)
-                }
-            })
-            dispatch({ type: 'pending', names: names })
+            updatePendig(json)
         })
     }
 
     /**
+     * Updates the list of teams for whom we do not have a result yet
+     * @param {*} json 
+     */
+    function updatePendig(json) {
+        const names = []
+        json.forEach(e => {
+            if (e.score1 || e.score2) {
+                //
+            }
+            else {
+                names.push(e.p1.name)
+                names.push(e.p2.name)
+            }
+        })
+        dispatch({ type: 'pending', names: names })
+    }
+    /**
      * Pair this round.
      */
     function pair() {
-        fetch(`/api/tournament/${tournament.id}/round/${params.id}/pair/`,
+        /* 
+         * note that it's the id of the round in the DB that we send
+         * rather than the round number
+         */
+        fetch(`/api/tournament/${tournament.id}/round/${round.id}/pair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
@@ -119,10 +131,44 @@ export function Round(props) {
                     "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify({})
-            }).then(resp => resp.json()).then(json => {
-                fetchResults()
-            })
+        }).then(resp => resp.json()).then(json => {
+            if(json.status === "ok") {
+                setRound({...round, paired: true})
+                setResults(json.results)
+                updatePendig(json.results)
+            }
+            else {
+                setError(json.message)
+            }
+        })
+    }
 
+    /**
+     * UnPair this round.
+     */
+    function unpair() {
+        /* 
+         * note that it's the id of the round in the DB that we send
+         * rather than the round number
+         */
+        fetch(`/api/tournament/${tournament.id}/round/${round.id}/unpair/`,
+            {
+                method: 'POST', 'credentials': 'same-origin',
+                headers:
+                {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify({})
+        }).then(resp => resp.json()).then(json => {
+            if(json.status === "ok") {
+                setRound({...round, paired: true})
+                setResults(null)
+            }
+            else {
+                setError(json.message)
+            }
+        })
     }
 
     /**
@@ -226,79 +272,110 @@ export function Round(props) {
         return name.toLowerCase().indexOf(txt) > -1
     }
 
-    if (round?.paired && results) {
-
+    function table() {
         return (
-            <>
-                {current.pending?.length && (
-                    <div className='row'>
-                        <div className='col'>
-                            <Autocomplete
-                                suggestions={current.pending} placeHolder='name'
-                                value={current.p1?.name || current.name}
-                                onChange={e => handleChange(e, 'name')}
-                                onSelect={ (e, suggestion) => handleChange(e, 'name', suggestion)}
-                                check={autoCompleteCheck}
-                            />
-                        </div>
-                        <div className='col'>
-                            <input value={current.won} placeholder="Games won" className='form-control'
-                                onChange={e => handleChange(e, 'won')} />
-                        </div>
-                        <div className='col'>
-                            <input value={current.score1} placeholder="Score for team1" className='form-control'
-                                onChange={e => handleChange(e, 'score1')} type='number' />
-                        </div>
-                        <div className='col'>
-                            <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
-                                className='form-control'
-                                size='small' onChange={e => { console.log('changed') }} />
-                        </div>
-                        <div className='col'>
-                            <input value={current.lost} placeholder="Games won" disabled type='number'
-                                className='form-control' />
-                        </div>
-                        <div className='col'>
-                            <input value={current.score2} placeholder="Score for team2"
-                                className='form-control' type='number'
-                                onChange={e => handleChange(e, 'score2')} />
-                        </div>
-                        <div className='col'>
-                            <button className='btn btn-primary' onClick={e => addScore()}>
-                                <i className='bi-plus' ></i>
-                            </button>
-                        </div>
+            <table className='table table-striped table-dark table-bordered'>
+                <thead>
+                    <tr>
+                        <td align="left">Team 1</td>
+                        <td align="right">Wins</td>
+                        <td align="right">Total Score</td>
+                        <td align="left">Team 2</td>
+                        <td align="right">Wins</td>
+                        <td align="right">Total Score</td>
+                        <td align="right"></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {results.map((r, idx) => <Result key={r.id} r={r}
+                        index={idx} editScore={editScore} />)}
+                </tbody>
+            </table>
+        )
+    }
+
+    function editor() {
+        <div className='row'>
+            <div className='col'>
+                <Autocomplete
+                    suggestions={current.pending} placeholder='name'
+                    value={current.p1?.name || current.name}
+                    onChange={e => handleChange(e, 'name')}
+                    onSelect={ (e, suggestion) => handleChange(e, 'name', suggestion)}
+                    check={autoCompleteCheck}
+                />
+            </div>
+            <div className='col'>
+                <input value={current.won} placeholder="Games won" className='form-control'
+                    onChange={e => handleChange(e, 'won')} />
+            </div>
+            <div className='col'>
+                <input value={current.score1} placeholder="Score for team1" className='form-control'
+                    onChange={e => handleChange(e, 'score1')} type='number' />
+            </div>
+            <div className='col'>
+                <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
+                    className='form-control'
+                    size='small' onChange={e => { console.log('changed') }} />
+            </div>
+            <div className='col'>
+                <input value={current.lost} placeholder="Games won" disabled type='number'
+                    className='form-control' />
+            </div>
+            <div className='col'>
+                <input value={current.score2} placeholder="Score for team2"
+                    className='form-control' type='number'
+                    onChange={e => handleChange(e, 'score2')} />
+            </div>
+            <div className='col'>
+                <button className='btn btn-primary' onClick={e => addScore()}>
+                    <i className='bi-plus' ></i>
+                </button>
+            </div>
+        </div>
+    }
+    if (round?.paired ) {
+        return (
+            <div>
+                <h2>{ tournament?.name }</h2>
+                { current.pending?.length && editor() }
+                { results && results.length && table() }            
+                <div className='row'>
+                    <div className='col'>
+                        <button className='btn btn-warning' onClick={unpair}>Unpair</button>
                     </div>
-
-                )}
-
-                <table className='table table-striped table-dark table-bordered'>
-                    <thead>
-                        <tr>
-                            <td sx={{ border: 1 }} align="left">Team 1</td>
-                            <td sx={{ border: 1 }} align="right">Wins</td>
-                            <td sx={{ border: 1 }} align="right">Total Score</td>
-                            <td sx={{ border: 1 }} align="left">Team 2</td>
-                            <td sx={{ border: 1 }} align="right">Wins</td>
-                            <td sx={{ border: 1 }} align="right">Total Score</td>
-                            <td sx={{ border: 1 }} align="right"></td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {results.map((r, idx) => <Result key={r.id} r={r}
-                            index={idx} editScore={editScore} />)}
-                    </tbody>
-                </table>
-
-            </>
-
+                </div>
+                <div>{ error }</div>
+            </div>
         )
     }
     else {
         return (
             <div>
+                <h2>{ tournament?.name }</h2>
                 This is a round that has not yet been paired
-                <div><button className='btn btn-primary' onClick={e => pair(e)}>Pair</button></div>
+                <table className='table'>
+                    <tbody>
+                    { tournament?.participants?.map((row, idx) => (
+                        <tr
+                            key={row.id}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                            <td className="text-left">{ idx + 1}</td>
+                            <td component="th" scope="row">
+                                <Link to={ `${row.id}` }>{row.name}</Link>
+                            </td>
+                            <td>Unpaired</td>
+                        </tr>))
+                    }
+                    </tbody>
+                </table>
+                <div className='row'>
+                    <div className='col'>
+                        <button className='btn btn-warning' onClick={pair}>Pair</button>
+                    </div>
+                </div>
+                <div>{ error }</div>
             </div>
         )
     }
@@ -322,4 +399,4 @@ export function Rounds(props) {
     )
 }
 
-console.log('Rounds 0.01.8')
+console.log('Rounds 0.02')

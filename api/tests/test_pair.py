@@ -96,6 +96,7 @@ class BasicTests(APITestCase):
 
         rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+        rnd3 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=3)
 
         # round 2 cannot be paired now without round 1 being pairedd
         self.assertRaises(ValueError, swiss.SwissPairing, rnd2)
@@ -124,6 +125,9 @@ class BasicTests(APITestCase):
         r2.save()
 
         self.assertEquals(1, Result.objects.filter(score1=1000).count())
+        self.assertEquals(1, r1.p2.game_wins)
+        self.assertEquals(1, r1.p1.game_wins)
+
         # round2 can now be paired.
         sp = swiss.SwissPairing(rnd2)
         sp.make_it()
@@ -131,6 +135,8 @@ class BasicTests(APITestCase):
 
         self.assertEqual(4, results.count())
 
+        # round3 cannot be paired
+        self.assertRaises(ValueError, swiss.SwissPairing, rnd3)
 
         
 

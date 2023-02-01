@@ -113,6 +113,7 @@ export function Tournament(props) {
 
     return (
         <div>
+            <h2>{ tournament?.name }</h2>
             <Participants /> 
             { addParticipant() }
             <Rounds/>

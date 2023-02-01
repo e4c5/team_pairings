@@ -47,12 +47,43 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def pair(self, request, tid, pk=None):
+        """Pairs the given round.
+        Possible only if there is at least 2 players in this tournament and
+        has not been paired already."""
         if models.Result.objects.filter(round=pk).exists():
             return Response({'status': 'error', 'message': 'already pairedd'})
         else:
-            p = SwissPairing(models.TournamentRound.objects.get(pk=pk))
-            p.save()
-        return Response({'status': 'ok'})
+            rnd = models.TournamentRound.objects.get(pk=pk)
+            if rnd.tournament.participants.count() % 2 == 1:
+                # this is when we actually add the bye for the very first time
+                models.Participant.objects.create(name='Bye',rating=0, 
+                        tournament=rnd.tournament)
+            p = SwissPairing(rnd)
+            p.make_it()
+            results = p.save()
+            serializer = ResultSerializer(results, many=True)
+            rnd.paired = True
+            rnd.save()
+            return Response({'status': 'ok', 
+                'results': serializer.data})
+
+    @action(detail=True, methods=['post'])
+    def unpair(self, request, tid, pk=None):
+        """Unpair a round if it does not have any results"""
+        rnd = models.TournamentRound.objects.get(pk=pk)
+        if rnd.paired:
+            qs = models.Result.objects.filter(round=rnd)
+            if qs.exclude(score1=None).exists():
+                return Response({"status": "error", 
+                    "message": "This round already has results. Delete them first"})
+            
+            qs.delete()
+            rnd.paired = False
+            rnd.save()
+            return Response({"status": "ok"})
+
+        else:
+            return Response({"status": "error", "message": "Not paired"})
 
     def get_queryset(self):
         return models.TournamentRound.objects.filter(tournament_id = self.kwargs['tid'])

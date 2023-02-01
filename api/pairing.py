@@ -63,6 +63,10 @@ class Pairing:
             )
 
     def save(self):
+        results = []
         for pair in self.pairs:
-            Result.objects.create(round=self.rnd,
+            r = Result.objects.create(round=self.rnd,
                                   p1=pair[0]['player'], p2=pair[1]['player'])
+            results.append(r)
+
+        return results
