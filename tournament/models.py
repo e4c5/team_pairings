@@ -142,6 +142,9 @@ class Result(models.Model):
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
     
+    def __str__(self):
+        return f"{self.p1.name} vs {self.p2.name}"
+        
     class Meta:
         unique_together = ['round','p1','p2']
 

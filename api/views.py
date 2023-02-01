@@ -42,6 +42,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
 
 class TournamentRoundViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = TournamentRoundSerializer
 
     @action(detail=True, methods=['post'])
@@ -50,6 +51,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
             return Response({'status': 'error', 'message': 'already pairedd'})
         else:
             p = DbPairing(models.TournamentRound.objects.get(pk=pk))
+        return Response({'status': 'ok'})
 
     def get_queryset(self):
         return models.TournamentRound.objects.filter(tournament_id = self.kwargs['tid'])

@@ -18,7 +18,7 @@ class IsAuthenticatedOrReadOnly(BasePermission):
             else:
                 pk = view.kwargs.get('pk')
                 if pk:
-                    if Tournament.objects.filter(pk=pk).exists():
+                    if Tournament.objects.filter(pk=pk).filter(director__user=request.user).exists():
                         return True
 
         return False                        
