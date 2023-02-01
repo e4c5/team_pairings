@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from tournament import models
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
         TournamentRoundSerializer, ResultSerializer)
-from api.swiss import DbPairing
+from api.swiss import SwissPairing
 from api.permissions import IsAuthenticatedOrReadOnly
 
 
@@ -50,7 +50,8 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         if models.Result.objects.filter(round=pk).exists():
             return Response({'status': 'error', 'message': 'already pairedd'})
         else:
-            p = DbPairing(models.TournamentRound.objects.get(pk=pk))
+            p = SwissPairing(models.TournamentRound.objects.get(pk=pk))
+            p.save()
         return Response({'status': 'ok'})
 
     def get_queryset(self):

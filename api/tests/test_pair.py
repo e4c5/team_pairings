@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from tournament.models import Tournament, Participant, TournamentRound, Director, Result
+from api import swiss
 
 class BasicTests(APITestCase):
     """Testing the various read and write permissions"""
@@ -51,7 +52,7 @@ class BasicTests(APITestCase):
         self.assertEquals(resp.status_code, 403)
         
         
-    def test_pairing(self):
+    def test_pair_empty(self):
         self.client.login(username='sri', password='12345')
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         resp = self.client.get(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
@@ -65,3 +66,9 @@ class BasicTests(APITestCase):
         res = Result.objects.all()
         self.assertEqual(res.count(), 0)
         
+
+    def test_simplest(self):
+        rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+

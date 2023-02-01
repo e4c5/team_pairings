@@ -2,14 +2,12 @@
 # it has been cut and chopped, some features that may seem to be missing
 # might actually be there
 
-import sys
-import os
 
 from tournament.models import Participant, Result, TournamentRound
 from django.db.models import Q
+from api.pairing import Pairing
 
-
-class Pairing:
+class SwissPairing(Pairing):
     '''
     Pairing procedure according to Swiss system rules
 
@@ -17,12 +15,25 @@ class Pairing:
     Adapted to work with scrabble scores rather than colors.
     '''
 
-    def __init__(self, next_round):
-        self.next_round = next_round
-        self.pairs = []
+    def __init__(self, rnd):
+        ''' Creates swiss pairing for the given round
+        Arguments: 
+            rnd: a TournamentRound instance.
+        '''
+
+        super().__init__(rnd)
+        brackets = {}
+        for player in self.players:
+            if player['score'] not in brackets:
+                brackets[player['score']] = []
+            brackets[player['score']].append(player)
+        self.brackets = brackets
 
     def make_it(self):
-        if len(self.pairs) % 2 == 1:
+        if len(self.players) == 0:
+            raise ValueError('No players')
+
+        if len(self.players) % 2 == 1:
             raise ValueError('Odd number of players')
 
         if self.next_round == 1:
@@ -51,7 +62,7 @@ class Pairing:
         sorted_players = self.order_players(self.players)
         S1count = len(self.players) // 2
 
-        if sorted_players[-1]['name'] == 'bye':
+        if sorted_players[-1]['name'] == 'Bye':
             self.pairs.append([sorted_players[-1], sorted_players[-2]])
             S1count -= 1
 
@@ -224,61 +235,3 @@ class Pairing:
     def get_switched_color_for_latest_game(self, player):
         return None
 
-
-class DbPairing(Pairing):
-    ''' Pairing from tournament results stored in a Database '''
-
-    def __init__(self, rnd):
-        ''' Creates swiss pairing for the given round
-        Arguments: 
-            rnd: a TournamentRound instance.
-        '''
-        self.pairs = []
-        self.tournament = rnd.tournament
-        self.players = []
-        self.rnd = rnd
-        self.next_round = rnd.round_no
-
-        qs = Result.objects.exclude(p1__name='Bye'
-                                    ).filter(round__round_no__lt=rnd.round_no
-                                             ).select_related('p1', 'p2', 'round')
-
-        players = Participant.objects.select_related().filter(tournament_id=self.tournament
-                                                              ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
-        for pl in players:
-            opponents = []
-            spread = 0
-            wins = 0
-
-            if pl.name != 'Bye':
-                games = qs.filter(Q(p1=pl) | Q(p2=pl)).order_by('-round')
-                opponents = []
-                for game in games:
-                    if game.p1.id == pl.id:
-                        opponents.append(game.p2)
-                    else:
-                        opponents.append(game.p1)
-
-                self.players.append(
-                    {'name': pl.name,
-                     'spread': pl.spread,
-                     'rating': pl.rating,
-                     'player': pl,
-                     'game_wins': pl.game_wins,
-                     'score': pl.round_wins,
-                     'opponents': opponents
-                     }
-                )
-
-        # A.3
-        brackets = {}
-        for player in self.players:
-            if player['score'] not in brackets:
-                brackets[player['score']] = []
-            brackets[player['score']].append(player)
-        self.brackets = brackets
-
-    def save(self):
-        for pair in self.pairs:
-            Result.objects.create(round=self.rnd,
-                                  p1=pair[0]['player'], p2=pair[1]['player'])
