@@ -212,7 +212,13 @@ def result_presave(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Result)
 def update_result(sender, instance, created, **kwargs):
+    if not created:
+        if instance.score1 or instance.score2:
+            update_standing(instance.p1_id)
+            update_standing(instance.p2_id)
 
+
+def update_standing(pid):
     q = """
         update tournament_participant set played = a.games + b.games,
             game_wins = a.games_won + b.games_won, 
@@ -230,12 +236,9 @@ def update_result(sender, instance, created, **kwargs):
                 coalesce(sum(score2 - score1),0) margin
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
-    if not created:
-        if instance.score1 or instance.score2:
-            with connection.cursor() as cursor:
-                cursor.execute(q.format(instance.p1_id))
-                cursor.execute(q.format(instance.p2_id))
 
+    with connection.cursor() as cursor:
+        cursor.execute(q.format(pid))
 
 @receiver(post_save, sender=Tournament)
 def setup_tournament(sender, instance, created, **kwargs):

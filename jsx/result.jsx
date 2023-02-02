@@ -11,10 +11,10 @@ export default function Result({r, index, editScore}) {
         return (
             <tr>
                 <td >{ r.p1.name }</td>
-                <td className="text-right" >{ r.games_won } - { tournament.team_size - r.games_won }</td>
+                <td className="text-right" >{ r.games_won } </td>
                 <td className="text-right" >{ r.score1 }</td>
                 <td>{ r.p2.name }</td>
-                <td className="text-right">{ tournament.team_size - r.games_won } - { r.games_won }</td>
+                <td className="text-right">{ tournament.team_size - r.games_won } </td>
                 <td className="text-right">{ r.score2 }</td>
                 <td className="text-right">
                     { editable &&

@@ -141,7 +141,7 @@ export function Participant(props) {
                         </tr>
                     </thead>
                     <tbody>
-                        { participant.members.map(p => (
+                        { participant?.members.map(p => (
                             <tr key={p.id}>
                                 <td>{p.board}</td>
                                 <td>{p.name}</td>

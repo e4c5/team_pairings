@@ -380,7 +380,7 @@ export function Round(props) {
     if (round?.paired) {
         return (
             <div>
-                <h2>{tournament?.name}</h2>
+                <h2><Link to="{tournament.slug}">{tournament?.name}</Link></h2>
                 {editor()}
                 {results && results.length && table()}
                 <div className='row'>

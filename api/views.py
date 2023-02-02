@@ -30,9 +30,15 @@ class TournamentViewSet(viewsets.ModelViewSet):
         query = """select to_json(f) from (
             select tt.*, 	
                 (select jsonb_agg(to_jsonb(parties)) 
-                from tournament_participant parties where tournament_id = tt.id) participants,
+                    FROM (
+                        select * from tournament_participant parties 
+                            where tournament_id = tt.id
+                            order by round_wins desc, game_wins desc, spread desc, rating
+                    ) parties
+                ) participants,
                 (select jsonb_agg(to_jsonb(rounds)) 
-                from tournament_tournamentround rounds where tournament_id = tt.id) rounds
+                    from tournament_tournamentround rounds where tournament_id = tt.id
+                ) rounds
             from tournament_tournament tt where id = %s 	   
         ) f """
 
