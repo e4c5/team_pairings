@@ -124,9 +124,12 @@ class BasicTests(APITestCase):
         r2.games_won = 3
         r2.save()
 
+        r1.refresh_from_db()
+        r2.refresh_from_db()
+
         self.assertEquals(1, Result.objects.filter(score1=1000).count())
         self.assertEquals(1, r1.p2.game_wins)
-        self.assertEquals(1, r1.p1.game_wins)
+        self.assertEquals(4, r1.p1.game_wins)
 
         # round2 can now be paired.
         sp = swiss.SwissPairing(rnd2)

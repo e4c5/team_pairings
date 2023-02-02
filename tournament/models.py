@@ -227,7 +227,7 @@ def update_result(sender, instance, created, **kwargs):
                 coalesce(sum(CASE WHEN games_won IS NULL THEN 0 
                          WHEN games_won < 2.5 THEN 1 
                          WHEN games_won = 2.5 THEN .5 else 0 END),0) rounds_won,
-                coalesce(sum(score1 - score2),0) margin
+                coalesce(sum(score2 - score1),0) margin
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
     if not created:

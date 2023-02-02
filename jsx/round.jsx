@@ -71,6 +71,7 @@ export function Round(props) {
     const [results, setResults] = useState(null)
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
+    const editable = document.getElementById('hh') && document.getElementById('hh').value;
 
     /**
      * This effect loads the current data for the round.
@@ -330,7 +331,9 @@ export function Round(props) {
     }
 
     function editor() {
-        console.log(current)
+        if(! editable) {
+            return <></>
+        }
         return (
             <div className='row'>
                 <div className='col'>

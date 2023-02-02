@@ -75,8 +75,6 @@ class BasicTests(APITestCase):
         resp = self.client.post('/api/tournament/', {})
         self.assertEquals(resp.status_code, 403)
 
-        print(f'/api/tournament/{self.t1.id}/participant')
-
         resp = self.client.get(f'/api/tournament/{self.t1.id}/participant/')
         self.assertEqual(200, resp.status_code)
         resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', {})

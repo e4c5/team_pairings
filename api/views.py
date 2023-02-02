@@ -52,20 +52,24 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         has not been paired already."""
         if models.Result.objects.filter(round=pk).exists():
             return Response({'status': 'error', 'message': 'already pairedd'})
-        else:
-            rnd = models.TournamentRound.objects.get(pk=pk)
-            if rnd.tournament.participants.count() % 2 == 1:
-                # this is when we actually add the bye for the very first time
-                models.Participant.objects.create(name='Bye',rating=0, 
-                        tournament=rnd.tournament)
-            p = SwissPairing(rnd)
-            p.make_it()
-            results = p.save()
-            serializer = ResultSerializer(results, many=True)
-            rnd.paired = True
-            rnd.save()
-            return Response({'status': 'ok', 
-                'results': serializer.data})
+
+        rnd = models.TournamentRound.objects.get(pk=pk)
+        count = rnd.tournament.participants.count()
+        if count < 2:
+            return Response({'status': 'error',
+                 'message': 'A tournament needs at least two player'})
+        if count % 2 == 1:
+            # this is when we actually add the bye for the very first time
+            models.Participant.objects.create(name='Bye',rating=0, 
+                    tournament=rnd.tournament)
+        p = SwissPairing(rnd)
+        p.make_it()
+        results = p.save()
+        serializer = ResultSerializer(results, many=True)
+        rnd.paired = True
+        rnd.save()
+        return Response({'status': 'ok', 
+            'results': serializer.data})
 
     @action(detail=True, methods=['post'])
     def unpair(self, request, tid, pk=None):

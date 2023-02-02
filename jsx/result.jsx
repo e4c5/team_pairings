@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useTournament, useTournamentDispatch } from './context.jsx';
   
 export default function Result({r, index, editScore}) {
-    const editable = document.getElementById('editable')
+
     const dispatch = useTournamentDispatch()
     const tournament = useTournament()
+    const editable = document.getElementById('hh') && document.getElementById('hh').value;
 
     function resultIn() {
-        if(editable) {
-
-        }
         return (
             <tr>
                 <td >{ r.p1.name }</td>
@@ -19,9 +17,11 @@ export default function Result({r, index, editScore}) {
                 <td className="text-right">{ tournament.team_size - r.games_won } - { r.games_won }</td>
                 <td className="text-right">{ r.score2 }</td>
                 <td className="text-right">
-                    <button className='btn btn-primary' onClick={e => editScore(e, index)}>
-                        <i className='bi-pencil' ></i>
-                    </button>
+                    { editable &&
+                        <button className='btn btn-primary' onClick={e => editScore(e, index)}>
+                            <i className='bi-pencil' ></i>
+                        </button>
+                    }
                 </td>
             </tr>
         )
