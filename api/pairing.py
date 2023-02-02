@@ -32,6 +32,7 @@ class Pairing:
         self.players = []
         self.rnd = rnd
         self.next_round = rnd.round_no
+        self.bye = None
 
         qs = Result.objects.filter(round__round_no__lt=rnd.round_no
                                              ).select_related('p1', 'p2', 'round')
@@ -40,8 +41,6 @@ class Pairing:
                                                               ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
         for pl in players:
             opponents = []
-            spread = 0
-            wins = 0
 
             games = qs.filter(Q(p1=pl) | Q(p2=pl)).order_by('-round')
             opponents = []
@@ -51,8 +50,7 @@ class Pairing:
                 else:
                     opponents.append(game.p1)
 
-            self.players.append(
-                {'name': pl.name,
+            record = {'name': pl.name,
                     'spread': pl.spread,
                     'rating': pl.rating,
                     'player': pl,
@@ -60,7 +58,31 @@ class Pairing:
                     'score': pl.round_wins,
                     'opponents': opponents
                     }
-            )
+            self.players.append(record)
+
+            if pl.name == 'Bye':
+                self.by = record
+
+    def assign_bye(self):
+        """Assign the bye to the lowest rank player"""
+        if not self.bye:
+            return
+        
+        players = self.order_players(self.players)
+
+        for player in reversed(players):
+            if 'Bye' not in self.opponents:
+                if player.name != 'Bye':
+                    self.pairs.append([self.player, self.bye])
+                    self.players.remove(self.player)
+                    self.players.remove(self.by)
+                    return
+        
+    def order_players(self, players):
+        sorted_players = sorted(players, reverse=True,
+                                key=lambda player: (player['score'], player['game_wins'], player['spread']))
+        return sorted_players
+
 
     def save(self):
         results = []

@@ -29,6 +29,7 @@ class SwissPairing(Pairing):
             brackets[player['score']].append(player)
         self.brackets = brackets
 
+
     def make_it(self):
         if len(self.players) == 0:
             raise ValueError('No players')
@@ -53,10 +54,6 @@ class SwissPairing(Pairing):
 
         return sorted(pairs, reverse=True, key=lambda x: (x[0]['score'], x[0]['spread']))
 
-    def order_players(self, players):
-        sorted_players = sorted(players, reverse=True,
-                                key=lambda player: (player['score'], player['game_wins'], player['spread']))
-        return sorted_players
 
     def pair_first_round(self):
         sorted_players = self.order_players(self.players)

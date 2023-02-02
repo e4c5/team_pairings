@@ -84,7 +84,7 @@ export function Participants(props) {
               >
                 <td className="text-left">{ idx + 1}</td>
                 <td component="th" scope="row">
-                    <Link to={ `${row.id}` } component={RouterLink}>{row.name}</Link>
+                    <Link to={ `${row.id}` }>{row.name}</Link>
                 </td>
                 <td className="text-right">{row.rating}</td>
                 <td className="text-right">{row.round_wins}</td>

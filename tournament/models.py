@@ -125,7 +125,6 @@ class Participant(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
 
     spread = models.IntegerField(default=0, null=True)
-    position = models.IntegerField(default=0, null=True)
     offed = models.IntegerField(default=0, null=True)
     rating = models.IntegerField(default=0, null=True)
 
