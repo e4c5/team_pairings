@@ -12,13 +12,16 @@ def add_participants(tournament, use_faker=False, count=0, filename=""):
         count: number of entries to add
         filename: the name of the file to read data from, whill be used
             only when faker is false
+
+    when using faker the ratings will always increase from the first added
+    record to the last
     """
     if use_faker:
         fake = Faker()
-        for _ in range(count):
+        for i in range(count):
             Participant.objects.create(tournament=tournament, 
-                name=fake.city() + " Scrabble Club",
-                rating=fake.random_int(0, 1000))
+                name = fake.city() + " Scrabble Club",
+                rating = i * 10 + 1)
 
     else:
         with open(filename) as fp:
@@ -73,6 +76,6 @@ def truncate_rounds(tournament, number):
         round.results.all().delete()
         round.paired = 0;
         round.save()
-        
+
     for p in tournament.participants.all():
         update_standing(p.id)

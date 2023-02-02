@@ -1,6 +1,8 @@
 # this code was imported from the react_pairing project
 # it has been cut and chopped, some features that may seem to be missing
-# might actually be there
+# might actually be there.
+# The earlier attempt mentioned above borrows this code form
+# https://github.com/gnomeby/swiss-system-chess-tournament
 
 import sys
 import os
@@ -8,25 +10,35 @@ import os
 from tournament.models import Participant, Result, TournamentRound
 from django.db.models import Q
 
+
 class Pairing:
-    ''' Pairing from tournament results stored in a Database '''
+    ''' Pairing from tournament results stored in a Database.
+
+    Important notes regarding the treatment of the bye:
+    When the TD enters his list of participants he will not type an entry for 
+    the bye. Instead when the tournament is being paired this class will 
+    count the number of active players and enable disable the bye 
+    accordingly.
+
+    The participant labelld as the bye does not have a rank or position. 
+    '''
 
     def __init__(self, rnd):
-        ''' Creates swiss pairing for the given round
+        ''' Creates pairing for the given round
+        Subclasses will implement Swiss and RR etc.
         Arguments: 
             rnd: a TournamentRound instance.
-        Throws: value error if this round cannot be paired
+        Throws: value error if this round cannot be paired 
+
+        Before pairing we need to make sure that the previous round has 
+        been completed. When lagged draw is used that may not be the round
+        immidiately before the current round.
+
+        If the previous round is zero, that means we pair based on ratings
+
+        When the previous round is non zero all active players need to have
+        a score before this round can be paired.
         '''
-
-        if rnd.based_on > 0:
-            prev = TournamentRound.objects.filter(tournament=rnd.tournament
-                    ).get(round_no=rnd.based_on)
-            results = Result.objects.filter(round=prev)
-            if results.count() < Participant.objects.filter(tournament=rnd.tournament).count() / 2:
-                raise ValueError(f"round {rnd.based_on} needs to be completed")
-            if results.filter(score1=None).exists():
-                raise ValueError(f"round {rnd.based_on} needs to be completed")
-
         self.pairs = []
         self.tournament = rnd.tournament
         self.players = []
@@ -34,11 +46,26 @@ class Pairing:
         self.next_round = rnd.round_no
         self.bye = None
 
-        qs = Result.objects.filter(round__round_no__lt=rnd.round_no
-                                             ).select_related('p1', 'p2', 'round')
+        players = Participant.objects.select_related(
+            ).filter(tournament_id=self.tournament
+            ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
 
-        players = Participant.objects.select_related().filter(tournament_id=self.tournament
-                                                              ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
+        if rnd.based_on > 0:
+            # this round has a predecessor that needs to be completed.
+            prev = TournamentRound.objects.filter(tournament=rnd.tournament
+                                                  ).get(round_no=rnd.based_on)
+            results = Result.objects.filter(round=prev)
+            if results.count() < players.count() / 2:
+                raise ValueError(f"round {rnd.based_on} needs to be completed")
+
+            if results.filter(score1=None).exists():
+                raise ValueError(f"round {rnd.based_on} needs to be completed")
+
+        # fetch all previous round results so that we know of all the 
+        # old pairings
+        qs = Result.objects.filter(round__round_no__lt=rnd.round_no
+                                   ).select_related('p1', 'p2', 'round')
+
         for pl in players:
             opponents = []
 
@@ -51,44 +78,59 @@ class Pairing:
                     opponents.append(game.p1)
 
             record = {'name': pl.name,
-                    'spread': pl.spread,
-                    'rating': pl.rating,
-                    'player': pl,
-                    'game_wins': pl.game_wins,
-                    'score': pl.round_wins,
-                    'opponents': opponents
-                    }
+                      'spread': pl.spread,
+                      'rating': pl.rating,
+                      'player': pl,
+                      'game_wins': pl.game_wins,
+                      'score': pl.round_wins,
+                      'opponents': opponents
+                      }
             self.players.append(record)
 
             if pl.name == 'Bye':
-                self.by = record
+                self.bye = record
+
+
+        if len(self.players) % 2 == 1:
+            if not self.bye:
+                # this tournament does not already have a configured by lets
+                # create one.
+                Participant.objects.create(
+                    name='Bye', rating=0
+                )
+                self.bye = {'name': 'Bye',}
+                self.players.append(self.bye)
+            else:
+                # we have a bye but the number is odd, that means a withdrawal
+                self.players.remove(self.bye)
 
     def assign_bye(self):
         """Assign the bye to the lowest rank player"""
         if not self.bye:
             return
-        
+
         players = self.order_players(self.players)
 
         for player in reversed(players):
-            if 'Bye' not in self.opponents:
-                if player.name != 'Bye':
-                    self.pairs.append([self.player, self.bye])
-                    self.players.remove(self.player)
-                    self.players.remove(self.by)
+            if 'Bye' not in player['opponents']:
+                if player['name'] != 'Bye':
+                    self.pairs.append([player, self.bye])
+                    self.players.remove(player)
+                    self.players.remove(self.bye)
                     return
-        
+
     def order_players(self, players):
         sorted_players = sorted(players, reverse=True,
                                 key=lambda player: (player['score'], player['game_wins'], player['spread']))
         return sorted_players
 
-
     def save(self):
         results = []
         for pair in self.pairs:
             r = Result.objects.create(round=self.rnd,
-                                  p1=pair[0]['player'], p2=pair[1]['player'])
+                                      p1=pair[0]['player'], p2=pair[1]['player'])
             results.append(r)
 
+        self.rnd.paired = True
+        self.rnd.save()
         return results

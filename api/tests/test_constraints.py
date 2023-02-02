@@ -30,7 +30,7 @@ class BasicTests(APITransactionTestCase, Helper):
         
     def test_participant(self):
         p1 = Participant(name='aa', rating=11, tournament=self.t1)
-        p2 = Participant(name='aa', rating=11, tournament=self.t1)
+        p2 = Participant(name='bb', rating=11, tournament=self.t1)
         p1.save()
         p2.save()
 

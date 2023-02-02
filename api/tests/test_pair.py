@@ -9,8 +9,9 @@ from tournament.models import Tournament, Participant, TournamentRound, Director
 from tournament.tools import add_participants
 
 from api import swiss
+from api.tests.helper import Helper
 
-class BasicTests(APITestCase):
+class BasicTests(APITestCase, Helper):
     """Testing the various read and write permissions"""
     
     def setUp(self) -> None:
@@ -23,21 +24,7 @@ class BasicTests(APITestCase):
         user. However neither should be able to edit/delete/create stuff in 
         the other director's event.
         """
-        self.t1 = Tournament.objects.create(name='Sri Lankan open', start_date='2023-02-25',
-            rated=False, team_size=5, entry_mode='T', num_rounds=5)
-
-        self.t2 = Tournament.objects.create(name='Indian Open', start_date='2023-02-25',
-            rated=False, team_size=5, entry_mode='P', num_rounds=5)
-
-        user = User.objects.create(username='sri')
-        user.set_password('12345')
-        user.save()
-        Director.objects.create(tournament=self.t1, user=user)
-
-        user = User.objects.create(username='ashok')
-        user.set_password('12345')
-        user.save()
-        Director.objects.create(tournament=self.t2, user=user)
+        self.create_tournaments();
 
 
     def test_unauth(self):
@@ -90,6 +77,88 @@ class BasicTests(APITestCase):
         self.assertEqual(res[0].p1.id, p1.id)
         self.assertEqual(res[0].p2.id, bye.id)
 
+
+    def test_switch_off_odd(self):
+        """What happens to the bye when a player is switched off?
+        If the tournament previously had an odd number (excluding the bye) 
+        then the bye is take off. Similiar if the number of humans was even
+        the by has to be added.
+        """
+        self.add_players(self.t1, 11)
+        self.add_players(self.t1, 12)
+
+        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=1))
+        sp.make_it()
+        sp.save()
+
+        # the number increases by one because the bye gets added
+        self.assertEquals(12, Participant.objects.filter(tournament=self.t1).count())
+        
+        # the bye should have been assignmed to the player with the lowest rating
+        lowest = Participant.objects.filter(
+            tournament=self.t1
+        ).order_by('rating')[0]
+        self.assertEqual('Bye', 
+            Result.objects.filter(tournament=self.t1).get(p1=lowest).p2.name
+        )
+
+        sp = swiss.SwissPairing(self.t2.rounds.get(round_no=2))
+        sp.make_it()
+        sp.save()
+
+        # No need of a by at this stage
+        self.assertEquals(12, Participant.objects.filter(tournament=self.t2).count())
+
+        # now we fill up with results.
+        self.add_results(self.t1)
+        self.add_results(self.t2)
+
+        # now switch off one of the players
+        p = Participant.objects.filter(tournament=self.t1)[3]
+        p.offed = True
+        p.save()
+
+        sp = swiss.SwissPairing(self.t2.rounds.filter(round_no=1))
+        sp.make_it()
+        sp.save()
+
+
+    def test_switch_off_even(self):
+        """What happens to the bye when a player is switched off?
+        If the tournament previously an even number of players not counting
+        the bye, when we switch off one of the players the total number of
+        active players shoudld remain at 12 due to the bye being created/.
+        """
+        self.add_players(self.t1, 12)
+
+        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=1))
+        sp.make_it()
+        sp.save()
+
+        # now we fill up with results.
+        self.add_results(self.t1)
+
+        # now switch off one of the players
+        p = Participant.objects.filter(tournament=self.t1)[3]
+        p.offed = True
+        p.save()
+        self.assertEqual(11, Participant.objects.filter(offed=False).count())
+        self.assertEqual(1, Participant.objects.filter(offed=True))
+
+        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=2))
+        sp.make_it()
+        sp.save()
+
+        # now the number increases by one
+        self.assertEqual(12, Participant.objects.count(offed=False))
+
+        # the bye should have been assignmed to the player with the lowest pos
+        lowest = Participant.objects.filter(
+            tournament=self.t1
+        ).order_by('-round_wins','-game_wins', '-spread')[0]
+        self.assertEqual('Bye', 
+            Result.objects.filter(tournament=self.t1).get(p1=lowest).p2.name
+        )
 
     def test_two_player(self):
         add_participants(self.t1, True, 4)

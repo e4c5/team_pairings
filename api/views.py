@@ -33,7 +33,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     FROM (
                         select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc) as "pos", * 
                         from tournament_participant parties 
-                            where tournament_id = tt.id
+                            where tournament_id = tt.id and name != 'Bye'
                     ) parties
                 ) participants,
                 (select jsonb_agg(to_jsonb(rounds)) 

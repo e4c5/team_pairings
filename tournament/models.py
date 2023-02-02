@@ -129,6 +129,8 @@ class Participant(models.Model):
     rating = models.IntegerField(default=0, null=True)
 
     class Meta:
+        unique_together = ['name','tournament']
+
         constraints = [
             models.CheckConstraint(
                 check=models.Q(game_wins__gte=0),

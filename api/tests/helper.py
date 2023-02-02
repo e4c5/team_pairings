@@ -1,5 +1,8 @@
-from tournament.models import Tournament, Director
 from django.contrib.auth.models import User
+
+from tournament.models import Tournament, Director, Participant
+from tournament.tools import add_participants, random_results
+
 
 class Helper:
     def create_tournaments(self):
@@ -27,3 +30,11 @@ class Helper:
         user.set_password('12345')
         user.save()
         Director.objects.create(tournament=self.t2, user=user)
+
+
+    def add_players(self, tournament, count):
+        add_participants(tournament, use_faker=True, count=count)
+
+
+    def add_results(self, tournament):
+        random_results(tournament)

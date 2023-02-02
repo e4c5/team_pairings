@@ -37,6 +37,8 @@ class SwissPairing(Pairing):
         if len(self.players) % 2 == 1:
             raise ValueError('Odd number of players')
 
+        self.assign_bye()
+        
         if self.next_round == 1:
             self.pair_first_round()
         elif self.next_round % 2 == 0:
@@ -58,10 +60,6 @@ class SwissPairing(Pairing):
     def pair_first_round(self):
         sorted_players = self.order_players(self.players)
         S1count = len(self.players) // 2
-
-        if sorted_players[-1]['name'] == 'Bye':
-            self.pairs.append([sorted_players[-1], sorted_players[-2]])
-            S1count -= 1
 
         for index in range(S1count):
             self.pairs.append(
