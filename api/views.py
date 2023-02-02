@@ -120,6 +120,15 @@ class ParticipantViewSet(viewsets.ModelViewSet):
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ResultSerializer
+
+
+    def update(self, request, *args, **kwargs):
+        result = super().update(request, *args, **kwargs)
+        instance = models.Result.objects.select_related('p1','p2').get(pk=kwargs['pk'])
+        serializer = ParticipantSerializer([instance.p1, instance.p2], many=True)
+        result.data = serializer.data
+        return result
+
     def get_queryset(self):
         return models.Result.objects.filter(round_id = self.kwargs['rid'])
 

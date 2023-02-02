@@ -14,7 +14,6 @@ const editorState = {
 function reducer(state, action) {
     switch (action.type) {
         case "typed":
-            console.log({ ...state, name: action.name })
             return { ...state, name: action.name }
 
         case 'autoComplete':
@@ -41,7 +40,7 @@ function reducer(state, action) {
             return { ...state, score1: action.score1 }
 
         case 'score2':
-            return { ...state, score2: action.score1 }
+            return { ...state, score2: action.score2 }
 
         case 'replace':
             return { ...action.value }
@@ -52,7 +51,7 @@ function reducer(state, action) {
             }
 
         default:
-            throw('unrecognized action')
+            throw Error(`unrecognized action ${action.type} in reducer`)
     }
 }
 /**
@@ -71,7 +70,7 @@ export function Round(props) {
     const [round, setRound] = useState(null)
     const [results, setResults] = useState(null)
     const tournament = useTournament();
-
+    const tournamentDispatch = useTournamentDispatch()
 
     /**
      * This effect loads the current data for the round.
@@ -188,11 +187,6 @@ export function Round(props) {
      * @param {*} e 
      */
     function addScore(e) {
-        console.log(JSON.stringify({
-            score1: current.score1,
-            score2: current.score2, games_won: current.won, round: round.id
-        }))
-
         fetch(`/api/tournament/${tournament.id}/${round.id}/result/${current.resultId}/`, {
             method: 'PUT', 'credentials': 'same-origin',
             headers:
@@ -215,14 +209,21 @@ export function Round(props) {
                     break;
                 }
             }
-            dispatch({ action: 'reset' })
+            dispatch({ type: 'reset' })
             dispatch({
-                action: 'pending',
+                type: 'pending',
                 names: current.pending.filter(
                     name => name != current.p1.name && name != current.p2.name
                 )
             })
-            props.updateStandings(json)
+            tournamentDispatch({type: 'editParticipant',
+                    participant: json[0]
+                }
+            )
+            tournamentDispatch({type: 'editParticipant',
+                    participant: json[1]
+                }
+            )
         })
     }
 
@@ -292,6 +293,7 @@ export function Round(props) {
             type: 'replace',
             value: {
                 p1: result.p1, p2: result.p2,
+                name: result.p1.name, 
                 resultId: result.id, pending: [],
                 score1: result.score1,
                 score2: result.score2,
@@ -351,7 +353,7 @@ export function Round(props) {
                 <div className='col'>
                     <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
                         className='form-control'
-                        size='small' onChange={e => { console.log('changed') }} />
+                        size='small' onChange={e => {  }} />
                 </div>
                 <div className='col'>
                     <input value={current.lost} placeholder="Games won" disabled type='number'
@@ -363,7 +365,9 @@ export function Round(props) {
                         onChange={e => handleChange(e, 'score2')} />
                 </div>
                 <div className='col'>
-                    <button className='btn btn-primary' onClick={e => addScore()}>
+                    <button className='btn btn-primary' 
+                        disabled={ current.resultId == ''}
+                        onClick={e => addScore()}>
                         <i className='bi-plus' ></i>
                     </button>
                 </div>

@@ -64,21 +64,6 @@ export function Tournament(props) {
             })
     }
 
-    function updateStandings(result) {
-        const p = props.participants.map(team => {
-            if(team.id == result.first.id) {
-                return result.first
-            }
-            else if(team.id == result.second.id) {
-                return result.second
-            }
-            else {
-                return team
-            }
-        })
-        props.setParticipants(p)
-    }
-
     function addParticipant() {
         if(document.getElementById('hh') && document.getElementById('hh').value) {
             return (

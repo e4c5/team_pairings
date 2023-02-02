@@ -49,8 +49,6 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
 		const { activeSuggestion, filteredSuggestions } = state;
 
 		if (e.keyCode === 13) {
-            console.log('ENTER')
-
 			setState({...state, 
 				activeSuggestion: 0,
 				showSuggestions: false,
@@ -100,7 +98,7 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
             suggestionsListComponent = null;
         }
     }
-    console.log('AUTO,', value)
+    
     return (
             <React.Fragment>
                 <input 	type="text"	className='form-control'
