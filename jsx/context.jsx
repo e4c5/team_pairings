@@ -83,15 +83,15 @@ function tournamentReducer(state, action) {
 
             const round = action.round
             if(state.results === undefined) {
-                return {...state, results: [action.result]}
+                const results = []
+                for(let i = 0 ; i < state.num_rounds ; i++) {
+                    results.push([])
+                }
+                results[round] = action.result
+                return {...state, results: results}
             }
             const results = [...state.results]
-            if(round >= results.length) {
-                results.push(action.result)
-            }
-            else {
-                results[round] = action.result
-            }
+            results[round] = action.result
             return { ...state, results: results }
         }
 

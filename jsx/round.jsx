@@ -86,30 +86,22 @@ export function Round(props) {
             if (tournament) {
                 // round numbers start from 0 params.id is the round number
                 // not the round id.
-                const result = tournament.results 
+                const result = tournament.results
                     ? tournament.results[params.id - 1]
                     : undefined
 
-                if (result === undefined) {
+
+                if (result === undefined || result.length === 0) {
                     console.log('FETCHING RESULTS')
                     fetchResults(tournament.rounds[params.id - 1])
-                    setRound(tournament.rounds[params.id - 1])
                 }
                 else {
                     updatePending(result)
                 }
+                setRound(tournament.rounds[params.id - 1])
             }
+            
         }
-        else 
-        {
-            console.log('DOES THIS HAPPEN?')
-        }
-        // this section probably not needed.
-        // else {
-        //     if (results == null) {
-        //         fetchResults(setRound(tournament.rounds[params.id - 1]))
-        //     }
-        // }
     }, [tournament, round])
 
     /**
@@ -385,11 +377,13 @@ export function Round(props) {
             </div>
         )
     }
+    console.log('render', round?.round_no)
     if (round?.paired) {
-        const results = tournament.results ? tournament.results[round.round_no-1] : undefined
+        const results = tournament.results ? tournament.results[round.round_no - 1] : undefined
         return (
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
+                <h3>Results for round : {round.round_no}</h3>
                 {editor()}
                 <ResultList results={results} editScore={editScore} />
                 <div className='row'>
@@ -438,24 +432,26 @@ export function Round(props) {
                         }
                     </div>
                 </div>
-                <div>{error}</div>
+                <div className='row'>
+                    <div className='col'>{error}</div>
+                </div>
             </div>
         )
     }
 }
 
-export function Rounds(props) {
+export function Rounds() {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
-
+    
     return (
-        <div className='row mt-1'>
+        <div className='row mt-3'>
             <div className='col-sm-2'><h3>Rounds: </h3></div>
-            <div className='col-sm-10btn-group' aria-label="outlined primary button group">
+            <div className='col-sm-10 btn-group' aria-label="outlined primary button group">
                 {
                     tournament?.rounds?.map(r =>
                         <Link to={'round/' + r.round_no} key={r.round_no}>
-                            <button className='btn btn-primary'>{r.round_no}</button></Link>)
+                            <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
                 }
             </div>
         </div>
