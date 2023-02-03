@@ -32,7 +32,9 @@ export function useTournamentDispatch() {
 }
 
 function tournamentReducer(state, action) {
-    switch (action.type) {
+    // i keep typing this as action instead of type!! so ....
+    const type = action.type || action.action;
+    switch (type) {
         case 'addParticipant': {
             if (state.participants === null) {
                 return { ...state, participants: [action.participant] }
@@ -73,18 +75,24 @@ function tournamentReducer(state, action) {
             });
         }
 
-        case 'addResult': {
+        case 'updateResult': {
+            // updates the results section of the tournament.
+            // results are maintained as an array referenced by round number 
+            // but round numbers start from one. The caller needs to make sure
+            // that round numbers are adjusted to zero based.
+
+            const round = action.round
+            if(state.results === undefined) {
+                return {...state, results: [action.result]}
+            }
             const results = [...state.results]
-            return { ...state, results, results }
-        }
-        case 'editResult': {
-            const r = state.results.map(p => {
-                if (p.id == action.result.id) {
-                    return action.result
-                }
-                return p
-            })
-            return { ...state, results: r }
+            if(round >= results.length) {
+                results.push(action.result)
+            }
+            else {
+                results[round] = action.result
+            }
+            return { ...state, results: results }
         }
 
         case 'addRound': {

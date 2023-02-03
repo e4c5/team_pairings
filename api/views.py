@@ -101,25 +101,29 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         return models.TournamentRound.objects.filter(tournament_id = self.kwargs['tid'])
         
 
+def get_participants(tid):
+    ''''Retrieve all information about participant'''
+    query = """select to_json(f) from (
+                    select tp.*, 
+                        (select jsonb_agg(to_jsonb(tm)) from tournament_teammember tm
+                        where team_id = tp.id) members,
+                        (select jsonb_agg(to_jsonb(tr)) from tournament_result tr
+                        where p1_id = tp.id or p2_id = tp.id) results
+                    from tournament_participant tp where tp.id = %s
+                ) f	 """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [tid])
+        return cursor.fetchone()[0]
+
+
 class ParticipantViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ParticipantSerializer
 
     def retrieve(self, request, *args, **kwargs):
         ''''Retrieve all information about participant'''
-
-        query = """select to_json(f) from (
-                        select tp.*, 
-                            (select jsonb_agg(to_jsonb(tm)) from tournament_teammember tm
-                            where team_id = tp.id) members,
-                            (select jsonb_agg(to_jsonb(tr)) from tournament_result tr
-                            where p1_id = tp.id or p2_id = tp.id) results
-                        from tournament_participant tp where tp.id = %s
-                    ) f	 """
-
-        with connection.cursor() as cursor:
-            cursor.execute(query, [kwargs['pk']])
-            return Response( cursor.fetchone()[0])
+        return Response(get_participants(kwargs['pk']))
 
     def perform_create(self, serializer):
         serializer.save(tournament_id=self.kwargs['tid'])
@@ -145,9 +149,17 @@ class ResultViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         result = super().update(request, *args, **kwargs)
-        instance = models.Result.objects.select_related('p1','p2').get(pk=kwargs['pk'])
-        serializer = ParticipantSerializer([instance.p1, instance.p2], many=True)
-        result.data = serializer.data
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "chat",
+            {
+                "type": "chat.message",
+                "message": {"type": "participants",
+                    "tournament_id": kwargs['tid'],
+                    "body": get_participants(kwargs['tid'])}
+            },
+        )
+
         return result
 
     def get_queryset(self):

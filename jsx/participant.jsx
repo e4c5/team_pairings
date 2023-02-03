@@ -1,11 +1,10 @@
 //npx babel --watch jsx --out-dir tournament/static/js/ --presets react-app/dev 
 import React, { useState, useEffect } from 'react';
-
 import {
     useParams,
     Link,
 } from "react-router-dom";
-
+import { ResultList } from './result.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
@@ -126,10 +125,14 @@ export function Participant(props) {
         } 
     },[tournament, participant])
 
+    function editScore(e) {
+
+    }
     if(participant) {
         return (
             <div>
-                <h2>{participant.name}</h2>
+                <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
+                <h3>{participant.name}</h3>
                 <table className='table'>
                     <thead>
                         <tr>
@@ -151,6 +154,9 @@ export function Participant(props) {
                         )}
                     </tbody>
                 </table>
+
+                <ResultList results={participant.results} editScore={editScore} />
+
             </div>
         )
     }

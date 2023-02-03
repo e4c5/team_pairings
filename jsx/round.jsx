@@ -3,9 +3,12 @@ import { useParams, Link } from "react-router-dom";
 
 import getCookie from './cookie.js';
 import { useTournament, useTournamentDispatch } from './context.jsx';
-import Result from './result.jsx';
+import { ResultList } from './result.jsx';
 import { Autocomplete } from './autocomplete.jsx';
 
+/**
+ * Initial value for the result entry form
+ */
 const editorState = {
     name: '', p1: {}, p2: {}, won: '', lost: '', pending: [],
     score1: '', score2: '',
@@ -17,9 +20,11 @@ function reducer(state, action) {
             return { ...state, name: action.name }
 
         case 'autoComplete':
-            return { ...state, p1: action.p1, p2: action.p2,
-                     resultId: action.resultId, 
-                     name: action.name }
+            return {
+                ...state, p1: action.p1, p2: action.p2,
+                resultId: action.resultId,
+                name: action.name
+            }
 
         case 'p1':
             return { ...state, p1: action.p1 }
@@ -66,9 +71,9 @@ function reducer(state, action) {
 export function Round(props) {
     const params = useParams()
     const [error, setError] = useState('')
-    const [current, dispatch] = useReducer(reducer,  editorState )
+    const [current, dispatch] = useReducer(reducer, editorState)
     const [round, setRound] = useState(null)
-    const [results, setResults] = useState(null)
+
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
     const editable = document.getElementById('hh') && document.getElementById('hh').value;
@@ -79,16 +84,32 @@ export function Round(props) {
     useEffect(() => {
         if (round == null || round.round_no != params.id) {
             if (tournament) {
-                // round numbers start from 0
-                fetchResults(tournament.rounds[params.id - 1])
-                setRound(tournament.rounds[params.id - 1])
+                // round numbers start from 0 params.id is the round number
+                // not the round id.
+                const result = tournament.results 
+                    ? tournament.results[params.id - 1]
+                    : undefined
+
+                if (result === undefined) {
+                    console.log('FETCHING RESULTS')
+                    fetchResults(tournament.rounds[params.id - 1])
+                    setRound(tournament.rounds[params.id - 1])
+                }
+                else {
+                    updatePending(result)
+                }
             }
         }
-        else {
-            if (results == null) {
-                fetchResults(setRound(tournament.rounds[params.id - 1]))
-            }
+        else 
+        {
+            console.log('DOES THIS HAPPEN?')
         }
+        // this section probably not needed.
+        // else {
+        //     if (results == null) {
+        //         fetchResults(setRound(tournament.rounds[params.id - 1]))
+        //     }
+        // }
     }, [tournament, round])
 
     /**
@@ -102,10 +123,14 @@ export function Round(props) {
         if (!round) {
             return
         }
-        fetch(`/api/tournament/${tournament.id}/${round.id}/result/`).then(resp => resp.json()
+        fetch(
+            `/api/tournament/${tournament.id}/${round.id}/result/`
+        ).then(resp => resp.json()
         ).then(json => {
-            setResults(json)
-            updatePendig(json)
+            tournamentDispatch(
+                { type: 'updateResult', round: round.round_no - 1, result: json }
+            )
+            updatePending(json)
         })
     }
 
@@ -113,7 +138,7 @@ export function Round(props) {
      * Updates the list of teams for whom we do not have a result yet
      * @param {*} json 
      */
-    function updatePendig(json) {
+    function updatePending(json) {
         const names = []
         json.forEach(e => {
             if (e.score1 || e.score2) {
@@ -146,8 +171,10 @@ export function Round(props) {
             }).then(resp => resp.json()).then(json => {
                 if (json.status === "ok") {
                     setRound({ ...round, paired: true })
-                    setResults(json.results)
-                    updatePendig(json.results)
+                    tournamentDispatch(
+                        { type: 'updateResult', round: round.round_no - 1, result: json }
+                    )
+                    updatePending(json.results)
                 }
                 else {
                     setError(json.message)
@@ -217,13 +244,15 @@ export function Round(props) {
                     name => name != current.p1.name && name != current.p2.name
                 )
             })
-            tournamentDispatch({type: 'editParticipant',
-                    participant: json[0]
-                }
+            tournamentDispatch({
+                type: 'editParticipant',
+                participant: json[0]
+            }
             )
-            tournamentDispatch({type: 'editParticipant',
-                    participant: json[1]
-                }
+            tournamentDispatch({
+                type: 'editParticipant',
+                participant: json[1]
+            }
             )
         })
     }
@@ -265,16 +294,16 @@ export function Round(props) {
                     matched = true;
                 }
             })
-            if(! matched) {
-                if( current?.p1?.name) {
+            if (!matched) {
+                if (current?.p1?.name) {
                     dispatch({
-                        type: 'autoComplete', name: name, 
+                        type: 'autoComplete', name: name,
                         p1: {}, p2: {}, resultId: null
                     })
                 }
-                
+
                 else {
-                    dispatch({type: "typed", name: name})
+                    dispatch({ type: "typed", name: name })
                 }
             }
         }
@@ -294,7 +323,7 @@ export function Round(props) {
             type: 'replace',
             value: {
                 p1: result.p1, p2: result.p2,
-                name: result.p1.name, 
+                name: result.p1.name,
                 resultId: result.id, pending: [],
                 score1: result.score1,
                 score2: result.score2,
@@ -308,30 +337,9 @@ export function Round(props) {
         return name.toLowerCase().indexOf(txt) > -1
     }
 
-    function table() {
-        return (
-            <table className='table table-striped table-dark table-bordered'>
-                <thead>
-                    <tr>
-                        <td align="left">Team 1</td>
-                        <td align="right">Wins</td>
-                        <td align="right">Total Score</td>
-                        <td align="left">Team 2</td>
-                        <td align="right">Wins</td>
-                        <td align="right">Total Score</td>
-                        <td align="right"></td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {results.map((r, idx) => <Result key={r.id} r={r}
-                        index={idx} editScore={editScore} />)}
-                </tbody>
-            </table>
-        )
-    }
 
     function editor() {
-        if(! editable) {
+        if (!editable) {
             return <></>
         }
         return (
@@ -356,7 +364,7 @@ export function Round(props) {
                 <div className='col'>
                     <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
                         className='form-control'
-                        size='small' onChange={e => {  }} />
+                        size='small' onChange={e => { }} />
                 </div>
                 <div className='col'>
                     <input value={current.lost} placeholder="Games won" disabled type='number'
@@ -368,8 +376,8 @@ export function Round(props) {
                         onChange={e => handleChange(e, 'score2')} />
                 </div>
                 <div className='col'>
-                    <button className='btn btn-primary' 
-                        disabled={ current.resultId == ''}
+                    <button className='btn btn-primary'
+                        disabled={current.resultId == ''}
                         onClick={e => addScore()}>
                         <i className='bi-plus' ></i>
                     </button>
@@ -378,14 +386,17 @@ export function Round(props) {
         )
     }
     if (round?.paired) {
+        const results = tournament.results ? tournament.results[round.round_no-1] : undefined
         return (
             <div>
-                <h2><Link to="{tournament.slug}">{tournament?.name}</Link></h2>
+                <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
                 {editor()}
-                {results && results.length && table()}
+                <ResultList results={results} editScore={editScore} />
                 <div className='row'>
                     <div className='col'>
-                        <button className='btn btn-warning' onClick={unpair}>Unpair</button>
+                        {editable &&
+                            <button className='btn btn-warning' onClick={unpair}>Unpair</button>
+                        }
                     </div>
                 </div>
                 <div>{error}</div>
@@ -399,8 +410,8 @@ export function Round(props) {
                 This is a round that has not yet been paired
                 <table className='table'>
                     <tbody>
-                    {   tournament?.participants?.map((row, idx) =>  {
-                            if(row.name != 'Bye') {
+                        {tournament?.participants?.map((row, idx) => {
+                            if (row.name != 'Bye') {
                                 return (
                                     <tr
                                         key={row.id}
@@ -413,16 +424,18 @@ export function Round(props) {
                                         <td>Unpaired</td>
                                     </tr>)
                             }
-                            else{
+                            else {
                                 return null
                             }
                         })
-                    }
+                        }
                     </tbody>
                 </table>
                 <div className='row'>
                     <div className='col'>
-                        <button className='btn btn-warning' onClick={pair}>Pair</button>
+                        {editable &&
+                            <button className='btn btn-warning' onClick={pair}>Pair</button>
+                        }
                     </div>
                 </div>
                 <div>{error}</div>
@@ -436,9 +449,9 @@ export function Rounds(props) {
     const dispatch = useTournamentDispatch()
 
     return (
-        <div className='row'>
-            <div className='col'><h3>Rounds: </h3></div>
-            <div className='btn-group' aria-label="outlined primary button group">
+        <div className='row mt-1'>
+            <div className='col-sm-2'><h3>Rounds: </h3></div>
+            <div className='col-sm-10btn-group' aria-label="outlined primary button group">
                 {
                     tournament?.rounds?.map(r =>
                         <Link to={'round/' + r.round_no} key={r.round_no}>
