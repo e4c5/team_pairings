@@ -205,15 +205,6 @@ class BoardResult(models.Model):
         unique_together = ['round','team1','team2','board']
 
 
-@receiver(post_save, sender=Participant)
-def add_members(sender, instance, created, **kwargs):
-    """When a participant is added, update the team members"""
-    if created:
-        for i in range(instance.tournament.team_size):
-            TeamMember.objects.create(
-                team=instance, board=i+1, name="", wins=0, spread=0
-            )
-
 @receiver(pre_save, sender=Result)
 def result_presave(sender, instance, **kwargs):
     """Before saving a round result validate p1 and p2
@@ -241,12 +232,16 @@ def update_board_result(sender, instance, created, **kwargs):
     player will be updated accordingly.
     """
     if instance.score1 or instance.score2:
-        player1 = TeamMember.objects.filter(
-            Q(team=instance.team1) & Q(board=instance.board)
-        )
-        player2 = TeamMember.objects.filter(
-            Q(team=instance.team2) & Q(board=instance.board)
-        )
+        try:
+            player1 = TeamMember.objects.get(
+                Q(team=instance.team1) & Q(board=instance.board)
+            )
+            player2 = TeamMember.objects.get(
+                Q(team=instance.team2) & Q(board=instance.board)
+            )
+        except TeamMember.DoesNotExist:
+            player1 = None
+            player2 = None
 
         r = Result.objects.get(
             (Q(p1=instance.team1) & Q(p2=instance.team2)) | 
@@ -259,20 +254,22 @@ def update_board_result(sender, instance, created, **kwargs):
             r.score2 = 0
         if instance.score1 > instance.score2:
             r.games_won +=1            
-            player1.wins += 1
+            if player1:
+                player1.wins += 1
         elif instance.score1 == instance.score2:
             r.games_won += 0.5         
-            player2.wins +=1
+            if player2:
+                player2.wins +=1
 
         r.score1 += instance.score1
         r.score2 += instance.score2
-        
-        player1.spread += (instance.score1 - instance.score2)
-        player2.spread -= (instance.score1 - instance.score2)
-
         r.save()
-        player1.save()
-        player2.save()
+
+        if player1 and player2:
+            player1.spread += (instance.score1 - instance.score2)
+            player2.spread -= (instance.score1 - instance.score2)
+            player1.save()
+            player2.save()
         
 
 @receiver(post_save, sender=Result)

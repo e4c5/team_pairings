@@ -38,15 +38,9 @@ def add_team_members(tournament):
     fake = Faker()
 
     for participant in tournament.participants.all():
-        if participant.team_members.count() == tournament.team_size:
-            for tm in participant.team_members.all():
-                if tm.name == '':
-                    tm.name = fake.name()
-                    tm.save()
-        else:                    
-            for i in range(tournament.team_size):
-                TeamMember.objects.create(team=participant, board=i+1,
-                    name=fake.name(), wins=0, spread=0)
+        for i in range(tournament.team_size):
+            TeamMember.objects.create(team=participant, board=i+1,
+                name=fake.name(), wins=0, spread=0)
 
 
 def random_results(tournament):
