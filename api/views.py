@@ -36,8 +36,10 @@ class TournamentViewSet(viewsets.ModelViewSet):
                             where tournament_id = tt.id and name != 'Bye'
                     ) parties
                 ) participants,
-                (select jsonb_agg(to_jsonb(rounds)) 
-                    from tournament_tournamentround rounds where tournament_id = tt.id
+                (select jsonb_agg(to_jsonb(r)) FROM (
+                    SELECT * from tournament_tournamentround rounds 
+                        where tournament_id = tt.id order by round_no
+                    ) r
                 ) rounds
             from tournament_tournament tt where id = %s 	   
         ) f """
@@ -50,6 +52,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
 class TournamentRoundViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = TournamentRoundSerializer
+
 
     @action(detail=True, methods=['post'])
     def pair(self, request, tid, pk=None):
@@ -64,10 +67,6 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         if count < 2:
             return Response({'status': 'error',
                  'message': 'A tournament needs at least two player'})
-        if count % 2 == 1:
-            # this is when we actually add the bye for the very first time
-            models.Participant.objects.create(name='Bye',rating=0, 
-                    tournament=rnd.tournament)
         p = SwissPairing(rnd)
         p.make_it()
         results = p.save()
@@ -76,6 +75,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         rnd.save()
         return Response({'status': 'ok', 
             'results': serializer.data})
+
 
     @action(detail=True, methods=['post'])
     def unpair(self, request, tid, pk=None):

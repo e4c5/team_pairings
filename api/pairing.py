@@ -55,7 +55,7 @@ class Pairing:
             prev = TournamentRound.objects.filter(tournament=rnd.tournament
                                                   ).get(round_no=rnd.based_on)
             results = Result.objects.filter(round=prev)
-            if results.count() < players.count() / 2:
+            if results.count() < players.count() // 2:
                 raise ValueError(f"round {rnd.based_on} needs to be completed")
 
             if results.filter(score1=None).exists():

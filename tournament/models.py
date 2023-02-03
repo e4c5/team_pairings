@@ -1,5 +1,6 @@
 import re
 from django.db import models, connection
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.db.models.signals import post_save, pre_save
@@ -203,8 +204,25 @@ class BoardResult(models.Model):
     class Meta:
         unique_together = ['round','team1','team2','board']
 
+
+@receiver(post_save, sender=Participant)
+def add_members(sender, instance, created, **kwargs):
+    """When a participant is added, update the team members"""
+    if created:
+        for i in range(instance.tournament.team_size):
+            TeamMember.objects.create(
+                team=instance, board=i+1, name="", wins=0, spread=0
+            )
+
 @receiver(pre_save, sender=Result)
 def result_presave(sender, instance, **kwargs):
+    """Before saving a round result validate p1 and p2
+
+    this can't be done in a constraint but  trigger can be used. The constrain
+    we are trying to enforce is that resutls are always saved with the lower
+    participant id taking up p1 and the higher one taking up p2
+    """
+
     if instance.p1 and instance.p1.id > instance.p2.id:
         instance.p1, instance.p2 = instance.p2, instance.p1 
         if instance.games_won:
@@ -212,9 +230,54 @@ def result_presave(sender, instance, **kwargs):
             instance.games_won = instance.round.tournament.num_rounds - instance.games_won
 
 
+@receiver(post_save, sender=BoardResult)
+def update_board_result(sender, instance, created, **kwargs):
+    """Update a team result when a board result is entered.
+    
+    This is used for tournaments where we keep score of individual players
+    rather than add the total resutl to the team
+
+    This signal ensures that the total result for both the team and the 
+    player will be updated accordingly.
+    """
+    if instance.score1 or instance.score2:
+        player1 = TeamMember.objects.filter(
+            Q(team=instance.team1) & Q(board=instance.board)
+        )
+        player2 = TeamMember.objects.filter(
+            Q(team=instance.team2) & Q(board=instance.board)
+        )
+
+        r = Result.objects.get(
+            (Q(p1=instance.team1) & Q(p2=instance.team2)) | 
+            (Q(p2=instance.team1) & Q(p1=instance.team2))
+        )
+
+        if r.games_won is None:
+            r.games_won = 0
+            r.score1 = 0
+            r.score2 = 0
+        if instance.score1 > instance.score2:
+            r.games_won +=1            
+            player1.wins += 1
+        elif instance.score1 == instance.score2:
+            r.games_won += 0.5         
+            player2.wins +=1
+
+        r.score1 += instance.score1
+        r.score2 += instance.score2
+        
+        player1.spread += (instance.score1 - instance.score2)
+        player2.spread -= (instance.score1 - instance.score2)
+
+        r.save()
+        player1.save()
+        player2.save()
+        
 
 @receiver(post_save, sender=Result)
 def update_result(sender, instance, created, **kwargs):
+    """When a result instance is saved the standings need to update"""
     if not created:
         if instance.score1 or instance.score2:
             update_standing(instance.p1_id)
@@ -222,6 +285,7 @@ def update_result(sender, instance, created, **kwargs):
 
 
 def update_standing(pid):
+    """Execute the standing update query."""
     q = """
         update tournament_participant set played = a.games + b.games,
             game_wins = a.games_won + b.games_won, 

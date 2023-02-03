@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 
 import {
     useParams,
-    Link as RouterLink,
+    Link,
 } from "react-router-dom";
 
-import { Link, Switch } from '@mui/material';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
@@ -141,7 +140,7 @@ export function Participant(props) {
                         </tr>
                     </thead>
                     <tbody>
-                        { participant?.members.map(p => (
+                        { participant?.members?.map(p => (
                             <tr key={p.id}>
                                 <td>{p.board}</td>
                                 <td>{p.name}</td>
