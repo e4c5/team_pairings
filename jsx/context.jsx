@@ -2,13 +2,19 @@ import React, { createContext, useContext, useReducer } from 'react';
 
 const TournamentContext = createContext(null)
 const TournamentDispatchContext = createContext(null)
+const ws = new WebSocket("ws://localhost:8000/ws/")
+ws.onMessage = function(e) {
+    console.log(e.data)
+}
 
 export function TournamentProvider({ children }) {
     const [tournament, dispatch] = useReducer(
         tournamentReducer,
         null
     );
-
+    
+    
+    
     return (
         <TournamentContext.Provider value={tournament}>
             <TournamentDispatchContext.Provider value={dispatch}>
