@@ -30,6 +30,23 @@ export default function App() {
     const dispatch = useTournamentDispatch();
     const navigate = useNavigate()
 
+    const [ws, setWs] = useState()
+
+    useEffect(() => {
+        console.log('Create socket')
+        const ws = new WebSocket("ws://localhost:8000/ws/")
+        ws.onmessage = function (e) {
+            const obj = JSON.parse(e.data)
+            switch(obj.type) {
+                case "participant":
+                    dispatch(
+                        {type: 'editParticipant', participant: obj.body }
+                    )
+            }
+        }
+        setWs(ws)
+    }, [])
+
     function fetchTournaments() {
         fetch(`/api/tournament/`).then(resp=>resp.json()).then(json=>{
             setTournaments(json)

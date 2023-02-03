@@ -27,15 +27,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
     serializer_class = TournamentSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "chat",
-            {
-                "type": "fans.message",
-                "text": "Hello world",
-            },
-        )
-
         # funnily enough if you use to_jsonb in the outermost query below
         # psycopg2 gives you a string instead of a dict
         query = """select to_json(f) from (
@@ -132,6 +123,15 @@ class ParticipantViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(tournament_id=self.kwargs['tid'])
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "chat",
+            {
+                "type": "chat.message",
+                "message": {"type": "participant", "body": serializer.data}
+            },
+        )
+
 
     def get_queryset(self):
         return models.Participant.objects.filter(
