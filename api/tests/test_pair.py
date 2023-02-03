@@ -1,6 +1,7 @@
 import csv
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -85,9 +86,8 @@ class BasicTests(APITestCase, Helper):
         the by has to be added.
         """
         self.add_players(self.t1, 11)
-        self.add_players(self.t1, 12)
-
-        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=1))
+        rnd = self.t1.rounds.get(round_no=1)
+        sp = swiss.SwissPairing(rnd)
         sp.make_it()
         sp.save()
 
@@ -99,28 +99,39 @@ class BasicTests(APITestCase, Helper):
             tournament=self.t1
         ).order_by('rating')[0]
         self.assertEqual('Bye', 
-            Result.objects.filter(tournament=self.t1).get(p1=lowest).p2.name
+            Result.objects.filter(round=rnd).get(p2=lowest).p2.name
         )
 
-        sp = swiss.SwissPairing(self.t2.rounds.get(round_no=2))
+        # need results
+        self.assertRaises(ValueError, swiss.SwissPairing, self.t1.rounds.get(round_no=2))
+        
+        self.add_results(self.t1)
+
+        # should generate valid pairing for round two 
+        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=2))
         sp.make_it()
         sp.save()
 
         # No need of a by at this stage
-        self.assertEquals(12, Participant.objects.filter(tournament=self.t2).count())
+        self.assertEquals(12, Participant.objects.filter(tournament=self.t1).count())
 
         # now we fill up with results.
+        
         self.add_results(self.t1)
-        self.add_results(self.t2)
 
         # now switch off one of the players
         p = Participant.objects.filter(tournament=self.t1)[3]
         p.offed = True
         p.save()
 
-        sp = swiss.SwissPairing(self.t2.rounds.filter(round_no=1))
+        rnd = self.t1.rounds.get(round_no=3)
+        sp = swiss.SwissPairing(rnd)
         sp.make_it()
         sp.save()
+
+        # none of the players should have a bye for this round
+        for result in Result.objects.filter(round=rnd):
+            self.assertTrue(result.p1.name != 'Bye' and result.p2.name != 'Bye')
 
 
     def test_switch_off_even(self):
@@ -130,8 +141,8 @@ class BasicTests(APITestCase, Helper):
         active players shoudld remain at 12 due to the bye being created/.
         """
         self.add_players(self.t1, 12)
-
-        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=1))
+        rnd = self.t1.rounds.get(round_no=1)
+        sp = swiss.SwissPairing(rnd)
         sp.make_it()
         sp.save()
 
@@ -143,22 +154,29 @@ class BasicTests(APITestCase, Helper):
         p.offed = True
         p.save()
         self.assertEqual(11, Participant.objects.filter(offed=False).count())
-        self.assertEqual(1, Participant.objects.filter(offed=True))
+        self.assertEqual(1, Participant.objects.filter(offed=True).count())
 
-        sp = swiss.SwissPairing(self.t1.rounds.get(round_no=2))
+        rnd = self.t1.rounds.get(round_no=2)
+        sp = swiss.SwissPairing(rnd)
         sp.make_it()
         sp.save()
 
         # now the number increases by one
-        self.assertEqual(12, Participant.objects.count(offed=False))
+        self.assertEqual(12, Participant.objects.filter(offed=False).count())
 
         # the bye should have been assignmed to the player with the lowest pos
-        lowest = Participant.objects.filter(
+        parties = Participant.objects.filter(
             tournament=self.t1
-        ).order_by('-round_wins','-game_wins', '-spread')[0]
-        self.assertEqual('Bye', 
-            Result.objects.filter(tournament=self.t1).get(p1=lowest).p2.name
+        ).exclude(name='Bye').order_by(
+            'round_wins','game_wins', 'spread'
         )
+        lowest = parties[0]
+
+        result = Result.objects.get(
+            (Q(p1=lowest) | Q(p2=lowest)) & Q(round=rnd)
+        )
+        
+        self.assertTrue('Bye' == result.p1.name or 'Bye' == result.p2.name)
 
     def test_two_player(self):
         add_participants(self.t1, True, 4)

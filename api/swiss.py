@@ -22,13 +22,6 @@ class SwissPairing(Pairing):
         '''
 
         super().__init__(rnd)
-        brackets = {}
-        for player in self.players:
-            if player['score'] not in brackets:
-                brackets[player['score']] = []
-            brackets[player['score']].append(player)
-        self.brackets = brackets
-
 
     def make_it(self):
         if len(self.players) == 0:
@@ -38,7 +31,14 @@ class SwissPairing(Pairing):
             raise ValueError('Odd number of players')
 
         self.assign_bye()
-        
+
+        brackets = {}
+        for player in self.players:
+            if player['score'] not in brackets:
+                brackets[player['score']] = []
+            brackets[player['score']].append(player)
+        self.brackets = brackets
+
         if self.next_round == 1:
             self.pair_first_round()
         elif self.next_round % 2 == 0:

@@ -47,7 +47,7 @@ class Pairing:
         self.bye = None
 
         players = Participant.objects.select_related(
-            ).filter(tournament_id=self.tournament
+            ).filter(tournament=self.tournament
             ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
 
         if rnd.based_on > 0:
@@ -73,9 +73,9 @@ class Pairing:
             opponents = []
             for game in games:
                 if game.p1.id == pl.id:
-                    opponents.append(game.p2)
+                    opponents.append(game.p2.name)
                 else:
-                    opponents.append(game.p1)
+                    opponents.append(game.p1.name)
 
             record = {'name': pl.name,
                       'spread': pl.spread,
@@ -95,14 +95,17 @@ class Pairing:
             if not self.bye:
                 # this tournament does not already have a configured by lets
                 # create one.
-                Participant.objects.create(
-                    name='Bye', rating=0
+                bye = Participant.objects.create(
+                    name='Bye', rating=0, tournament=self.tournament
                 )
-                self.bye = {'name': 'Bye',}
+                self.bye = {'name': 'Bye', 
+                    'rating': 0, 'opponents': [], 'player': bye,
+                    'score': 0, 'game_wins':-1, 'spread': -1}
                 self.players.append(self.bye)
             else:
                 # we have a bye but the number is odd, that means a withdrawal
                 self.players.remove(self.bye)
+                self.bye = None
 
     def assign_bye(self):
         """Assign the bye to the lowest rank player"""

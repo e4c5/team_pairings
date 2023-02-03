@@ -128,6 +128,8 @@ class Participant(models.Model):
     offed = models.IntegerField(default=0, null=True)
     rating = models.IntegerField(default=0, null=True)
 
+    def __str__(self):
+        return f'{self.name} {self.round_wins} {self.game_wins}'
     class Meta:
         unique_together = ['name','tournament']
 
