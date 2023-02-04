@@ -166,6 +166,14 @@ class ParticipantViewSet(viewsets.ModelViewSet):
         return models.Participant.objects.filter(
             tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
+def get_results(round_id):
+    query = """select json_agg(to_jsonb(tr)) 
+                from tournament_result tr where round_id = %s"""
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [round_id])
+        return cursor.fetchone()[0]
+
 
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -174,14 +182,18 @@ class ResultViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         result = super().update(request, *args, **kwargs)
+        rnd = models.TournamentRound.objects.get(pk=kwargs['rid'])
+
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             "chat",
             {
                 "type": "chat.message",
                 "message": {
-                    "type": get_participants(kwargs['tid']),
+                    "participants": get_participants(kwargs['tid']),
                     "tournament_id": kwargs['tid'],
+                    "results": get_results(kwargs['rid']),
+                    "round": TournamentRoundSerializer(rnd).data
                 }
             },
         )

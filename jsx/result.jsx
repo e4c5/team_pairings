@@ -56,10 +56,10 @@ export function Result({r, index, editScore}) {
     function resultOut() {
         return (
             <tr>
-                <td>{ r.p1.name }</td>
+                <td>{ get_p1(r) }</td>
                 <td></td>
                 <td></td>
-                <td>{ r.p2.name }</td>
+                <td>{ get_p2(r) }</td>
                 <td></td>
                 <td></td>
                 <td></td>

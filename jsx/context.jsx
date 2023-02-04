@@ -97,9 +97,14 @@ function tournamentReducer(state, action) {
                 results[round] = action.result
                 return {...state, results: results}
             }
-            const results = [...state.results]
-            results[round] = action.result
-            return { ...state, results: results }
+            const res = [...state.results]
+            const old = res[round]
+
+            const merged = action.result.map((result, idx) => {
+                return { ...old[idx], ...result}
+            })
+            res[round] = merged
+            return { ...state, results: res }
         }
 
         case 'addRound': {

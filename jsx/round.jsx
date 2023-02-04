@@ -72,6 +72,10 @@ export function Round(props) {
     const params = useParams()
     const [error, setError] = useState('')
     const [current, dispatch] = useReducer(reducer, editorState)
+    /*
+     * Store the round number counting from 1. That means you need to deduct
+     * 1 when reading full data for the round in the tournament.rounds array
+     */
     const [round, setRound] = useState(null)
 
     const tournament = useTournament();
@@ -82,27 +86,37 @@ export function Round(props) {
      * This effect loads the current data for the round.
      */
     useEffect(() => {
-        if (round == null || round.round_no != params.id) {
-            if (tournament) {
-                // round numbers start from 0 params.id is the round number
-                // not the round id.
-                const result = tournament.results
-                    ? tournament.results[params.id - 1]
-                    : undefined
-
-
-                if (result === undefined || result.length === 0) {
-                    console.log('FETCHING RESULTS')
-                    fetchResults(tournament.rounds[params.id - 1])
-                }
-                else {
-                    updatePending(result)
-                }
-                setRound(tournament.rounds[params.id - 1])
-            }
+        if (tournament) {
             
+            const results = getRoundResults()
+            console.log(results)
+            if (results === undefined ) {
+                fetchResults(tournament.rounds[params.id - 1])
+            }
+            else {
+                updatePending(results)
+            }
+        }
+        // round numbers start from 0 params.id is the round number
+        // not the round id.
+        if(round !== params.id) {
+            setRound(params.id)            
         }
     }, [tournament, round])
+
+    function getRoundDetails() {
+        if(tournament && tournament.rounds && round) {
+            return tournament.rounds[round -1]
+        }
+        return undefined;
+    }
+
+    function getRoundResults() {
+        if(tournament && tournament.results && round) {
+            return tournament.results[round -1]
+        }
+        return undefined;
+    }
 
     /**
      * Fetch the results for this round. 
@@ -112,15 +126,19 @@ export function Round(props) {
      * @returns 
      */
     function fetchResults(round) {
-        if (!round) {
+        console.log('FETCHING REULTS')
+
+        const roundDetails = getRoundDetails()
+        if (roundDetails === undefined) {
             return
         }
+        
         fetch(
-            `/api/tournament/${tournament.id}/${round.id}/result/`
+            `/api/tournament/${tournament.id}/${roundDetails.id}/result/`
         ).then(resp => resp.json()
         ).then(json => {
             tournamentDispatch(
-                { type: 'updateResult', round: round.round_no - 1, result: json }
+                { type: 'updateResult', round: round.round_no -1, result: json }
             )
             updatePending(json)
         })
@@ -151,7 +169,8 @@ export function Round(props) {
          * note that it's the id of the round in the DB that we send
          * rather than the round number
          */
-        fetch(`/api/tournament/${tournament.id}/round/${round.id}/pair/`,
+        const round_id = tournament.rounds[round -1].id
+        fetch(`/api/tournament/${tournament.id}/round/${round_id}/pair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
@@ -161,10 +180,7 @@ export function Round(props) {
                 },
                 body: JSON.stringify({})
             }).then(resp => resp.json()).then(json => {
-                if (json.status === "ok") {
-                    setRound({ ...round, paired: true })
-                }
-                else {
+                if (json.status !== "ok") {
                     setError(json.message)
                 }
             })
@@ -178,7 +194,9 @@ export function Round(props) {
          * note that it's the id of the round in the DB that we send
          * rather than the round number
          */
-        fetch(`/api/tournament/${tournament.id}/round/${round.id}/unpair/`,
+        const roundDetails = getRoundDetails()
+        
+        fetch(`/api/tournament/${tournament.id}/round/${roundDetails.id}/unpair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
@@ -188,10 +206,7 @@ export function Round(props) {
                 },
                 body: JSON.stringify({})
             }).then(resp => resp.json()).then(json => {
-                if (json.status === "ok") {
-                    setRound({ ...round, paired: true })
-                }
-                else {
+                if (json.status !== "ok") {
                     setError(json.message)
                 }
             })
@@ -202,7 +217,8 @@ export function Round(props) {
      * @param {*} e 
      */
     function addScore(e) {
-        fetch(`/api/tournament/${tournament.id}/${round.id}/result/${current.resultId}/`, {
+        const round_id = tournament.rounds[round -1].id
+        fetch(`/api/tournament/${tournament.id}/${round_id}/result/${current.resultId}/`, {
             method: 'PUT', 'credentials': 'same-origin',
             headers:
             {
@@ -211,19 +227,9 @@ export function Round(props) {
             },
             body: JSON.stringify({
                 score1: current.score1,
-                score2: current.score2, games_won: current.won, round: round.id
+                score2: current.score2, games_won: current.won, round: round_id
             })
         }).then(resp => resp.json()).then(json => {
-            const res = [...results];
-            for (let i = 0; i < res.length; i++) {
-                if (results[i].p1.name == current.p1.name) {
-                    res[i].score1 = current.score1;
-                    res[i].score2 = current.score2;
-                    res[i].games_won = current.won;
-                    setResults(res)
-                    break;
-                }
-            }
             dispatch({ type: 'reset' })
             dispatch({
                 type: 'pending',
@@ -231,16 +237,6 @@ export function Round(props) {
                     name => name != current.p1.name && name != current.p2.name
                 )
             })
-            tournamentDispatch({
-                type: 'editParticipant',
-                participant: json[0]
-            }
-            )
-            tournamentDispatch({
-                type: 'editParticipant',
-                participant: json[1]
-            }
-            )
         })
     }
 
@@ -265,7 +261,9 @@ export function Round(props) {
              */
             const name = (kwargs !== undefined) ? kwargs : e.target?.value;
             let matched = false;
-            results.forEach(result => {
+            const results = getRoundResults()
+
+            results?.forEach(result => {
                 if (name == result.p1.name) {
                     dispatch({
                         type: 'autoComplete', name: name,
@@ -305,19 +303,22 @@ export function Round(props) {
         /* Edit a score means replacing the contents of the form with the 
          * existing score
          */
-        const result = results[index]
-        dispatch({
-            type: 'replace',
-            value: {
-                p1: result.p1, p2: result.p2,
-                name: result.p1.name,
-                resultId: result.id, pending: [],
-                score1: result.score1,
-                score2: result.score2,
-                won: result.games_won,
-                lost: tournament.team_size - result.games_won
-            }
-        })
+        const results = getRoundResults()
+        if(results) {
+            const result = results[index]
+            dispatch({
+                type: 'replace',
+                value: {
+                    p1: result.p1, p2: result.p2,
+                    name: result.p1.name,
+                    resultId: result.id, pending: [],
+                    score1: result.score1,
+                    score2: result.score2,
+                    won: result.games_won,
+                    lost: tournament.team_size - result.games_won
+                }
+            })
+        }
     }
 
     function autoCompleteCheck(name, txt) {
@@ -372,15 +373,16 @@ export function Round(props) {
             </div>
         )
     }
-    console.log('render', round?.round_no)
-    if (round?.paired) {
-        const results = tournament.results ? tournament.results[round.round_no - 1] : undefined
+    
+    const roundDetails = getRoundDetails()
+    if (roundDetails?.paired) {
+        
         return (
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
-                <h3>Results for round : {round.round_no}</h3>
+                <h3>Results for round : {round}</h3>
                 {editor()}
-                <ResultList results={results} editScore={editScore} />
+                <ResultList results={getRoundResults()} editScore={editScore} />
                 <div className='row'>
                     <div className='col'>
                         {editable &&
