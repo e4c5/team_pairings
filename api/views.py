@@ -72,13 +72,27 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         p = SwissPairing(rnd)
         p.make_it()
         results = p.save()
-        serializer = ResultSerializer(results, many=True)
+        res_serializer = ResultSerializer(results, many=True)
+        rnd_serializer = TournamentRoundSerializer(rnd)
+
         rnd.paired = True
         rnd.save()
-        return Response({'status': 'ok', 
-            'results': serializer.data})
 
-
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "chat",
+            {
+                "type": "chat.message",
+                "message": {
+                    "round": rnd_serializer.data,
+                    "results": res_serializer.data,
+                    "participants": get_participants(tid),
+                    "tournament_id": tid
+                }
+            },
+        )
+        return Response({'status': 'ok'})
+        
     @action(detail=True, methods=['post'])
     def unpair(self, request, tid, pk=None):
         """Unpair a round if it does not have any results"""
@@ -92,6 +106,21 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
             qs.delete()
             rnd.paired = False
             rnd.save()
+            rnd_serializer = TournamentRoundSerializer(rnd)
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+            "chat",
+            {
+                "type": "chat.message",
+                "message": {
+                    "round": rnd_serializer.data,
+                    "results": [],
+                    "participants": get_participants(tid),
+                    "tournament_id": tid
+                }
+            },
+        )
+ 
             return Response({"status": "ok"})
 
         else:
@@ -103,13 +132,13 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
 
 def get_participants(tid):
     ''''Retrieve all information about participant'''
-    query = """select to_json(f) from (
+    query = """select json_agg(f) from (
                     select tp.*, 
                         (select jsonb_agg(to_jsonb(tm)) from tournament_teammember tm
                         where team_id = tp.id) members,
                         (select jsonb_agg(to_jsonb(tr)) from tournament_result tr
                         where p1_id = tp.id or p2_id = tp.id) results
-                    from tournament_participant tp where tp.id = %s
+                    from tournament_participant tp where tp.tournament_id = %s
                 ) f	 """
 
     with connection.cursor() as cursor:
@@ -121,10 +150,6 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ParticipantSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        ''''Retrieve all information about participant'''
-        return Response(get_participants(kwargs['pk']))
-
     def perform_create(self, serializer):
         serializer.save(tournament_id=self.kwargs['tid'])
         channel_layer = get_channel_layer()
@@ -132,7 +157,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             "chat",
             {
                 "type": "chat.message",
-                "message": {"type": "participant", "body": serializer.data}
+                "message" : {"participant": serializer.data}
             },
         )
 
@@ -154,9 +179,10 @@ class ResultViewSet(viewsets.ModelViewSet):
             "chat",
             {
                 "type": "chat.message",
-                "message": {"type": "participants",
+                "message": {
+                    "type": get_participants(kwargs['tid']),
                     "tournament_id": kwargs['tid'],
-                    "body": get_participants(kwargs['tid'])}
+                }
             },
         )
 

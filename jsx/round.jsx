@@ -163,10 +163,6 @@ export function Round(props) {
             }).then(resp => resp.json()).then(json => {
                 if (json.status === "ok") {
                     setRound({ ...round, paired: true })
-                    tournamentDispatch(
-                        { type: 'updateResult', round: round.round_no - 1, result: json }
-                    )
-                    updatePending(json.results)
                 }
                 else {
                     setError(json.message)
@@ -194,7 +190,6 @@ export function Round(props) {
             }).then(resp => resp.json()).then(json => {
                 if (json.status === "ok") {
                     setRound({ ...round, paired: true })
-                    setResults(null)
                 }
                 else {
                     setError(json.message)

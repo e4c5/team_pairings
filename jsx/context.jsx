@@ -35,7 +35,12 @@ function tournamentReducer(state, action) {
     // i keep typing this as action instead of type!! so ....
     const type = action.type || action.action;
     switch (type) {
+        case 'participants':
+            // replace all the participants with the new once
+            return {...state, participants: action.participants}
+
         case 'addParticipant': {
+            // add a single participant
             if (state.participants === null) {
                 return { ...state, participants: [action.participant] }
             }
@@ -43,6 +48,7 @@ function tournamentReducer(state, action) {
             return { ...state, participants: p }
         }
         case 'editParticipant': {
+            // replace a single participant
             let matched = false;
             const p = state.participants.map(p => {
                 if (p.id == action.participant.id) {
@@ -58,6 +64,7 @@ function tournamentReducer(state, action) {
             return { ...state, participants: p }
         }
         case 'deleteParticipant': {
+            // delete a single participant
             if (state.participants === null) {
                 return state
             }
@@ -101,7 +108,7 @@ function tournamentReducer(state, action) {
         }
 
         case 'editRound':
-            const r = state.participants.map(p => {
+            const r = state.rounds.map(p => {
                 if (p.id == action.round.id) {
                     return action.round
                 }
@@ -112,7 +119,7 @@ function tournamentReducer(state, action) {
 
         case 'reset':
         case 'replace':
-            console.log(action.value)
+            console.log('Warning replace/reset is deprecated')
             return { ...action.value }
 
         default: {

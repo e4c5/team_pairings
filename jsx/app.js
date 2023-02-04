@@ -6,11 +6,11 @@ import {
     useNavigate
 } from "react-router-dom";
 
-import {Participant, Participants } from "./participant.jsx"
-import {Tournament, Tournaments } from "./tournament.jsx"
-import {Round, Rounds} from "./round.jsx"
-import { TournamentProvider, useTournamentDispatch } from './context.jsx';
- 
+import { Participant, Participants } from "./participant.jsx"
+import { Tournament, Tournaments } from "./tournament.jsx"
+import { Round, Rounds } from "./round.jsx"
+import { useTournament, useTournamentDispatch } from './context.jsx';
+
 /**
  * The main entry.
  * 
@@ -27,6 +27,7 @@ import { TournamentProvider, useTournamentDispatch } from './context.jsx';
  */
 export default function App() {
     const [tournaments, setTournaments] = useState()
+    const tournament = useTournament()
     const dispatch = useTournamentDispatch();
     const navigate = useNavigate()
 
@@ -37,44 +38,69 @@ export default function App() {
         const ws = new WebSocket("ws://localhost:8000/ws/")
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
-            switch(obj.type) {
-                case "participant":
+            console.log(obj)
+            if (obj.participant) {
+                // add a new participant to the event
+                dispatch(
+                    { type: 'editParticipant', participant: obj.body }
+                )
+            }
+            if (obj.participants) {
+                // replace all the participants with new data
+                dispatch(
+                    { type: 'participants', participants: obj.participants }
+                )
+            }
+            if (obj.results) {
+                // replace the results for the given round
+                if (obj.round) {
                     dispatch(
-                        {type: 'editParticipant', participant: obj.body }
+                        {
+                            type: 'updateResult', result: obj.results,
+                            round: obj.round.round_no -1
+                        }
                     )
+                }
+            }
+            if (obj.round) {
+                // update a reound
+                dispatch(
+                    { type: 'editRound', round: obj.round }
+                )
+
             }
         }
         setWs(ws)
     }, [])
 
     function fetchTournaments() {
-        fetch(`/api/tournament/`).then(resp=>resp.json()).then(json=>{
+        fetch(`/api/tournament/`).then(resp => resp.json()).then(json => {
             setTournaments(json)
         })
     }
 
     useEffect(() => {
         document.title = 'Sri Lanka Scrabble Pairing App'
-        if(tournaments == null) {
+        if (tournaments == null) {
             fetchTournaments()
-        } 
-    },[])
+        }
+    }, [])
 
     useEffect(() => {
-        if(tournaments != null) {
+        if (tournaments != null) {
             const path = document.getElementById('frm')
             if (path?.innerText.length > 1) {
                 const parts = path.innerText.split('/')
-                if(parts.length > 1) {
+                if (parts.length > 1) {
                     const slug = parts[0] === "" ? parts[1] : parts[0];
                     tournaments?.map(t => {
-                        if(t.slug == slug) {
-                            fetch(`/api/tournament/${t.id}/`).then(resp=>resp.json()
-                            ).then(json=>{
-                                dispatch({type: 'replace', value: json})                
+                        if (t.slug == slug) {
+                            fetch(`/api/tournament/${t.id}/`).then(resp => resp.json()
+                            ).then(json => {
+                                dispatch({ type: 'replace', value: json })
                             })
                         }
-                    })   
+                    })
                 }
                 navigate(path.innerText)
             }
@@ -83,10 +109,10 @@ export default function App() {
 
     return (
         <Routes>
-            <Route path="/" element={<Tournaments tournaments={tournaments}/>}></Route>
+            <Route path="/" element={<Tournaments tournaments={tournaments} />}></Route>
             <Route path="/:slug" >
-                <Route path="" 
-                    element={ <Tournament tournaments={tournaments} /> } 
+                <Route path=""
+                    element={<Tournament tournaments={tournaments} />}
                 />
 
                 <Route path=":id" element={<Participant />} />
