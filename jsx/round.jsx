@@ -5,6 +5,7 @@ import getCookie from './cookie.js';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import { ResultList } from './result.jsx';
 import { Autocomplete } from './autocomplete.jsx';
+import { Confirm } from './dialog.js';
 
 /**
  * Initial value for the result entry form
@@ -70,6 +71,9 @@ function reducer(state, action) {
  */
 export function Round(props) {
     const params = useParams()
+    /*
+     * for display of any errors recieved from the api
+     */
     const [error, setError] = useState('')
     const [current, dispatch] = useReducer(reducer, editorState)
     /*
@@ -78,6 +82,9 @@ export function Round(props) {
      */
     const [round, setRound] = useState(null)
 
+    const [modal, setModal] = useState(false)
+    const [code, setCode] = useState('')
+    
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
     const editable = document.getElementById('hh') && document.getElementById('hh').value;
@@ -87,7 +94,6 @@ export function Round(props) {
      */
     useEffect(() => {
         if (tournament) {
-            
             const results = getRoundResults()
             console.log(results)
             if (results === undefined ) {
@@ -102,7 +108,9 @@ export function Round(props) {
         if(round !== params.id) {
             setRound(params.id)            
         }
-    }, [tournament, round])
+        setError('')
+        
+    }, [tournament, round, params])
 
     function getRoundDetails() {
         if(tournament && tournament.rounds && round) {
@@ -179,11 +187,11 @@ export function Round(props) {
                     "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify({})
-            }).then(resp => resp.json()).then(json => {
-                if (json.status !== "ok") {
-                    setError(json.message)
-                }
-            })
+        }).then(resp => resp.json()).then(json => {
+            if (json.status !== "ok") {
+                setError(json.message)
+            }
+        })
     }
 
     /**
@@ -212,6 +220,12 @@ export function Round(props) {
             })
     }
 
+    /**
+     * Truncates the tourament by clearing results and pairing for this round.
+     */
+    function truncate(e) {
+        setModal(true)
+    }
     /**
      * Adds a round score.
      * @param {*} e 
@@ -321,6 +335,25 @@ export function Round(props) {
         }
     }
 
+    function confirmDelete(e) {
+        setModal(false)
+        const roundDetails = getRoundDetails()
+        fetch(`/api/tournament/${tournament.id}/round/${roundDetails.id}/truncate/`,
+            {
+                method: 'POST', 'credentials': 'same-origin',
+                headers:
+                {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify({'td' : code})
+        }).then(resp => resp.json()).then(json => {
+            if (json.status !== "ok") {
+                setError(json.message)
+            }
+        })
+    }
+
     function autoCompleteCheck(name, txt) {
         return name.toLowerCase().indexOf(txt) > -1
     }
@@ -389,8 +422,16 @@ export function Round(props) {
                             <button className='btn btn-warning' onClick={unpair}>Unpair</button>
                         }
                     </div>
+                    <div className='col'>
+                        {editable &&
+                            <button className='btn btn-danger' onClick={truncate}>Truncate</button>
+                        }
+                    </div>
                 </div>
                 <div>{error}</div>
+                <Confirm code={code} onCodeChange={e => setCode(e.target.value)} display={modal}
+                    setModal={setModal} confirmDelete={confirmDelete}/>
+                <Rounds />
             </div>
         )
     }
@@ -432,6 +473,7 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>{error}</div>
                 </div>
+                <Rounds />
             </div>
         )
     }
@@ -447,7 +489,7 @@ export function Rounds() {
             <div className='col-sm-10 btn-group' aria-label="outlined primary button group">
                 {
                     tournament?.rounds?.map(r =>
-                        <Link to={'round/' + r.round_no} key={r.round_no}>
+                        <Link to={ `/${tournament.slug}/round/${r.round_no}` } key={r.round_no}>
                             <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
                 }
             </div>
@@ -455,4 +497,4 @@ export function Rounds() {
     )
 }
 
-console.log('Rounds 0.02')
+console.log('Rounds 0.03.1')

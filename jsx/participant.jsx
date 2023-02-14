@@ -120,7 +120,6 @@ export function Participant(props) {
         if(participant == null && tournament) {
             fetch(`/api/tournament/${tournament.id}/participant/${params.id}/`).then(resp=>resp.json()).then(json=>{
                 setParticipant(json)
-                console.log(json)
             })
         } 
     },[tournament, participant])
@@ -128,6 +127,7 @@ export function Participant(props) {
     function editScore(e) {
 
     }
+    console.log(participant)
     if(participant) {
         return (
             <div>

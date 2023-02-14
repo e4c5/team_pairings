@@ -82,7 +82,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
             td = models.Director.objects.filter(
                 Q(tournament_id=tid) & Q(user=request.user))
             if td.exists():
-                if request.POST.get('td') == request.user.username:
+                if request.data.get('td') == request.user.username:
                     models.BoardResult.objects.filter(round=rnd).delete()
                     models.Result.objects.filter(round=rnd).delete()
                     self.unpair_helper(rnd)
