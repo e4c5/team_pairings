@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from tournament.models import Tournament, TournamentRound, Participant, Director
+from tournament.models import Tournament, TournamentRound, Participant, \
+        Director, TeamMember
+
 
 
 # Register your models here.
@@ -18,7 +20,12 @@ class TDAdmin(admin.ModelAdmin):
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ['tournament','name']
 
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ['team','board','name','wins','spread']
+
+
 admin.site.register(Tournament, TournamentAdmin)    
 admin.site.register(TournamentRound, RoundAdmin) 
 admin.site.register(Participant,ParticipantAdmin)
 admin.site.register(Director,TDAdmin)
+admin.site.register(TeamMember, TeamMemberAdmin)

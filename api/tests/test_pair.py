@@ -43,6 +43,7 @@ class BasicTests(APITestCase, Helper):
         
         
     def test_pair_empty(self):
+        """Cannot pair a tournament unless you have participants in it!"""
         self.client.login(username='sri', password='12345')
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         resp = self.client.get(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
@@ -58,6 +59,7 @@ class BasicTests(APITestCase, Helper):
         
 
     def test_simple_swiss(self):
+        """Round 1 pairing for a tiny swiss tournament"""
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         sp = swiss.SwissPairing(rnd)
         # no participants
@@ -228,6 +230,57 @@ class BasicTests(APITestCase, Helper):
         # round3 cannot be paired
         self.assertRaises(ValueError, swiss.SwissPairing, rnd3)
 
+    
+    def test_truncate(self):
+        """Test that a tournament round can be truncated"""
+        add_participants(self.t1, True, 4)
+
+        rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+
+        # pair round 1
+        sp = swiss.SwissPairing(rnd1)
+        sp.make_it()
+        sp.save()
+        self.add_results(self.t1)
+
+        # pair round 2
+        sp = swiss.SwissPairing(rnd2)
+        sp.make_it()
+        sp.save()
+        self.add_results(self.t1)
+
+        self.client.login(username='sri', password='12345')
+
+        #truncating unpaired round 3 will fail
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        self.assertEqual(resp.data['status'],'error')
+
+        #truncating unpaired round 1 will fail because 2 is paired
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        self.assertEqual(resp.data['status'],'error')
+
+        #truncating round 2 will fail because not authenticated
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        self.assertEqual(resp.data['status'],'error')
+
+        # truncating round 2 will fail because validation code was not sent
+        self.client.login(username='sri', password='12345')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        self.assertEqual(resp.data['status'],'error')
+
+        # stil doesn't work, the next round is paird
+        resp = self.client.post(
+            f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/',
+            {'td': 'sri'})
+        self.assertEqual(resp.data['status'],'error', resp.data['message'])
+
+        #finally this should work
+        resp = self.client.post(
+            f'/api/tournament/{self.t1.id}/round/{rnd2.id}/truncate/',
+            {'td': 'sri'})
+        self.assertEqual(resp.data['status'],'ok')
+        
         
 
-
+        
