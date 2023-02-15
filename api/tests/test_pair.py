@@ -1,4 +1,4 @@
-import csv
+from unittest.mock import patch
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -26,7 +26,6 @@ class BasicTests(APITestCase, Helper):
         the other director's event.
         """
         self.create_tournaments();
-
 
     def test_unauth(self):
         """Test that the pairing endpoint is not accessible unless you are logged"""
@@ -231,7 +230,8 @@ class BasicTests(APITestCase, Helper):
         self.assertRaises(ValueError, swiss.SwissPairing, rnd3)
 
     
-    def test_truncate(self):
+    @patch('api.views.broadcast')
+    def test_truncate(self, p):
         """Test that a tournament round can be truncated"""
         add_participants(self.t1, True, 4)
 

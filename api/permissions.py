@@ -11,15 +11,10 @@ class IsAuthenticatedOrReadOnly(BasePermission):
             return True
 
         if request.user and request.user.is_authenticated:
-            tid =  view.kwargs.get('tid')
-            if tid:
-                if Tournament.objects.filter(pk=tid).filter(director__user=request.user).exists():
+            if hasattr(request, 'tournament'):
+                td = request.tournament.director_set.filter(user=request.user)
+                if td.exists():
                     return True
-            else:
-                pk = view.kwargs.get('pk')
-                if pk:
-                    if Tournament.objects.filter(pk=pk).filter(director__user=request.user).exists():
-                        return True
 
         return False                        
 

@@ -120,18 +120,12 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         rnd.paired = True
         rnd.save()
 
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "chat",
-            {
-                "type": "chat.message",
-                "message": {
+        broadcast({
                     "round": rnd_serializer.data,
                     "results": res_serializer.data,
                     "participants": get_participants(tid),
                     "tournament_id": tid
                 }
-            },
         )
         return Response({'status': 'ok'})
 
@@ -140,18 +134,13 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         rnd.paired = False
         rnd.save()
         rnd_serializer = TournamentRoundSerializer(rnd)
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "chat",
-            {
-                "type": "chat.message",
-                "message": {
+        
+        broadcast({
                     "round": rnd_serializer.data,
                     "results": [],
                     "participants": get_participants(rnd.tournament_id),
                     "tournament_id": rnd.tournament_id
                 }
-            },
         )
 
     @action(detail=True, methods=['post'])
@@ -219,14 +208,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(tournament_id=self.kwargs['tid'])
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "chat",
-            {
-                "type": "chat.message",
-                "message" : {"participant": serializer.data}
-            },
-        )
+        broadcast({"participant": serializer.data})
 
     def retrieve(self, request, pk=None, **kwargs):
         return Response(get_participant(pk))
@@ -253,18 +235,12 @@ class ResultViewSet(viewsets.ModelViewSet):
         result = super().update(request, *args, **kwargs)
         rnd = models.TournamentRound.objects.get(pk=kwargs['rid'])
 
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "chat",
-            {
-                "type": "chat.message",
-                "message": {
+        broadcast({
                     "participants": get_participants(kwargs['tid']),
                     "tournament_id": kwargs['tid'],
                     "results": get_results(kwargs['rid']),
                     "round": TournamentRoundSerializer(rnd).data
                 }
-            },
         )
 
         return result
@@ -273,3 +249,12 @@ class ResultViewSet(viewsets.ModelViewSet):
         return models.Result.objects.filter(round_id = self.kwargs['rid'])
 
 
+def broadcast(message):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "chat",
+        {
+            "type": "chat.message",
+            "message": message
+        },
+    )

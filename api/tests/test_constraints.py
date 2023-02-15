@@ -1,4 +1,5 @@
 import csv
+import asyncio
 from psycopg2.errors import CheckViolation
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -12,7 +13,7 @@ from api.tests.helper import Helper
 
 class BasicTests(APITransactionTestCase, Helper):
     """Tests that db doesnt end up with bad data"""
-    
+
     def setUp(self) -> None:
         self.create_tournaments()
 

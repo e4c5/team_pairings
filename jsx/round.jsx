@@ -363,6 +363,13 @@ export function Round(props) {
         if (!editable) {
             return <></>
         }
+        if(tournament.entry_mode == 'T') {
+            return scoreByTeam()
+        }
+        return scoreByPlayer();
+    }
+
+    function scoreByTeam() {
         return (
             <div className='row'>
                 <div className='col'>
@@ -407,6 +414,53 @@ export function Round(props) {
         )
     }
     
+    /**
+     * Keep track of scores by individual player in a team.
+     * The total team result is calculated as the sum of all player wins and
+     * player margins.
+     * @returns 
+     */
+    function scoreByPlayer() {
+        return (
+            <div className='row'>
+                <div className='col'>
+                    <Autocomplete
+                        suggestions={current.pending} placeholder='name'
+                        value={current.name}
+                        onChange={e => handleChange(e, 'name')}
+                        onSelect={(e, suggestion) => handleChange(e, 'name', suggestion)}
+                        check={autoCompleteCheck}
+                    />
+                </div>
+                <div className='col'>
+                    <input value={current.won} placeholder="Board Number" className='form-control'
+                        onChange={e => handleChange(e, 'board')} />
+                </div>
+                <div className='col'>
+                    <input value={current.score1} placeholder="Score for player1" className='form-control'
+                        onChange={e => handleChange(e, 'score1')} type='number' />
+                </div>
+                <div className='col'>
+                    <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
+                        className='form-control'
+                        size='small' onChange={e => { }} />
+                </div>
+                <div className='col'>
+                    <input value={current.score2} placeholder="Score for player2"
+                        className='form-control' type='number'
+                        onChange={e => handleChange(e, 'score2')} />
+                </div>
+                <div className='col'>
+                    <button className='btn btn-primary'
+                        disabled={current.resultId == ''}
+                        onClick={e => addScore()}>
+                        <i className='bi-plus' ></i>
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     const roundDetails = getRoundDetails()
     if (roundDetails?.paired) {
         

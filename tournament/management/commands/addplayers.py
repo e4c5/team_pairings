@@ -17,7 +17,6 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        print(options)
 
         if options.get('tournament'):
             self.t = Tournament.get_by_name(options.get('tournament'),'')

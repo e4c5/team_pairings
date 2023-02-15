@@ -1,4 +1,6 @@
 import csv
+import asyncio
+
 from django.urls import reverse
 from django.contrib.auth.models import User
 
@@ -36,7 +38,7 @@ class BasicTests(APITestCase):
         user.save()
         models.Director.objects.create(tournament=self.t2, user=user)
 
-
+   
     def test_unauth(self):
         """Test that our endpoints are read only for anonymous users"""
         resp = self.client.post('/api/tournament/', {})

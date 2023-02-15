@@ -1,6 +1,10 @@
 import csv
+
+from unittest.mock import patch
 from django.urls import reverse
 from django.contrib.auth.models import User
+
+from channels.testing import HttpCommunicator
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -9,7 +13,7 @@ from tournament import models
 
 class BasicTests(APITestCase):
     """Not going to test creating a tournament since that's one off and done in admin"""
-    
+
     def setUp(self) -> None:
         self.t1 = models.Tournament.objects.create(name='Richmond Showdown U20', start_date='2023-02-25',
             rated=False, team_size=5, entry_mode='T', num_rounds=5)
@@ -56,7 +60,8 @@ class BasicTests(APITestCase):
         self.assertEqual('richmond-showdown-u20', response.data[0]['slug'])
 
 
-    def test_add_teams(self):
+    @patch('api.views.broadcast')
+    def test_add_teams(self, m):
         with open('api/tests/data/teams.csv') as fp:
             self.client.login(username='testuser', password='12345')
             reader = csv.reader(fp)
