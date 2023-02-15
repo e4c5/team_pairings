@@ -115,6 +115,8 @@ class TestParticipants(ChannelsLiveServerTestCase):
                 rating.send_keys(line[1])
                 btn.click()
                 time.sleep(0.1)
+
+        time.sleep(0.1)
             
             
 

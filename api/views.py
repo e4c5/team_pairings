@@ -86,6 +86,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
                     models.BoardResult.objects.filter(round=rnd).delete()
                     models.Result.objects.filter(round=rnd).delete()
                     self.unpair_helper(rnd)
+                    update_all_standings(request.tournament)
                     return Response({'status': 'ok'})
                 else:
                     return Response({'status': 'error', 'message': 'confirmation code needed'})
@@ -258,3 +259,16 @@ def broadcast(message):
             "message": message
         },
     )
+
+def update_all_standings(tournament):
+    """Updates all the standings for the given tournament.
+    Args: tournament: A tournament object
+    This is specially usefull when a round is truncated.
+    see also: models.update_standings
+    """
+
+    for p in tournament.participants.all():
+        # this absolutely is not the right way but this is not a function
+        # that will be used all that much and even with 200 players this
+        # is still only going to take a second or two.
+        models.update_standing(p.id)

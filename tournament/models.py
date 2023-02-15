@@ -203,6 +203,12 @@ class BoardResult(models.Model):
 
     class Meta:
         unique_together = ['round','team1','team2','board']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(team1_id__lt=models.F('team2_id')),
+                name='t1t2_check'
+            ),
+        ]
 
 
 @receiver(pre_save, sender=Result)
@@ -213,12 +219,22 @@ def result_presave(sender, instance, **kwargs):
     we are trying to enforce is that resutls are always saved with the lower
     participant id taking up p1 and the higher one taking up p2
     """
-
     if instance.p1 and instance.p1.id > instance.p2.id:
         instance.p1, instance.p2 = instance.p2, instance.p1 
         if instance.games_won:
             instance.score1, instance.score2 = instance.score2, instance.score1
-            instance.games_won = instance.round.tournament.num_rounds - instance.games_won
+
+
+@receiver(pre_save, sender=BoardResult)
+def board_result_presave(sender, instance, **kwargs):
+    """Before saving a round result validate p1 and p2
+
+    Please see result_presave
+    """
+    if instance.team1 and instance.team1.id > instance.team2.id:
+        instance.team1, instance.team2 = instance.team2, instance.team1
+        if instance.score1:
+            instance.score1, instance.score2 = instance.score2, instance.score1
 
 
 @receiver(post_save, sender=BoardResult)
@@ -244,8 +260,7 @@ def update_board_result(sender, instance, created, **kwargs):
             player2 = None
 
         r = Result.objects.get(
-            (Q(p1=instance.team1) & Q(p2=instance.team2)) | 
-            (Q(p2=instance.team1) & Q(p1=instance.team2))
+            (Q(p1=instance.team1) & Q(p2=instance.team2)) 
         )
 
         if r.games_won is None:
@@ -282,7 +297,11 @@ def update_result(sender, instance, created, **kwargs):
 
 
 def update_standing(pid):
-    """Execute the standing update query."""
+    """Execute the standing update query. for the given participant
+    Args: pid: participant id
+
+    Also see api.views.update_all_standings
+    """
     q = """
         update tournament_participant set played = a.games + b.games,
             game_wins = a.games_won + b.games_won, 
