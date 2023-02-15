@@ -31,7 +31,14 @@ class BasicTests(APITestCase):
         self.assertEqual(models.TournamentRound.objects.count(), 10)
 
 
+    def test_retrieve(self):
+        resp = self.client.get(f'/api/tournament/{self.t1.id}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNone(resp.data['participants'])
+
+
     def test_get_by_name(self):
+        """Get by name converts name to slug and queries db"""
         t = models.Tournament.get_by_name('Richmond shoWdOwn U20',start_date='2023-01-01')
         self.assertEqual(2, models.Tournament.objects.count())
         self.assertIsNotNone(t)

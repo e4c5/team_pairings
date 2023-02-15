@@ -95,7 +95,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
                 )    
 
         else:
-            return Response({'status': 'error', 'message': 'round not paird'})
+            return Response({'status': 'error', 'message': 'round not paired'})
 
 
     @action(detail=True, methods=['post'])
@@ -104,7 +104,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         Possible only if there is at least 2 players in this tournament and
         has not been paired already."""
         if models.Result.objects.filter(round=pk).exists():
-            return Response({'status': 'error', 'message': 'already pairedd'})
+            return Response({'status': 'error', 'message': 'already paired'})
 
         rnd = models.TournamentRound.objects.get(pk=pk)
         count = rnd.tournament.participants.count()
