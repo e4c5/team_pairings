@@ -50,6 +50,11 @@ function tournamentReducer(state, action) {
         case 'editParticipant': {
             // replace a single participant
             let matched = false;
+            console.log(state.participants)
+            if (state.participants === null) {
+                return { ...state, participants: [action.participant] }
+            }
+
             const p = state.participants.map(p => {
                 if (p.id == action.participant.id) {
                     matched = true;

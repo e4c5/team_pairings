@@ -1,5 +1,9 @@
 import time
 import csv
+import asyncio
+
+from unittest.mock import patch
+from channels.testing import ChannelsLiveServerTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.contrib.auth.models import User
 
@@ -12,13 +16,14 @@ from selenium.webdriver.common.by import By
 
 from tournament.models import Tournament, Participant, Director
 
-class TestParticipants(StaticLiveServerTestCase):
+class TestParticipants(ChannelsLiveServerTestCase):
+    
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.selenium = webdriver.Chrome()
         cls.selenium.maximize_window()
-        
+
     def login(self):
         """Some actions you need to be logged in"""
         self.selenium.refresh()
@@ -44,6 +49,7 @@ class TestParticipants(StaticLiveServerTestCase):
             rated=False, team_size=5, entry_mode='T', num_rounds=5)
 
         Director.objects.create(tournament=self.t1, user=u)
+
     def get_url(self, relative_path):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))
 

@@ -54,13 +54,7 @@ export function Tournament(props) {
                 }
                 return resp.json()
             }).then(json => {
-                if(ok) {
-                    dispatch({type: "addParticipant", participant: json})
-                }
-                else {
-                    setRating({...rating, error: json.rating ? json.rating[0] : ''})
-                    setName({...name, error: json.name ? json.name[0] : ''})
-                }
+                
             })
     }
 

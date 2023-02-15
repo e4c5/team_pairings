@@ -35,14 +35,14 @@ export default function App() {
 
     useEffect(() => {
         console.log('Create socket')
-        const ws = new WebSocket("ws://localhost:8000/ws/")
+        const ws = new WebSocket(`ws://${location.host}/ws/`)
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
             console.log(obj)
             if (obj.participant) {
                 // add a new participant to the event
                 dispatch(
-                    { type: 'editParticipant', participant: obj.body }
+                    { type: 'editParticipant', participant: obj.participant }
                 )
             }
             if (obj.participants) {
