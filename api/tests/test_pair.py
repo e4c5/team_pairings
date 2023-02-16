@@ -5,7 +5,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from tournament.models import Tournament, Participant, TournamentRound, Director, Result
+from tournament.models import BoardResult, Participant, TournamentRound, Director, Result
 from tournament.tools import add_participants
 
 from api import swiss
@@ -228,7 +228,14 @@ class BasicTests(APITestCase, Helper):
         # round3 cannot be paired
         self.assertRaises(ValueError, swiss.SwissPairing, rnd3)
 
-    
+    def speed_pair(self, rnd):
+        """Pair using swiss and add results"""
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+        self.add_results(rnd.tournament)
+
+
     @patch('api.views.broadcast')
     def test_truncate_by_td(self, p):
         """Test that a tournament round can be truncated by a TD
@@ -245,17 +252,9 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'], 'round not paired')
 
-        # pair round 1
-        sp = swiss.SwissPairing(rnd1)
-        sp.make_it()
-        sp.save()
-        self.add_results(self.t1)
-
-        # pair round 2
-        sp = swiss.SwissPairing(rnd2)
-        sp.make_it()
-        sp.save()
-        self.add_results(self.t1)
+        # pair round 1, 2
+        self.speed_pair(rnd1)
+        self.speed_pair(rnd2)
 
         #truncating unpaired round 1 will fail because 2 is paired
         resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
@@ -273,6 +272,13 @@ class BasicTests(APITestCase, Helper):
             {'td': 'sri'})
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'],'next round already paired')
+
+        # and before we do the actual truncate, let's see what happens if we
+        # call unpair on this
+        resp = self.client.post(
+            f'/api/tournament/{self.t1.id}/round/{rnd1.id}/unpair/',{})
+        self.assertEqual(resp.data['status'],'error')
+        self.assertEqual(resp.data['message'],'This round already has results. Delete them first')
 
         #finally this should work
         resp = self.client.post(
@@ -295,7 +301,104 @@ class BasicTests(APITestCase, Helper):
         resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
         self.assertEqual(403, resp.status_code)
 
+
+    @patch('api.views.broadcast')
+    def test_enter_results_by_board(self, m):
+        """Entering results by board should update standings"""
+        self.add_players(self.t2, 10)
+        rnd1 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=1)
+        sp = swiss.SwissPairing(rnd1)
+        sp.make_it()
+        sp.save()
+
+        r = rnd1.results.all()[0]
+        self.client.login(username='ashok', password='12345')
+        resp = self.client.put(
+            f'/api/tournament/{self.t2.id}/{rnd1.id}/result/{r.id}/',
+            {
+                'team1': r.p1.id, 'team2': r.p2.id, 'board': 1,
+                'score1': 100, 'score2': 200,
+                'round': rnd1.id
+            }
+        )
+        self.assertEquals(200, resp.status_code, resp.data)
+        r.refresh_from_db()
+        # gets flipped because of id
+        self.assertEqual(r.score2, 200)
+        self.assertEqual(r.score1, 100)
+
+        self.assertEquals(BoardResult.objects.count(), 25)
+        self.assertEquals(BoardResult.objects.exclude(score1=None).count(), 1)
+
+
+    @patch('api.views.broadcast')
+    def test_enter_results_by_team(self, m):
+        """Entering results by team should update standings"""
+        self.add_players(self.t1, 10)
+        rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        sp = swiss.SwissPairing(rnd1)
+        sp.make_it()
+        sp.save()
+
+        r = rnd1.results.all()[0]
+        self.client.login(username='sri', password='12345')
+        resp = self.client.put(
+            f'/api/tournament/{self.t1.id}/{rnd1.id}/result/{r.id}/',
+            {
+                'team1': r.p1, 'team2': r.p2, 'board': 1,
+                'score1': 100, 'score2': 200, 'game_wins': 2,
+                'round': rnd1.id
+            }
+        )
+        self.assertEqual(200, resp.status_code, resp.data)
+        r.refresh_from_db()
+        self.assertEqual(r.score1, 100)
+        self.assertEqual(r.score2, 200)
+
+
+    def test_truncate_standings(self):
+        """Truncate should effect the participant objects"""
+
+        self.add_players(self.t1, 10)
+        self.add_players(self.t2, 10)
+        rnd1_1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        rnd1_2 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=1)
+        self.speed_pair(rnd1_1)
+        self.speed_pair(rnd1_2)
+
+        # boiler plate out of the way. We should have 10 results (5 each 
+        # for the two tournaments). The number of teams with 1 win in each
+        # tournament should also be 5
+        self.assertEqual(Result.objects.count(), 10)
+        winners = self.t1.participants.filter(round_wins=1).count()
+        self.assertEquals(winners, 5)
+
+        self.assertEqual(BoardResult.objects.count(), 25)
+        winners = self.t2.participants.filter(round_wins=1).count()
+        self.assertEquals(winners, 5)
+
+        # quickly fill up the round 2 for the first tournament.
+        rnd2_1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+        self.speed_pair(rnd2_1)
         
+        self.assertEqual(Result.objects.count(), 15)
+        winners = self.t1.participants.filter(round_wins=2).count()
+        self.assertGreater(BoardResult.objects.count(), 1)
+
+        # now we will truncate the second round that we just created above.
+        self.client.login(username='sri', password='12345')
+        resp = self.client.post(
+            f'/api/tournament/{self.t1.id}/round/{rnd2_1.id}/truncate/',
+            {'td': 'sri'})
+        
+        self.assertEqual(resp.data['status'],'ok')
+        
+        self.assertEqual(Result.objects.count(), 10)
+
+        winners = self.t1.participants.filter(round_wins=1).count()
+        self.assertEquals(winners, 5)
+
+
     @patch('api.views.broadcast')
     def test_pair_view(self, m):
         """Test the view
@@ -323,4 +426,3 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(200, resp.status_code)
         self.assertEqual('ok', resp.data['status'])
 
-        

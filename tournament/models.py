@@ -198,8 +198,8 @@ class BoardResult(models.Model):
     team1 = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='team1')   
     team2 = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='team2')   
     board = models.IntegerField()
-    score1 = models.IntegerField()
-    score2 = models.IntegerField()
+    score1 = models.IntegerField(null=True, blank=True)
+    score2 = models.IntegerField(null=True, blank=True)
 
     class Meta:
         unique_together = ['round','team1','team2','board']

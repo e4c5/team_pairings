@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from tournament import models
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
-        TournamentRoundSerializer, ResultSerializer)
+        TournamentRoundSerializer, ResultSerializer, BoardResultSerializer)
 from api.swiss import SwissPairing
 from api.permissions import IsAuthenticatedOrReadOnly
 
@@ -90,11 +90,6 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
                     return Response({'status': 'ok'})
                 else:
                     return Response({'status': 'error', 'message': 'confirmation code needed'})
-            else:
-                return Response(
-                    {'status': 'error', 'message': 'not a director'}
-                )    
-
         else:
             return Response({'status': 'error', 'message': 'round not paired'})
 
@@ -154,6 +149,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
                 return Response({"status": "error", 
                     "message": "This round already has results. Delete them first"})
             
+            rnd.boardresult_set.all().delete()
             qs.delete()
             self.unpair_helper(rnd)
             return Response({"status": "ok"})
@@ -228,13 +224,51 @@ def get_results(round_id):
 
 
 class ResultViewSet(viewsets.ModelViewSet):
+    """Primarily used for results entry most retrievals will be over WS anyway.
+    The result objects will initially be created by the pairing system so it's 
+    unlikely that this method will be invoked to create a result object 
+    unless it's for manual pairing (which has not yet been implemented)
+    """
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ResultSerializer
 
+    def get_serializer_class(self):
+        """Returns the serializer class to be used
+        Returns: a ResultSerializer if this is a tournament with entry by team
+            a BoardResultSerializer if results are entered by board
+        """
+        if self.request.tournament.entry_mode == models.Tournament.BY_TEAM:
+            return super().get_serializer_class()
+
+        return BoardResultSerializer
+
 
     def update(self, request, *args, **kwargs):
-        result = super().update(request, *args, **kwargs)
+        """Update a result.
+        That is set the scores for a result object that would have been created
+        already by the pairing system."""
+
         rnd = models.TournamentRound.objects.get(pk=kwargs['rid'])
+
+        if self.request.tournament.entry_mode == models.Tournament.BY_PLAYER:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+
+            b = rnd.boardresult_set.get(
+                Q(board=serializer.validated_data['board']) &
+                Q(team1_id=serializer.validated_data['team1'])
+            )
+
+            b.score1 = serializer.validated_data['score1']
+            b.score2 = serializer.validated_data['score2']
+
+            b.save()
+            return Response({'status': 'ok'})
+
+        result = super().update(request, *args, **kwargs)
+        
 
         broadcast({
                     "participants": get_participants(kwargs['tid']),

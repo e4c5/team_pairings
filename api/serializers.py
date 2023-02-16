@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from tournament.models import Tournament, TournamentRound, Participant, Result
+from tournament.models import Tournament, TournamentRound, Participant,\
+     Result, BoardResult
 
 class TournamentSerializer(serializers.ModelSerializer):
     is_editable = serializers.SerializerMethodField()
@@ -47,7 +48,6 @@ class ResultDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'        
 
 
-
 class TournamentSerializer(serializers.ModelSerializer):
     is_editable = serializers.SerializerMethodField()
 
@@ -62,3 +62,15 @@ class TournamentSerializer(serializers.ModelSerializer):
         fields = ['id', 'start_date','name','rated','slug', 'is_editable']
 
     
+class BoardResultSerializer(serializers.Serializer):
+    round = serializers.IntegerField()
+    team1 = serializers.IntegerField()
+    team2 = serializers.IntegerField()
+    board = serializers.IntegerField()
+    score1 = serializers.IntegerField()
+    score2 = serializers.IntegerField()
+
+    def validate(self, attrs):
+        if int(attrs['team1']) > int(attrs['team2']):
+            attrs['team1'], attrs['team2'] = attrs['team2'], attrs['team1']
+        return super().validate(attrs)
