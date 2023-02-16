@@ -12,11 +12,16 @@ import { Round, Rounds } from "./round.jsx"
 import { useTournament, useTournamentDispatch } from './context.jsx';
 
 /**
- * The main entry.
+ * The main entry point.
  * 
- * This project is read only for non authenticated users and read/write for
- * logged in users. We implement it strictly in the backend. All end points
- * will return forbidden http status codes for PUT, PATH, DELETE and POST.
+ * This project is setup to provide read only data for non authenticated users
+ * and read/write for logged in users. We implement it strictly in the backend. 
+ * All end points will return forbidden http status codes for PUT, PATH, DELETE
+ * and POST for no authenticated users.
+ * 
+ * Even when a user has been authenticated he needs to be identified as a 
+ * director for the tournament in order to sucessfully send PUT, POST etc to
+ * the backend.
  * 
  * So how does react find out if the user is authenticated or not, well 
  * there are lots of different ways but it was chosen that a hidden html field
@@ -34,7 +39,9 @@ export default function App() {
     const [ws, setWs] = useState()
 
     useEffect(() => {
-        console.log('Create socket')
+        /**
+         * For real time updates use websockets.
+         */
         const ws = new WebSocket(`ws://${location.host}/ws/`)
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
@@ -73,6 +80,9 @@ export default function App() {
         setWs(ws)
     }, [])
 
+    /**
+     * Initial list of tournaments fetched as http
+     */
     function fetchTournaments() {
         fetch(`/api/tournament/`).then(resp => resp.json()).then(json => {
             setTournaments(json)
@@ -86,6 +96,12 @@ export default function App() {
         }
     }, [])
 
+    /**
+     * This effect supports bookmarkable URLs.
+     * If a react route is saved as a bookmark and visited later or the page is
+     * simply reloaded, this effect fetches the neccassary data to recreate the
+     * route and navigate there.
+     */
     useEffect(() => {
         if (tournaments != null) {
             const path = document.getElementById('frm')

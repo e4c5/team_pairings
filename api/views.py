@@ -237,7 +237,8 @@ class ResultViewSet(viewsets.ModelViewSet):
         Returns: a ResultSerializer if this is a tournament with entry by team
             a BoardResultSerializer if results are entered by board
         """
-        if self.request.tournament.entry_mode == models.Tournament.BY_TEAM:
+        if (self.request.tournament.entry_mode == models.Tournament.BY_TEAM
+                or self.request.method == 'GET'):
             return super().get_serializer_class()
 
         return BoardResultSerializer
@@ -285,6 +286,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
 
 def broadcast(message):
+    
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         "chat",

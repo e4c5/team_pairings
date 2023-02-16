@@ -35,7 +35,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
 class ResultSerializer(serializers.ModelSerializer):
     p1 = ParticipantSerializer(read_only=True)
     p2 = ParticipantSerializer(read_only=True)
-
+    round = TournamentRoundSerializer(read_only=True)
+    
     class Meta:
         model = Result
         fields = '__all__'

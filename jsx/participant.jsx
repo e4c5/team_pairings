@@ -127,7 +127,7 @@ export function Participant(props) {
     function editScore(e) {
 
     }
-    console.log(participant)
+
     if(participant) {
         return (
             <div>
