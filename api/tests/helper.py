@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 
 from tournament.models import Tournament, Director, Participant
-from tournament.tools import add_participants, random_results
+from tournament.tools import add_participants, random_results, add_team_members
 
 
 class Helper:
@@ -36,5 +36,9 @@ class Helper:
         add_participants(tournament, use_faker=True, count=count)
 
 
+    def add_team_members(self, tournament):
+        add_team_members(tournament)
+
+        
     def add_results(self, tournament):
         random_results(tournament)

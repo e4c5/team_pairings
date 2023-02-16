@@ -75,14 +75,16 @@ class BasicTests(APITransactionTestCase, Helper):
         sp.make_it()
         sp.save()
         
-        b = BoardResult(team1=p2, team2=p1, board=1,
+        
+        b = BoardResult(team1=p1, team2=p1, board=1,
              round=rnd)
         # needs scores
         self.assertRaises(IntegrityError, b.save)
         
         b.score1 = 100
         b.score2 = 100
-
+        b.team1 = p4
+        
         # trying to save a mismatched pair. Team 1 did not play team2!
         self.assertRaises(Result.DoesNotExist, b.save)
 

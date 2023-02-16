@@ -1,6 +1,8 @@
 import csv
 from faker import Faker
 
+from django.db.models import Q
+
 from tournament.models import Participant, TeamMember, Tournament, BoardResult
 from tournament.models import update_standing
 
@@ -54,43 +56,35 @@ def random_results(tournament):
             if result.p2.name == 'Bye':
                 # player 1 got a bye
                 for i in range(tournament.team_size):
+                    b = BoardResult.objects.get(
+                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
+                    )
                     if i <= mid:
-                        BoardResult.objects.create(
-                            round=rnd, board=i+1,
-                            score1=100, score2=0,
-                            team1=result.p1, team2=result.p2
-                        )
+                        b.score1, b.score2 = 100, 0
                     else:
-                        BoardResult.objects.create(
-                            round=rnd, board=i+1,
-                            score1=0, score2=1,
-                            team1=result.p1, team2=result.p2
-                        )   
+                        b.score1, b.score2 = 0, 100
+                    b.save()
+
             elif result.p1.name == 'Bye':
                 # player 2 got a bye
                 for i in range(tournament.team_size):
+                    b = BoardResult.objects.get(
+                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
+                    )
                     if i <= mid:
-                        BoardResult.objects.create(
-                            round=rnd, board=i+1,
-                            score1=100, score2=0,
-                            team1=result.p2, team2=result.p1
-                        )
+                        b.score1, b.score2 = 0, 100
                     else:
-                        BoardResult.objects.create(
-                            round=rnd, board=i+1,
-                            score1=0, score2=1,
-                            team1=result.p2, team2=result.p1
-                        ) 
+                        b.score1, b.score2 = 100, 0
+                    b.save()
+
             else:
                 for i in range(tournament.team_size):
-                    score1=fake.random_int(290, 550)
-                    score2=fake.random_int(290, 550)
-                    BoardResult.objects.get_or_create(
-                        round=rnd, board=i+1,
-                        team1=result.p2, team2=result.p1,
-                        defaults={'score1': score1, 'score2': score2}
+                    b = BoardResult.objects.get(
+                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
                     )
-
+                    b.score1 = fake.random_int(290, 550)
+                    b.score2 = fake.random_int(290, 550)
+                    b.save()
         else:
             if result.p1.name == 'Bye':
                 result.score1 = 0
