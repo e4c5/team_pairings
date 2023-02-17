@@ -104,3 +104,5 @@ export function ResultList({editScore, results}) {
     }
     return null
 }
+
+console.log('Results.js 0.01')

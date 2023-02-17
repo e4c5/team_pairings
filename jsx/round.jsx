@@ -97,9 +97,9 @@ export function Round(props) {
     useEffect(() => {
         if (tournament) {
             const results = getRoundResults()
-            console.log(results)
             if (results === undefined ) {
-                fetchResults(tournament.rounds[params.id - 1])
+                fetchResults()
+                console.log('Fetched', results)
             }
             else {
                 updatePending(results)
@@ -135,9 +135,7 @@ export function Round(props) {
      * @param {*} round 
      * @returns 
      */
-    function fetchResults(round) {
-        console.log('FETCHING REULTS')
-
+    function fetchResults() {
         const roundDetails = getRoundDetails()
         if (roundDetails === undefined) {
             return

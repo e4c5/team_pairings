@@ -129,7 +129,8 @@ class _ScoreByTeam extends Editor {
                     />
                 </div>
                 <div className='col'>
-                    <input value={current.won} placeholder="Games won" className='form-control'
+                    <input value={current.won} placeholder="Games won"
+                        className='form-control' type='number'
                         onChange={e => this.handleChange(e, 'won')} />
                 </div>
                 <div className='col'>

@@ -100,6 +100,9 @@ class TournamentRound(models.Model):
     based_on = models.IntegerField(null=True, blank=True)
     paired = models.BooleanField(default=False)
     
+    def __str__(self):
+        return f'Round {self.round_no}'
+        
     class Meta:
         constraints = [
             models.CheckConstraint(

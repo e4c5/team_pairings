@@ -215,9 +215,12 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
 def get_results(round_id):
-    query = """select json_agg(to_jsonb(tr)) 
-                from tournament_result tr where round_id = %s"""
-
+    query = """select to_json(r) from (     
+        select *,
+            (select to_jsonb(tp) from tournament_participant tp where id = tr.p1_id) p1,
+            (select to_jsonb(tp) from tournament_participant tp where id = tr.p2_id) p2
+        from tournament_result tr where round_id = %s     
+    ) r"""
     with connection.cursor() as cursor:
         cursor.execute(query, [round_id])
         return cursor.fetchone()[0]
