@@ -53,26 +53,7 @@ export function Result({r, index, editScore}) {
         )
     }
 
-    function resultOut() {
-        return (
-            <tr>
-                <td>{ get_p1(r) }</td>
-                <td></td>
-                <td></td>
-                <td>{ get_p2(r) }</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        )
-    }
-
-    if(r.score1) {
-        return resultIn()
-    }
-    else {
-        return resultOut();
-    }
+    return resultIn()
 }
 
 /**

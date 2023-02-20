@@ -22,6 +22,6 @@ router = routers.SimpleRouter()
 router.register('tournament', views.TournamentViewSet)
 router.register('tournament/(?P<tid>\d+)/participant', views.ParticipantViewSet, 'participant')
 router.register('tournament/(?P<tid>\d+)/round', views.TournamentRoundViewSet,'round')
-router.register('tournament/(?P<tid>\d+)/(?P<rid>\d+)/result', views.ResultViewSet, 'result')
+router.register('tournament/(?P<tid>\d+)/result', views.ResultViewSet, 'result')
 
 urlpatterns = router.urls

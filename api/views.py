@@ -275,7 +275,6 @@ class ResultViewSet(viewsets.ModelViewSet):
         
 
         broadcast({
-                    "participants": get_participants(kwargs['tid']),
                     "tournament_id": kwargs['tid'],
                     "results": get_results(kwargs['rid']),
                     "round": TournamentRoundSerializer(rnd).data

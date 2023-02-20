@@ -27,7 +27,7 @@ function reducer(state, action) {
                 name: action.name
             }
         case 'board':
-            return {...state, board: action.board}
+            return { ...state, board: action.board }
 
         case 'p1':
             return { ...state, p1: action.p1 }
@@ -86,7 +86,7 @@ export function Round(props) {
 
     const [modal, setModal] = useState(false)
     const [code, setCode] = useState('')
-    
+
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
     const editable = document.getElementById('hh') && document.getElementById('hh').value;
@@ -97,7 +97,7 @@ export function Round(props) {
     useEffect(() => {
         if (tournament) {
             const results = getRoundResults()
-            if (results === undefined ) {
+            if (results === undefined || results.length === 0) {
                 fetchResults()
                 console.log('Fetched', results)
             }
@@ -105,25 +105,29 @@ export function Round(props) {
                 updatePending(results)
             }
         }
+        setError('')
+
+    }, [tournament, round])
+
+    useEffect(() => {
         // round numbers start from 0 params.id is the round number
         // not the round id.
-        if(round !== params.id) {
-            setRound(params.id)            
+        if (round !== params.id) {
+            setRound(params.id)
         }
-        setError('')
-        
-    }, [tournament, round, params])
+
+    }, [params]);
 
     function getRoundDetails() {
-        if(tournament && tournament.rounds && round) {
-            return tournament.rounds[round -1]
+        if (tournament && tournament.rounds && round) {
+            return tournament.rounds[round - 1]
         }
         return undefined;
     }
 
     function getRoundResults() {
-        if(tournament && tournament.results && round) {
-            return tournament.results[round -1]
+        if (tournament && tournament.results && round) {
+            return tournament.results[round - 1]
         }
         return undefined;
     }
@@ -140,15 +144,15 @@ export function Round(props) {
         if (roundDetails === undefined) {
             return
         }
-        
+
         fetch(
             `/api/tournament/${tournament.id}/${roundDetails.id}/result/`
         ).then(resp => resp.json()
         ).then(json => {
             tournamentDispatch(
-                { type: 'updateResult', round: round.round_no -1, result: json }
+                { type: 'updateResult', round: roundDetails.round_no - 1, result: json }
             )
-            updatePending(json)
+            //updatePending(json)
         })
     }
 
@@ -177,7 +181,7 @@ export function Round(props) {
          * note that it's the id of the round in the DB that we send
          * rather than the round number
          */
-        const round_id = tournament.rounds[round -1].id
+        const round_id = tournament.rounds[round - 1].id
         fetch(`/api/tournament/${tournament.id}/round/${round_id}/pair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
@@ -187,11 +191,11 @@ export function Round(props) {
                     "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify({})
-        }).then(resp => resp.json()).then(json => {
-            if (json.status !== "ok") {
-                setError(json.message)
-            }
-        })
+            }).then(resp => resp.json()).then(json => {
+                if (json.status !== "ok") {
+                    setError(json.message)
+                }
+            })
     }
 
     /**
@@ -203,7 +207,7 @@ export function Round(props) {
          * rather than the round number
          */
         const roundDetails = getRoundDetails()
-        
+
         fetch(`/api/tournament/${tournament.id}/round/${roundDetails.id}/unpair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
@@ -226,7 +230,7 @@ export function Round(props) {
     function truncate(e) {
         setModal(true)
     }
-   
+
     /**
      * edit a previously entered score
      * @param {*} e 
@@ -237,7 +241,7 @@ export function Round(props) {
          * existing score
          */
         const results = getRoundResults()
-        if(results) {
+        if (results) {
             const result = results[index]
             dispatch({
                 type: 'replace',
@@ -245,9 +249,9 @@ export function Round(props) {
                     p1: result.p1, p2: result.p2,
                     name: result.p1.name,
                     resultId: result.id, pending: [],
-                    score1: result.score1,
-                    score2: result.score2,
-                    won: result.games_won,
+                    score1: result.score1 || '',
+                    score2: result.score2 || '',
+                    won: result.games_won || '',
                     lost: tournament.team_size - result.games_won
                 }
             })
@@ -265,12 +269,12 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({'td' : code})
-        }).then(resp => resp.json()).then(json => {
-            if (json.status !== "ok") {
-                setError(json.message)
-            }
-        })
+                body: JSON.stringify({ 'td': code })
+            }).then(resp => resp.json()).then(json => {
+                if (json.status !== "ok") {
+                    setError(json.message)
+                }
+            })
         setCode('')
     }
 
@@ -278,16 +282,16 @@ export function Round(props) {
         if (!editable) {
             return <></>
         }
-        if(tournament.entry_mode == 'T') {
-            return <ScoreByTeam current={current} dispatch={dispatch} round={round}/>
+        if (tournament.entry_mode == 'T') {
+            return <ScoreByTeam current={current} dispatch={dispatch} round={round} />
         }
-        return <ScoreByPlayer current={current} dispatch={dispatch} round={round}/>
+        return <ScoreByPlayer current={current} dispatch={dispatch} round={round} />
     }
 
 
     const roundDetails = getRoundDetails()
     if (roundDetails?.paired) {
-        
+
         return (
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
@@ -308,7 +312,7 @@ export function Round(props) {
                 </div>
                 <div>{error}</div>
                 <Confirm code={code} onCodeChange={e => setCode(e.target.value)} display={modal}
-                    setModal={setModal} confirmDelete={confirmDelete}/>
+                    setModal={setModal} confirmDelete={confirmDelete} />
                 <Rounds />
             </div>
         )
@@ -360,14 +364,14 @@ export function Round(props) {
 export function Rounds() {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
-    
+
     return (
         <div className='row mt-3'>
             <div className='col-sm-2'><h3>Rounds: </h3></div>
             <div className='col-sm-10 btn-group' aria-label="outlined primary button group">
                 {
                     tournament?.rounds?.map(r =>
-                        <Link to={ `/${tournament.slug}/round/${r.round_no}` } key={r.round_no}>
+                        <Link to={`/${tournament.slug}/round/${r.round_no}`} key={r.round_no}>
                             <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
                 }
             </div>
