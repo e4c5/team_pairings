@@ -108,11 +108,11 @@ class BasicTests(APITestCase):
     def test_pairing(self):
         self.client.login(username='sri', password='12345')
         rnd = models.TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
-        resp = self.client.get(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.get(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd.id})
         # get not allowed
         self.assertEqual(405, resp.status_code)
 
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd.id})
         self.assertEqual(200, resp.status_code)
 
         # does not work because this tournament does not have any participants

@@ -19,7 +19,8 @@ class TournamentMiddleware:
                     request.tournament = Tournament.objects.get(pk=parts[0])
                 except Tournament.DoesNotExist:
                     raise Http404('Tournament not found')
-            
+                except:
+                    print('Trouble for', parts, path)
         response = self.get_response(request)
 
         # Code to be executed for each request/response after

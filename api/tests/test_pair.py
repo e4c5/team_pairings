@@ -29,14 +29,14 @@ class BasicTests(APITestCase, Helper):
     def test_unauth(self):
         """Test that the pairing endpoint is not accessible unless you are logged"""
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/')
         self.assertEquals(resp.status_code, 403)
 
         self.client.login(username='ashok', password='12345')
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/')
         self.assertEquals(resp.status_code, 403)
         
-        resp = self.client.delete(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.delete(f'/api/tournament/{self.t1.id}/pair/')
         self.assertEquals(resp.status_code, 403)
         
         
@@ -44,11 +44,12 @@ class BasicTests(APITestCase, Helper):
         """Cannot pair a tournament unless you have participants in it!"""
         self.client.login(username='sri', password='12345')
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
-        resp = self.client.get(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.get(f'/api/tournament/{self.t1.id}/pair/')
         # get not allowed
         self.assertEqual(405, resp.status_code)
 
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/',
+            {'id': rnd.id})
         self.assertEqual(200, resp.status_code)
 
         # does not work because this tournament does not have any participants
@@ -248,7 +249,7 @@ class BasicTests(APITestCase, Helper):
         rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
 
         #truncating unpaired round 1 will fail as it's not yet paired
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/truncate/', {'id': rnd1.id})
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'], 'round not paired')
 
@@ -257,33 +258,33 @@ class BasicTests(APITestCase, Helper):
         self.speed_pair(rnd2)
 
         #truncating unpaired round 1 will fail because 2 is paired
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/truncate/', {'id': rnd1.id})
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'],'next round already paired')
 
         # truncating round 2 will fail because validation code was not sent
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd2.id}/truncate/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/truncate/', {'id': rnd2.id})
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'],'confirmation code needed')
 
         # stil doesn't work, the next round is paird
         resp = self.client.post(
-            f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/',
-            {'td': 'sri'})
+            f'/api/tournament/{self.t1.id}/truncate/',
+            {'td': 'sri', 'id': rnd1.id})
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'],'next round already paired')
 
         # and before we do the actual truncate, let's see what happens if we
         # call unpair on this
         resp = self.client.post(
-            f'/api/tournament/{self.t1.id}/round/{rnd1.id}/unpair/',{})
+            f'/api/tournament/{self.t1.id}/unpair/', {'id': rnd2.id})
         self.assertEqual(resp.data['status'],'error')
         self.assertEqual(resp.data['message'],'This round already has results. Delete them first')
 
         #finally this should work
         resp = self.client.post(
-            f'/api/tournament/{self.t1.id}/round/{rnd2.id}/truncate/',
-            {'td': 'sri'})
+            f'/api/tournament/{self.t1.id}/truncate/',
+            {'td': 'sri', 'id': rnd2.id})
         self.assertEqual(resp.data['status'],'ok')
 
 
@@ -294,11 +295,12 @@ class BasicTests(APITestCase, Helper):
         rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
 
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        resp = self.client.post(f'/api/tournament/{self.t2.id}/truncate/')
         self.assertEqual(403, resp.status_code)
 
         self.client.login(username='ashok', password='12345')
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/truncate/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/truncate/',
+            {'td': 'sri', 'id': rnd1.id})
         self.assertEqual(403, resp.status_code)
 
 
@@ -316,7 +318,7 @@ class BasicTests(APITestCase, Helper):
         r = rnd1.results.all()[0]
         self.client.login(username='ashok', password='12345')
         resp = self.client.put(
-            f'/api/tournament/{self.t2.id}/{rnd1.id}/result/{r.id}/',
+            f'/api/tournament/{self.t2.id}/result/{r.id}/',
             {
                 'team1': r.p1.id, 'team2': r.p2.id, 'board': 1,
                 'score1': 100, 'score2': 200,
@@ -345,7 +347,7 @@ class BasicTests(APITestCase, Helper):
         r = rnd1.results.all()[0]
         self.client.login(username='sri', password='12345')
         resp = self.client.put(
-            f'/api/tournament/{self.t1.id}/{rnd1.id}/result/{r.id}/',
+            f'/api/tournament/{self.t1.id}/result/{r.id}/',
             {
                 'team1': r.p1, 'team2': r.p2, 'board': 1,
                 'score1': 100, 'score2': 200, 'game_wins': 2,
@@ -390,8 +392,8 @@ class BasicTests(APITestCase, Helper):
         # now we will truncate the second round that we just created above.
         self.client.login(username='sri', password='12345')
         resp = self.client.post(
-            f'/api/tournament/{self.t1.id}/round/{rnd2_1.id}/truncate/',
-            {'td': 'sri'})
+            f'/api/tournament/{self.t1.id}/truncate/',
+            {'td': 'sri', 'id': rnd2_1.id})
         
         self.assertEqual(resp.data['status'],'ok')
         
@@ -409,22 +411,22 @@ class BasicTests(APITestCase, Helper):
         add_participants(self.t1, True, 4)
         
         rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(403, resp.status_code)
 
         self.client.login(username='sri', password='12345')
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(200, resp.status_code)
         self.assertEqual('ok', resp.data['status'])
 
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(200, resp.status_code)
         self.assertEqual('already paired', resp.data['message'])
 
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/unpair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/unpair/', {'id': rnd1.id})
         self.assertEqual(200, resp.status_code)
 
-        resp = self.client.post(f'/api/tournament/{self.t1.id}/round/{rnd1.id}/pair/')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(200, resp.status_code)
         self.assertEqual('ok', resp.data['status'])
 

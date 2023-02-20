@@ -55,19 +55,13 @@ class TournamentViewSet(viewsets.ModelViewSet):
             cursor.execute(query, [kwargs['pk']])
             return Response( cursor.fetchone()[0])
 
-
-class TournamentRoundViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = TournamentRoundSerializer
-
-
     @action(detail=True, methods=['post'])
-    def truncate(self, request, tid, pk=None):
+    def truncate(self, request,pk, **kwargs):
         """Deletes the last round of a tournament.
         A very dangerous operation. To avoid accidental truncation, the TD is 
         supposed to send this username as a post data item.
         """
-        rnd = models.TournamentRound.objects.get(pk=pk)
+        rnd = models.TournamentRound.objects.get(id=request.data['id'])
         if rnd.paired:
             # find out if the round after this one is already paired.
             after = models.TournamentRound.objects.filter(
@@ -80,7 +74,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
                 )    
 
             td = models.Director.objects.filter(
-                Q(tournament_id=tid) & Q(user=request.user))
+                Q(tournament_id=request.tournament.id) & Q(user=request.user))
             if td.exists():
                 if request.data.get('td') == request.user.username:
                     models.BoardResult.objects.filter(round=rnd).delete()
@@ -95,14 +89,14 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
 
 
     @action(detail=True, methods=['post'])
-    def pair(self, request, tid, pk=None):
+    def pair(self, request, pk):
         """Pairs the given round.
         Possible only if there is at least 2 players in this tournament and
         has not been paired already."""
-        if models.Result.objects.filter(round=pk).exists():
+        if models.Result.objects.filter(round_id=request.data['id']).exists():
             return Response({'status': 'error', 'message': 'already paired'})
 
-        rnd = models.TournamentRound.objects.get(pk=pk)
+        rnd = models.TournamentRound.objects.get(id=request.data['id'])
         count = rnd.tournament.participants.count()
         if count < 2:
             return Response({'status': 'error',
@@ -119,8 +113,8 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         broadcast({
                     "round": rnd_serializer.data,
                     "results": res_serializer.data,
-                    "participants": get_participants(tid),
-                    "tournament_id": tid
+                    "participants": get_participants(request.tournament.id),
+                    "tournament_id": request.tournament.id
                 }
         )
         return Response({'status': 'ok'})
@@ -140,9 +134,9 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=['post'])
-    def unpair(self, request, tid, pk=None):
+    def unpair(self, request, pk=None, **kwargs):
         """Unpair a round if it does not have any results"""
-        rnd = models.TournamentRound.objects.get(pk=pk)
+        rnd = models.TournamentRound.objects.get(pk=request.data['id'])
         if rnd.paired:
             qs = models.Result.objects.filter(round=rnd)
             if qs.exclude(score1=None).exists():
@@ -156,10 +150,7 @@ class TournamentRoundViewSet(viewsets.ModelViewSet):
 
         else:
             return Response({"status": "error", "message": "Not paired"})
-
-    def get_queryset(self):
-        return models.TournamentRound.objects.filter(tournament_id = self.kwargs['tid'])
-        
+       
 
 def get_participant(pk):
     """Fetch information about a single participant.
@@ -247,16 +238,16 @@ class ResultViewSet(viewsets.ModelViewSet):
         return BoardResultSerializer
 
 
-    def update(self, request, *args, **kwargs):
+    def update(self, request, pk, *args, **kwargs):
         """Update a result.
         That is set the scores for a result object that would have been created
         already by the pairing system."""
 
-        rnd = models.TournamentRound.objects.get(pk=kwargs['rid'])
+        instance = self.get_object()
+        rnd = instance.round
 
         if self.request.tournament.entry_mode == models.Tournament.BY_PLAYER:
             partial = kwargs.pop('partial', False)
-            instance = self.get_object()
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
 
@@ -272,11 +263,10 @@ class ResultViewSet(viewsets.ModelViewSet):
             return Response({'status': 'ok'})
 
         result = super().update(request, *args, **kwargs)
-        
 
         broadcast({
                     "tournament_id": kwargs['tid'],
-                    "results": get_results(kwargs['rid']),
+                    "results": get_results(rnd.id),
                     "round": TournamentRoundSerializer(rnd).data
                 }
         )
@@ -284,7 +274,7 @@ class ResultViewSet(viewsets.ModelViewSet):
         return result
 
     def get_queryset(self):
-        return models.Result.objects.filter(round_id = self.kwargs['rid'])
+        return models.Result.objects.all()
 
 
 def broadcast(message):
