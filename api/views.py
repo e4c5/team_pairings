@@ -151,6 +151,53 @@ class TournamentViewSet(viewsets.ModelViewSet):
         else:
             return Response({"status": "error", "message": "Not paired"})
        
+    @action(detail=True, methods=['post','get','put'])
+    def result(self, request, pk, *args, **kwargs):
+        """Update or retrieve a result.
+
+        That is set the scores for a result object that would have been created
+        already by the pairing system.
+        
+        Primary means of result delivery will be WS. 
+    
+        It's unlikely that this method will be invoked to create a result object 
+        unless it's for manual pairing (which has not yet been implemented)
+        """
+
+        if request.method == 'GET':
+            return get_results(request.data.get('round'))
+
+        partial = kwargs.pop('partial', False)
+
+        if (self.request.tournament.entry_mode == models.Tournament.BY_TEAM
+                or self.request.method == 'GET'):
+            instance = models.Result.objects.get(pk=request.data.get('result'))
+            serializer = ResultSerializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+
+            instance.score1 = serializer.validated_data['score1']
+            instance.score2 = serializer.validated_data['score2']
+            instance.save()
+
+        else :
+            instance = models.BoardResult.objects.get(
+                Q(pk=request.data['result']) | Q(pk=request.data['board'])
+            )
+            serializer = BoardResultSerializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+
+            instance.score1 = serializer.validated_data['score1']
+            instance.score2 = serializer.validated_data['score2']
+            instance.save()
+            return Response({'status': 'ok'})
+
+        broadcast({
+                    "tournament_id": request.tournament.id,
+                    "results": get_results(instance.round_id),
+                }
+        )
+
+        return Response({'status': 'ok'})
 
 def get_participant(pk):
     """Fetch information about a single participant.
@@ -215,67 +262,6 @@ def get_results(round_id):
     with connection.cursor() as cursor:
         cursor.execute(query, [round_id])
         return cursor.fetchone()[0]
-
-
-class ResultViewSet(viewsets.ModelViewSet):
-    """Primarily used for results entry most retrievals will be over WS anyway.
-    The result objects will initially be created by the pairing system so it's 
-    unlikely that this method will be invoked to create a result object 
-    unless it's for manual pairing (which has not yet been implemented)
-    """
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = ResultSerializer
-
-    def get_serializer_class(self):
-        """Returns the serializer class to be used
-        Returns: a ResultSerializer if this is a tournament with entry by team
-            a BoardResultSerializer if results are entered by board
-        """
-        if (self.request.tournament.entry_mode == models.Tournament.BY_TEAM
-                or self.request.method == 'GET'):
-            return super().get_serializer_class()
-
-        return BoardResultSerializer
-
-
-    def update(self, request, pk, *args, **kwargs):
-        """Update a result.
-        That is set the scores for a result object that would have been created
-        already by the pairing system."""
-
-        instance = self.get_object()
-        rnd = instance.round
-
-        if self.request.tournament.entry_mode == models.Tournament.BY_PLAYER:
-            partial = kwargs.pop('partial', False)
-            serializer = self.get_serializer(instance, data=request.data, partial=partial)
-            serializer.is_valid(raise_exception=True)
-
-            b = rnd.boardresult_set.get(
-                Q(board=serializer.validated_data['board']) &
-                Q(team1_id=serializer.validated_data['team1'])
-            )
-
-            b.score1 = serializer.validated_data['score1']
-            b.score2 = serializer.validated_data['score2']
-
-            b.save()
-            return Response({'status': 'ok'})
-
-        result = super().update(request, *args, **kwargs)
-
-        broadcast({
-                    "tournament_id": kwargs['tid'],
-                    "results": get_results(rnd.id),
-                    "round": TournamentRoundSerializer(rnd).data
-                }
-        )
-
-        return result
-
-    def get_queryset(self):
-        return models.Result.objects.all()
-
 
 def broadcast(message):
     

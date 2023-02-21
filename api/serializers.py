@@ -33,21 +33,9 @@ class ParticipantSerializer(serializers.ModelSerializer):
     
 
 class ResultSerializer(serializers.ModelSerializer):
-    p1 = ParticipantSerializer(read_only=True)
-    p2 = ParticipantSerializer(read_only=True)
-    round = TournamentRoundSerializer(read_only=True)
-    
     class Meta:
         model = Result
-        fields = '__all__'
-
-
-class ResultDetailSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Result
-        fields = '__all__'        
-
+        fields = ['score1','score2','games_won']
 
 class TournamentSerializer(serializers.ModelSerializer):
     is_editable = serializers.SerializerMethodField()
@@ -64,14 +52,6 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     
 class BoardResultSerializer(serializers.Serializer):
-    round = serializers.IntegerField()
-    team1 = serializers.IntegerField()
-    team2 = serializers.IntegerField()
-    board = serializers.IntegerField()
     score1 = serializers.IntegerField()
     score2 = serializers.IntegerField()
 
-    def validate(self, attrs):
-        if int(attrs['team1']) > int(attrs['team2']):
-            attrs['team1'], attrs['team2'] = attrs['team2'], attrs['team1']
-        return super().validate(attrs)

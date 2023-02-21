@@ -315,16 +315,17 @@ class BasicTests(APITestCase, Helper):
         sp.make_it()
         sp.save()
 
-        r = rnd1.results.all()[0]
+        r = rnd1.boardresult_set.all()[0]
         self.client.login(username='ashok', password='12345')
         resp = self.client.put(
-            f'/api/tournament/{self.t2.id}/result/{r.id}/',
+            f'/api/tournament/{self.t2.id}/result/',
             {
-                'team1': r.p1.id, 'team2': r.p2.id, 'board': 1,
+                'board': 1,
                 'score1': 100, 'score2': 200,
-                'round': rnd1.id
+                'result': r.id
             }
         )
+
         self.assertEquals(200, resp.status_code, resp.data)
         r.refresh_from_db()
         # gets flipped because of id
@@ -347,11 +348,11 @@ class BasicTests(APITestCase, Helper):
         r = rnd1.results.all()[0]
         self.client.login(username='sri', password='12345')
         resp = self.client.put(
-            f'/api/tournament/{self.t1.id}/result/{r.id}/',
+            f'/api/tournament/{self.t1.id}/result/',
             {
-                'team1': r.p1, 'team2': r.p2, 'board': 1,
+                'board': 1,
                 'score1': 100, 'score2': 200, 'game_wins': 2,
-                'round': rnd1.id
+                'result': r.id
             }
         )
         self.assertEqual(200, resp.status_code, resp.data)
