@@ -20,7 +20,7 @@ class Editor extends React.Component {
     addScore(e) {
         const { current, dispatch, tournament, round } = this.props;
         const round_id = tournament.rounds[round - 1].id
-        fetch(`/api/tournament/${tournament.id}/${round_id}/result/${current.resultId}/`, {
+        fetch(`/api/tournament/${tournament.id}/result/`, {
             method: 'PUT', 'credentials': 'same-origin',
             headers:
             {
@@ -28,7 +28,7 @@ class Editor extends React.Component {
                 "X-CSRFToken": getCookie("csrftoken")
             },
             body: JSON.stringify({
-                score1: current.score1,
+                score1: current.score1, result: current.resultId,
                 score2: current.score2, games_won: current.won, round: round_id
             })
         }).then(resp => resp.json()).then(json => {

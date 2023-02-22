@@ -60,11 +60,11 @@ export default function App() {
             }
             if (obj.results) {
                 // replace the results for the given round
-                if (obj.round) {
+                if (obj.round_no) {
                     dispatch(
                         {
                             type: 'updateResult', result: obj.results,
-                            round: obj.round.round_no -1
+                            round: obj.round_no -1
                         }
                     )
                 }

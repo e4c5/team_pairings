@@ -165,23 +165,26 @@ class TournamentViewSet(viewsets.ModelViewSet):
         """
 
         if request.method == 'GET':
-            return get_results(request.data.get('round'))
+            return Response(
+                    get_results(request.query_params.get('round'))
+            )
 
         partial = kwargs.pop('partial', False)
+        instance = models.Result.objects.get(pk=request.data.get('result'))
 
-        if (self.request.tournament.entry_mode == models.Tournament.BY_TEAM
-                or self.request.method == 'GET'):
-            instance = models.Result.objects.get(pk=request.data.get('result'))
+        if self.request.tournament.entry_mode == models.Tournament.BY_TEAM:
             serializer = ResultSerializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
 
             instance.score1 = serializer.validated_data['score1']
             instance.score2 = serializer.validated_data['score2']
+            instance.games_won = serializer.validated_data['games_won']
             instance.save()
 
         else :
             instance = models.BoardResult.objects.get(
-                Q(pk=request.data['result']) | Q(pk=request.data['board'])
+                Q(team1=instance.p1) & Q(team2=instance.p2) & 
+                Q(board=request.data['board'])
             )
             serializer = BoardResultSerializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
@@ -194,6 +197,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
         broadcast({
                     "tournament_id": request.tournament.id,
                     "results": get_results(instance.round_id),
+                    "round_no": instance.round.round_no
                 }
         )
 
@@ -253,7 +257,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
 def get_results(round_id):
-    query = """select to_json(r) from (     
+    query = """select json_agg(r) from (     
         select *,
             (select to_jsonb(tp) from tournament_participant tp where id = tr.p1_id) p1,
             (select to_jsonb(tp) from tournament_participant tp where id = tr.p2_id) p2

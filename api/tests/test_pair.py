@@ -315,7 +315,7 @@ class BasicTests(APITestCase, Helper):
         sp.make_it()
         sp.save()
 
-        r = rnd1.boardresult_set.all()[0]
+        r = rnd1.results.all()[0]
         self.client.login(username='ashok', password='12345')
         resp = self.client.put(
             f'/api/tournament/{self.t2.id}/result/',
@@ -351,7 +351,7 @@ class BasicTests(APITestCase, Helper):
             f'/api/tournament/{self.t1.id}/result/',
             {
                 'board': 1,
-                'score1': 100, 'score2': 200, 'game_wins': 2,
+                'score1': 100, 'score2': 200, 'games_won': 2,
                 'result': r.id
             }
         )

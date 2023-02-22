@@ -146,7 +146,7 @@ export function Round(props) {
         }
 
         fetch(
-            `/api/tournament/${tournament.id}/${roundDetails.id}/result/`
+            `/api/tournament/${tournament.id}/result/?round=${roundDetails.id}`
         ).then(resp => resp.json()
         ).then(json => {
             tournamentDispatch(
@@ -182,7 +182,7 @@ export function Round(props) {
          * rather than the round number
          */
         const round_id = tournament.rounds[round - 1].id
-        fetch(`/api/tournament/${tournament.id}/round/${round_id}/pair/`,
+        fetch(`/api/tournament/${tournament.id}/pair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
@@ -190,7 +190,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({round: round_id})
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)
@@ -208,7 +208,7 @@ export function Round(props) {
          */
         const roundDetails = getRoundDetails()
 
-        fetch(`/api/tournament/${tournament.id}/round/${roundDetails.id}/unpair/`,
+        fetch(`/api/tournament/${tournament.id}/unpair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
@@ -216,7 +216,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({round: round_id})
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)
@@ -261,7 +261,7 @@ export function Round(props) {
     function confirmDelete(e) {
         setModal(false)
         const roundDetails = getRoundDetails()
-        fetch(`/api/tournament/${tournament.id}/round/${roundDetails.id}/truncate/`,
+        fetch(`/api/tournament/${tournament.id}/truncate/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:
@@ -269,7 +269,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({ 'td': code })
+                body: JSON.stringify({ 'td': code , round: round_id })
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)

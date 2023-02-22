@@ -105,7 +105,13 @@ function tournamentReducer(state, action) {
             const res = [...state.results]
 
             res[round] = action.result
-            return { ...state, results: res }
+            const p = new Set()
+            action.result.forEach(r => {
+                p.add(r.p1)
+                p.add(r.p2)
+            })
+            console.log(p)
+            return { ...state, results: res, participants: Array.from(p) }
         }
 
         case 'addRound': {
