@@ -190,7 +190,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({round: round_id})
+                body: JSON.stringify({id: round_id})
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)
@@ -301,12 +301,16 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-warning' onClick={unpair}>Unpair</button>
+                            <button className='btn btn-warning' onClick={unpair} data-test-id='unpair'>
+                                Unpair
+                            </button>
                         }
                     </div>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-danger' onClick={truncate}>Truncate</button>
+                            <button className='btn btn-danger' onClick={truncate} data-test-id='unpair'>
+                                Truncate
+                            </button>
                         }
                     </div>
                 </div>
@@ -348,7 +352,9 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-warning' onClick={pair}>Pair</button>
+                            <button className='btn btn-warning' onClick={pair} data-test-id='pair'>
+                                Pair
+                            </button>
                         }
                     </div>
                 </div>
