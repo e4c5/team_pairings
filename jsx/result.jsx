@@ -40,7 +40,7 @@ export function Result({r, index, editScore}) {
                 <td className="text-right" >{ r.games_won } </td>
                 <td className="text-right" >{ r.score1 }</td>
                 <td>{ get_p2(r) }</td>
-                <td className="text-right">{ tournament.team_size - r.games_won } </td>
+                <td className="text-right">{ r.games_won ? tournament.team_size - r.games_won : ""} </td>
                 <td className="text-right">{ r.score2 }</td>
                 <td className="text-right">
                     { editable &&
@@ -67,13 +67,13 @@ export function ResultList({editScore, results}) {
             <table className='table table-striped table-dark table-bordered'>
                 <thead>
                     <tr>
-                        <td align="left">Team 1</td>
-                        <td align="right">Wins</td>
-                        <td align="right">Total Score</td>
-                        <td align="left">Team 2</td>
-                        <td align="right">Wins</td>
-                        <td align="right">Total Score</td>
-                        <td align="right"></td>
+                        <th align="left">Team 1</th>
+                        <th align="right">Wins</th>
+                        <th align="right">Total Score</th>
+                        <th align="left">Team 2</th>
+                        <th align="right">Wins</th>
+                        <th align="right">Total Score</th>
+                        <th align="right"></th>
                     </tr>
                 </thead>
                 <tbody>

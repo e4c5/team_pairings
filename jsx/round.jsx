@@ -141,7 +141,7 @@ export function Round(props) {
      */
     function fetchResults() {
         const roundDetails = getRoundDetails()
-        if (roundDetails === undefined) {
+        if (roundDetails === undefined || roundDetails.paired === false) {
             return
         }
 
@@ -207,7 +207,7 @@ export function Round(props) {
          * rather than the round number
          */
         const roundDetails = getRoundDetails()
-
+        const round_id = tournament.rounds[round - 1].id
         fetch(`/api/tournament/${tournament.id}/unpair/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
@@ -216,7 +216,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({round: round_id})
+                body: JSON.stringify({id: round_id})
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)
@@ -269,7 +269,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({ 'td': code , round: round_id })
+                body: JSON.stringify({ 'td': code , id: round_id })
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)

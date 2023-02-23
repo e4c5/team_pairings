@@ -130,17 +130,18 @@ class _ScoreByTeam extends Editor {
                 </div>
                 <div className='col'>
                     <input value={current.won} placeholder="Games won"
-                        className='form-control' type='number'
+                        className='form-control' type='number' data-test-id='games-won'
                         onChange={e => this.handleChange(e, 'won')} />
                 </div>
                 <div className='col'>
-                    <input value={current.score1} placeholder="Score for team1" className='form-control'
+                    <input value={current.score1} placeholder="Score for team1" 
+                        className='form-control' data-test-id='score1'
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col'>
-                    <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
-                        className='form-control'
-                        size='small' onChange={e => { }} />
+                    <input value={current.p2?.name ? current.p2.name : ""}
+                        placeholder="Opponent"
+                        className='form-control' onChange={e => { }} />
                 </div>
                 <div className='col'>
                     <input value={current.lost} placeholder="Games won" disabled type='number'
@@ -148,8 +149,8 @@ class _ScoreByTeam extends Editor {
                 </div>
                 <div className='col'>
                     <input value={current.score2} placeholder="Score for team2"
-                        className='form-control' type='number'
-                        onChange={e => this.handleChange(e, 'score2')} />
+                        className='form-control' data-test-id='score2'
+                        type='number' onChange={e => this.handleChange(e, 'score2')} />
                 </div>
                 <div className='col'>
                     <button className='btn btn-primary'
