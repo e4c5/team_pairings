@@ -31,26 +31,62 @@ export function useTournamentDispatch() {
     return useContext(TournamentDispatchContext);
 }
 
+/**
+ * Sorts the tournament participant list based on the order property
+ * 
+ * @param {*} tournament 
+ * @returns 
+ */
+function sortTournament(tournament, participants) {
+    let field = tournament.order || 'rank';
+    const reverse = field[0] == '-'
+    if(reverse) {
+        field = field.substr(1)
+    }
+
+    if(field === 'name') {
+        if(reverse) {
+            tournament.participants.sort( (a,b) => b.name.localeCompare(a.name))    
+        }
+        else {
+            tournament.participants.sort( (a,b) => a.name.localeCompare(b.name))
+        }
+    }
+    else {
+        if(reverse) {
+            tournament.participants.sort( (a,b) => b[field] - a[field])
+        }
+        else {
+            tournament.participants.sort( (a,b) => a[field] - b[field])
+        }
+    }
+    return [...tournament.participants]
+}
+
 function tournamentReducer(state, action) {
     // i keep typing this as action instead of type!! so ....
     const type = action.type || action.action;
     switch (type) {
         case 'participants':
             // replace all the participants with the new once
-            return {...state, participants: action.participants}
+            return {...state, 
+                participants: sortTournament(state, action.participants)
+            }
 
         case 'addParticipant': {
             // add a single participant
             if (state.participants === null) {
                 return { ...state, participants: [action.participant] }
             }
-            const p = [...state.participants, action.participant]
-            return { ...state, participants: p }
+            state.participants.push(action.participant)
+            return { ...state, 
+                participants: sortTournament(state, state.participants) 
+            }
         }
         case 'editParticipant': {
             // replace a single participant
             let matched = false;
-            console.log(state.participants)
+            
             if (state.participants === null) {
                 return { ...state, participants: [action.participant] }
             }
@@ -66,7 +102,7 @@ function tournamentReducer(state, action) {
                 return {...state,
                      participants: [...state.participants, action.participant]}
             }
-            return { ...state, participants: p }
+            return { ...state, participants: sortTournament(state, p) }
         }
         case 'deleteParticipant': {
             // delete a single participant
@@ -111,7 +147,9 @@ function tournamentReducer(state, action) {
                 p.add(r.p2)
             })
             console.log(p)
-            return { ...state, results: res, participants: Array.from(p) }
+            return { ...state, results: res, 
+                participants: sortTournament(state, Array.from(p))
+            }
         }
 
         case 'addRound': {
@@ -128,7 +166,11 @@ function tournamentReducer(state, action) {
             })
             return { ...state, rounds: r }
 
-
+        case 'sort': 
+            state.order = action.field
+            return {...state, order: action.field, 
+                participants: sortTournament(state, state.participants)
+            }
         case 'reset':
         case 'replace':
             console.log('Warning replace/reset is deprecated')

@@ -11,7 +11,6 @@ import getCookie from './cookie.js';
 export function Participants(props) {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch();
-    const [order, setOrder] = useState('pos')
 
     const auth = document.getElementById('hh') && document.getElementById('hh').value
     const columns = [
@@ -77,25 +76,18 @@ export function Participants(props) {
     }
 
     function changeOrder(field) {
-        if(field == order || `-${field}` == order) {
-            setOrder(`-${field}`)    
-            tournament.participants.reverse()
-            dispatch({type: 'participants', participants: [...tournament.participants]})
+        const order = tournament?.order || 'rank'
+
+        if(field == order ) {
+            dispatch({type: 'sort', field: `-${field}`})
         }
         else {
-            if(field === 'name') {
-                tournament.participants.sort( (a,b) => a.name.localeCompare(b.name))
-            }
-            else {
-                tournament.participants.sort( (a,b) => a[field] - b[field])
-            }
-            setOrder(field)
-            dispatch({type: 'participants', participants: [...tournament.participants]})
+            dispatch({type: 'sort', field: field })
         }
-        
     }
 
     function getHeading(name, field) {
+        const order = tournament?.order || 'rank'
         if (order == field) {
             return (
                 <th onClick={e => changeOrder(field)} key={field}>
