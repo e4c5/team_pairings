@@ -78,11 +78,11 @@ export function Participants(props) {
     function changeOrder(field) {
         const order = tournament?.order || 'rank'
 
-        if(field == order ) {
-            dispatch({type: 'sort', field: `-${field}`})
+        if (field == order) {
+            dispatch({ type: 'sort', field: `-${field}` })
         }
         else {
-            dispatch({type: 'sort', field: field })
+            dispatch({ type: 'sort', field: field })
         }
     }
 
@@ -96,16 +96,17 @@ export function Participants(props) {
         }
         if (order == `-${field}`) {
             return (
-                <th onClick={e => changeOrder(field)}  key={field}>
+                <th onClick={e => changeOrder(field)} key={field}>
                     {name}<i className='bi-sort-up-alt ml-2'></i>
                 </th>)
         }
         return (
-            <th onClick={e => changeOrder(field)}  key={field}>
+            <th onClick={e => changeOrder(field)} key={field}>
                 {name}
             </th>)
     }
 
+    console.log('Render participants', tournament?.participants)
     return (
         <table className='table table-striped align-middle table-bordered table-dark'>
             <thead>
@@ -125,7 +126,7 @@ export function Participants(props) {
                         key={row.id}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                        <td className="text-left">{ row.pos }</td>
+                        <td className="text-left">{row.pos}</td>
                         <td component="th" scope="row">
                             <Link to={`${row.id}`}>{row.name}</Link>
                         </td>

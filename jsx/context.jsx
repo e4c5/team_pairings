@@ -43,24 +43,26 @@ function sortTournament(tournament, participants) {
     if(reverse) {
         field = field.substr(1)
     }
-
+    if(participants === undefined) {
+        participants = tournament.participants
+    }
     if(field === 'name') {
         if(reverse) {
-            tournament.participants.sort( (a,b) => b.name.localeCompare(a.name))    
+            participants.sort( (a,b) => b.name.localeCompare(a.name))    
         }
         else {
-            tournament.participants.sort( (a,b) => a.name.localeCompare(b.name))
+            participants.sort( (a,b) => a.name.localeCompare(b.name))
         }
     }
     else {
         if(reverse) {
-            tournament.participants.sort( (a,b) => b[field] - a[field])
+            participants.sort( (a,b) => b[field] - a[field])
         }
         else {
-            tournament.participants.sort( (a,b) => a[field] - b[field])
+            participants.sort( (a,b) => a[field] - b[field])
         }
     }
-    return [...tournament.participants]
+    return [...participants]
 }
 
 function tournamentReducer(state, action) {
