@@ -27,3 +27,4 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     re_path('^', views.redirect_view)
 ]
+13

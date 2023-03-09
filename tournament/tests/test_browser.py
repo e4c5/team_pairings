@@ -54,26 +54,5 @@ class TestParticipants(SeleniumTest):
         for button in reversed(buttons):
             button.click()
 
-
-    def add_participants(self):
-        """Helper method to load participants in a file by filling forms"""
-        driver = self.selenium
-        with open('api/tests/data/teams.csv') as fp:
-            name = WebDriverWait(driver, 5, 0.2).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-test-id=name]'))
-            )
-
-            rating = driver.find_element(By.CSS_SELECTOR,'input[data-test-id=rating]')
-            btn = driver.find_element(By.CSS_SELECTOR,'button[data-test-id=add]')
-
-            reader = csv.reader(fp)
-            for line in reader:
-                name.send_keys(line[0])
-                rating.send_keys(line[1])
-                btn.click()
-                time.sleep(0.1)
-
-        time.sleep(0.1)
-            
             
 

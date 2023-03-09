@@ -1,11 +1,15 @@
+import time
+import csv
+
 from channels.testing import ChannelsLiveServerTestCase
 from django.contrib.auth.models import User
 
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from tournament.models import Tournament, Participant, Director
+from tournament.models import Tournament, Director
 
 class SeleniumTest(ChannelsLiveServerTestCase):
     
@@ -43,3 +47,26 @@ class SeleniumTest(ChannelsLiveServerTestCase):
 
     def get_url(self, relative_path):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))
+
+
+
+    def add_participants(self):
+        """Helper method to load participants in a file by filling forms"""
+        driver = self.selenium
+        with open('api/tests/data/teams.csv') as fp:
+            name = WebDriverWait(driver, 5, 0.2).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-test-id=name]'))
+            )
+
+            rating = driver.find_element(By.CSS_SELECTOR,'input[data-test-id=rating]')
+            btn = driver.find_element(By.CSS_SELECTOR,'button[data-test-id=add]')
+
+            reader = csv.reader(fp)
+            for line in reader:
+                name.send_keys(line[0])
+                rating.send_keys(line[1])
+                btn.click()
+                time.sleep(0.1)
+
+        time.sleep(0.1)
+            
