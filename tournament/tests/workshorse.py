@@ -1,5 +1,6 @@
 import time
 import csv
+import logging
 
 from channels.testing import ChannelsLiveServerTestCase
 from django.contrib.auth.models import User
@@ -11,6 +12,7 @@ from selenium.webdriver.common.by import By
 
 from tournament.models import Tournament, Director
 
+
 class SeleniumTest(ChannelsLiveServerTestCase):
     
     @classmethod
@@ -18,6 +20,20 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         super().setUpClass()
         cls.selenium = webdriver.Chrome()
         cls.selenium.maximize_window()
+
+        for handler in logging.getLogger('').handlers:
+            if isinstance(handler, logging.StreamHandler):
+                logging.getLogger('').removeHandler(handler)
+
+        # Add a file handler for logging to a file
+        log_file = '/tmp/test_log_file.log'
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.DEBUG)
+        logging.getLogger('').addHandler(file_handler)
+
+        # Set the log level for Django Channels to DEBUG
+        logger = logging.getLogger('django.channels')
+        logger.setLevel(logging.DEBUG)
 
     def login(self):
         """Some actions you need to be logged in"""
@@ -49,7 +65,14 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))
 
 
+    def type_score(self, games, score1, score2) :
+        driver = self.selenium
+        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(games);
+        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(score1);
+        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(score2);
+        driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()
 
+    
     def add_participants(self):
         """Helper method to load participants in a file by filling forms"""
         driver = self.selenium

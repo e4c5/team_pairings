@@ -51,12 +51,9 @@ class TestResults(SeleniumTest):
 
         # now let's add some results shall we?
         pencil.click()
-        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(4);
-        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(2000);
-        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(1500);
-        driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()
+        self.type_score(4, 2000, 1500)
 
-        time.sleep(0.1)
+        time.sleep(0.2)
         # now we wait for the result to be posted and for updated standings to
         # come back to us through web push. If this doesn't get updated something
         # has gone wrong.
@@ -70,6 +67,13 @@ class TestResults(SeleniumTest):
         self.assertEquals(
             '1500', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(6)").text
         )
+
+        # add another score
+        pencil = driver.find_elements(By.CLASS_NAME,'bi-pencil')[1]
+        pencil.click()
+        self.type_score(0, 1430, 2000)
+        time.sleep(1)
+        self.assertEquals(Result.objects.filter(games_won=0).count(), 1)
         
 
     def next_one(self):

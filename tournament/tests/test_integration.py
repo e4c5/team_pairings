@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys 
-
+from selenium.webdriver.common.action_chains import ActionChains
 
 from tournament.tests.workshorse import SeleniumTest
 from tournament.tools import add_participants
@@ -31,14 +31,19 @@ class TestIntegrat(SeleniumTest):
         WebDriverWait(driver, 5, 0.2).until(
             EC.visibility_of_element_located((By.LINK_TEXT, rnd))
         )
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, rnd))
-        ).click()
+        try:
+            WebDriverWait(driver, 5, 0.2).until(
+                EC.element_to_be_clickable((By.LINK_TEXT, rnd))
+            ).click()
+        except :
+            action = ActionChains(driver)
+            action.move_to_element(driver.find_element(By.LINK_TEXT, rnd)).click().perform()
+            
         WebDriverWait(driver, 5, 0.6).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
         ).click()
 
-        time.sleep(0.1)
+        time.sleep(0.5)
 
 
     def load_tournament(self):
