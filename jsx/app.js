@@ -45,7 +45,7 @@ export default function App() {
         const ws = new WebSocket(`ws://${location.host}/ws/`)
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
-            console.log(obj)
+
             if (obj.participant) {
                 // add a new participant to the event
                 dispatch(

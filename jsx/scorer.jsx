@@ -140,7 +140,7 @@ class _ScoreByTeam extends Editor {
                 </div>
                 <div className='col'>
                     <input value={current.p2?.name ? current.p2.name : ""}
-                        placeholder="Opponent"
+                        placeholder="Opponent" data-test-id='p2'
                         className='form-control' onChange={e => { }} />
                 </div>
                 <div className='col'>

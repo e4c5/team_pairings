@@ -15,6 +15,12 @@ const editorState = {
     score1: '', score2: '', board: ''
 }
 
+/**
+ * Reducer for result entry section
+ * @param {*} state 
+ * @param {*} action 
+ * @returns 
+ */
 function reducer(state, action) {
     switch (action.type) {
         case "typed":
@@ -99,7 +105,6 @@ export function Round(props) {
             const results = getRoundResults()
             if (results === undefined || results.length === 0) {
                 fetchResults()
-                console.log('Fetched', results)
             }
             else {
                 updatePending(results)
@@ -232,7 +237,11 @@ export function Round(props) {
     }
 
     /**
-     * edit a previously entered score
+     * Edit a previously entered score or add a new one.
+     * Called by the edit icon in the child component <Result/> clicking on it
+     * will change the editor area to show the scores for that particular game
+     * if the score had not already been entered most fields will be blank but
+     * two names for the players/teams will be filled
      * @param {*} e 
      * @param {*} index 
      */

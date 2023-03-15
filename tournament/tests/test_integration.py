@@ -28,8 +28,8 @@ class TestIntegrat(SeleniumTest):
     @classmethod
     def tearDownClass(cls):
         "Sometimes you don't want to quit though "
-        #cls.selenium.quit()
-        #cls.firefox.quit()
+        cls.selenium.quit()
+        cls.firefox.quit()
 
     def pair_round(self, rnd):
         driver = self.selenium
@@ -77,15 +77,22 @@ class TestIntegrat(SeleniumTest):
 
         for elem in driver.find_elements(By.CLASS_NAME, "bi-pencil"):
             elem.click()
-            time.sleep(0.05)
+            
             r = random.randint(0, 5)
-            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(r);
+
+            p2 = driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=p2]')         
+            # wait for the value of the input field to change from blank to non-blank
+            WebDriverWait(driver, 1).until_not(lambda x: p2.get_attribute("value") == "")
+
+            won = driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(r);
             score1 = random.randint(350, 500) * r
             score2 = random.randint(350, 500) * (5-4)
             driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(score1);
             driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(score2);
             driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()
-            time.sleep(0.1)
+
+            # wait for the value of the input field to clear
+            WebDriverWait(driver, 1).until(lambda x: p2.get_attribute("value") == "")
 
     def test_integration(self):
         self.load_tournament()

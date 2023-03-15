@@ -38,7 +38,8 @@ export function useTournamentDispatch() {
  * @returns 
  */
 function sortTournament(tournament, participants) {
-    let field = tournament.order || 'rank';
+    let field = tournament.order || 'pos';
+    console.log('Sort tournament by ', field)
     const reverse = field[0] == '-'
     if(reverse) {
         field = field.substr(1)
@@ -141,14 +142,14 @@ function tournamentReducer(state, action) {
                 return {...state, results: results}
             }
             const res = [...state.results]
-
             res[round] = action.result
+            
             const p = new Set()
             action.result.forEach(r => {
                 p.add(r.p1)
                 p.add(r.p2)
             })
-            console.log(p)
+            
             return { ...state, results: res, 
                 participants: sortTournament(state, Array.from(p))
             }

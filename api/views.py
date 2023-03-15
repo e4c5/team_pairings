@@ -202,6 +202,10 @@ class TournamentViewSet(viewsets.ModelViewSet):
             )
 
             return Response({'status': 'ok'})
+        except models.Result.DoesNotExist:
+            for result in  models.Result.objects.all():
+                print(result.id)
+            print("We got ",request.data.get('result') )
         except:
             import traceback
             traceback.print_exc()

@@ -106,7 +106,6 @@ export function Participants(props) {
             </th>)
     }
 
-    console.log('Render participants', tournament?.participants)
     return (
         <table className='table table-striped align-middle table-bordered table-dark'>
             <thead>
