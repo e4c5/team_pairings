@@ -10,6 +10,10 @@ from tournament.models import TournamentRound, Participant, Result
 
 
 class TestResults(SeleniumTest):
+   
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
 
     def test_team_entry(self):
         """Testing a tournament where data is entered per team"""
@@ -46,8 +50,6 @@ class TestResults(SeleniumTest):
         )
 
         self.assertEqual(9, Result.objects.count())
-        for r in Result.objects.all():
-            print(r.id)
 
         # now let's add some results shall we?
         pencil.click()

@@ -269,7 +269,7 @@ export function Round(props) {
                     'Content-Type': 'application/json',
                     "X-CSRFToken": getCookie("csrftoken")
                 },
-                body: JSON.stringify({ 'td': code , id: round_id })
+                body: JSON.stringify({ 'td': code , id: roundDetails.id })
             }).then(resp => resp.json()).then(json => {
                 if (json.status !== "ok") {
                     setError(json.message)

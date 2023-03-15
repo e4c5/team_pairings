@@ -24,6 +24,13 @@ class TestIntegrat(SeleniumTest):
         super().setUpClass()
         cls.firefox = webdriver.Firefox()
 
+
+    @classmethod
+    def tearDownClass(cls):
+        "Sometimes you don't want to quit though "
+        #cls.selenium.quit()
+        #cls.firefox.quit()
+
     def pair_round(self, rnd):
         driver = self.selenium
         driver.find_element(By.TAG_NAME,'body').send_keys(Keys.END);
@@ -42,8 +49,6 @@ class TestIntegrat(SeleniumTest):
         WebDriverWait(driver, 5, 0.6).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
         ).click()
-
-        time.sleep(0.5)
 
 
     def load_tournament(self):
@@ -87,3 +92,5 @@ class TestIntegrat(SeleniumTest):
         self.add_participants()
         self.pair_round('1')
         self.add_scores()
+
+       # time.sleep(100)

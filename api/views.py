@@ -168,7 +168,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 return Response(
                         get_results(request.query_params.get('round'))
                 )
-            print(request.data)
+            
             partial = kwargs.pop('partial', False)
             instance = models.Result.objects.get(pk=request.data.get('result'))
 
@@ -261,7 +261,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
 def get_results(round_id):
-    query = """select json_agg(r order by pos) from (     
+    query = """select json_agg(r) from (     
         select *,
             (select to_jsonb(tp) from 
                   ( select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc) as "pos", * 

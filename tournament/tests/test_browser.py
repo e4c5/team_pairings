@@ -11,6 +11,10 @@ from tournament.tests.workshorse import SeleniumTest
 
 class TestParticipants(SeleniumTest):
         
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+    
     def test_no_forms(self):
         """For not authenticated users the edit/create forms would not show up"""
         driver = self.selenium
