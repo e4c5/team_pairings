@@ -75,15 +75,19 @@ class Editor extends React.Component {
             results?.forEach(result => {
                 if (name == result.p1.name) {
                     dispatch({
-                        type: 'autoComplete', name: name,
-                        p1: result.p1, p2: result.p2, resultId: result.id
+                        type: 'autoComplete', name: name, boards: result.boards,
+                        p1: result.p1, p2: result.p2, resultId: result.id,
+                        score1: tournament.entry_mode == 'T' ? result.score1 : "",
+                        score2: tournament.entry_mode == 'T' ? result.score2 : "",
                     })
                     matched = true;
                 }
                 if (name == result.p2.name) {
                     dispatch({
-                        type: 'autoComplete', name: name,
-                        p1: result.p2, p2: result.p1, resultId: result.id
+                        type: 'autoComplete', name: name, boards: result.boards,
+                        p1: result.p2, p2: result.p1, resultId: result.id,
+                        score1: tournament.entry_mode == 'T' ? result.score2 : "",
+                        score2: tournament.entry_mode == 'T' ? result.score1 : "",
                     })
                     matched = true;
                 }
@@ -188,7 +192,7 @@ class _ScoreByPlayer extends Editor {
         for(let i = 0 ; i < tournament.team_size ; i++) {
             const board = current?.boards?.[i]
             if(current.resultId && board) {
-                if(current.p1_id == board.team1_id) {
+                if(current.p1.id == board.team1_id) {
                     scores.push(
                         <tr key={i}>
                             <td>{ i + 1 }</td><td>{board.score1}</td><td>{board.score2}</td>
@@ -215,7 +219,7 @@ class _ScoreByPlayer extends Editor {
     }
     render() {    
         const { current, dispatch, tournament } = this.props;
-        console.log(current)
+
         return (
             <>
             <div className='row'>
@@ -258,14 +262,14 @@ class _ScoreByPlayer extends Editor {
                     </button>
                 </div>
             </div>
-            <div className='row'>
-                <div className='col-md-10 col-offset-1'>
+            <div className='row mt-3 mb-3'>
+                <div className='col-md-10 offset-md-1'>
                     <table className='table'>
                         { current.resultId ? 
                             (<thead>
                                 <tr><th>Board</th>
-                                    <th>{current.name} score</th>
-                                    <th>{current.p2?.name ? current.p2.name : ""} score</th>
+                                    <th><b>{current.name}</b> score</th>
+                                    <th><b>{current.p2?.name ? current.p2.name : ""}</b> score</th>
                                 </tr>
                             </thead>)
                             :

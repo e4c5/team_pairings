@@ -168,7 +168,7 @@ export function Round(props) {
     function updatePending(json) {
         const names = []
         json.forEach(e => {
-            if (e.score1 || e.score2) {
+            if (tournament.entry_mode == 'T' && (e.score1 || e.score2)) {
                 //
             }
             else {
@@ -254,6 +254,8 @@ export function Round(props) {
         /* Edit a score means replacing the contents of the form with the 
          * existing score
          */
+        console.log('editScore')
+        console.log(current)
         const results = getRoundResults()
         if (results) {
             const result = results[index]
@@ -262,7 +264,7 @@ export function Round(props) {
                 value: {
                     p1: result.p1, p2: result.p2,
                     name: result.p1.name,
-                    resultId: result.id, pending: [],
+                    resultId: result.id, pending: current.pending,
                     score1: result.score1 || '',
                     score2: result.score2 || '',
                     board: result.board || '',
