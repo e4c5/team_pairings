@@ -31,25 +31,6 @@ class TestIntegrat(SeleniumTest):
         cls.selenium.quit()
         cls.firefox.quit()
 
-    def pair_round(self, rnd):
-        driver = self.selenium
-        driver.find_element(By.TAG_NAME,'body').send_keys(Keys.END);
-
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.visibility_of_element_located((By.LINK_TEXT, rnd))
-        )
-        try:
-            WebDriverWait(driver, 5, 0.2).until(
-                EC.element_to_be_clickable((By.LINK_TEXT, rnd))
-            ).click()
-        except :
-            action = ActionChains(driver)
-            action.move_to_element(driver.find_element(By.LINK_TEXT, rnd)).click().perform()
-            
-        WebDriverWait(driver, 5, 0.6).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
-        ).click()
-
 
     def load_tournament(self):
         driver = self.selenium
@@ -60,44 +41,45 @@ class TestIntegrat(SeleniumTest):
         self.login()
         self.get_url('/')
 
-        WebDriverWait(driver, 5, 0.2).until(
+        WebDriverWait(driver, 5, 0.1).until(
             EC.presence_of_element_located((By.LINK_TEXT, "Richmond Showdown U20"))
         ).click()
 
-        WebDriverWait(ff, 5, 0.2).until(
+        WebDriverWait(ff, 5, 0.1).until(
             EC.presence_of_element_located((By.LINK_TEXT, "Richmond Showdown U20"))
         ).click()
         
 
     def add_scores(self):
         driver = self.selenium
-        WebDriverWait(driver, 5, 0.2).until(
+        WebDriverWait(driver, 5, 0.1).until(
             EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
         )
 
         for elem in driver.find_elements(By.CLASS_NAME, "bi-pencil"):
             elem.click()
-            
             r = random.randint(0, 5)
-
-            p2 = driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=p2]')         
-            # wait for the value of the input field to change from blank to non-blank
-            WebDriverWait(driver, 1).until_not(lambda x: p2.get_attribute("value") == "")
-
-            won = driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(r);
             score1 = random.randint(350, 500) * r
             score2 = random.randint(350, 500) * (5-4)
-            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(score1);
-            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(score2);
-            driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()
+            self.type_score(r, score1, score2)
 
-            # wait for the value of the input field to clear
-            WebDriverWait(driver, 1).until(lambda x: p2.get_attribute("value") == "")
 
     def test_integration(self):
         self.load_tournament()
         self.add_participants()
         self.pair_round('1')
+        self.add_scores()
+
+        self.pair_round('2')
+        self.add_scores()
+
+        self.pair_round('3')
+        self.add_scores()
+
+        self.pair_round('4')
+        self.add_scores()
+
+        self.pair_round('5')
         self.add_scores()
 
        # time.sleep(100)

@@ -29,21 +29,7 @@ class TestResults(SeleniumTest):
             EC.presence_of_element_located((By.LINK_TEXT, "Richmond Showdown U20"))
         ).click()
 
-        driver.find_element(By.TAG_NAME,'body').send_keys(Keys.END);
-
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.visibility_of_element_located((By.LINK_TEXT, "1"))
-        )
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "1"))
-        ).click()
-
-
-        WebDriverWait(driver, 5, 0.6).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
-        ).click()
-
-        time.sleep(0.1)
+        self.pair_round('1')
         
         pencil = WebDriverWait(driver, 5, 0.2).until(
             EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
@@ -55,7 +41,6 @@ class TestResults(SeleniumTest):
         pencil.click()
         self.type_score(4, 2000, 1500)
 
-        time.sleep(0.2)
         # now we wait for the result to be posted and for updated standings to
         # come back to us through web push. If this doesn't get updated something
         # has gone wrong.
