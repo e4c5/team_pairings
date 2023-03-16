@@ -30,7 +30,7 @@ function reducer(state, action) {
             return {
                 ...state, p1: action.p1, p2: action.p2,
                 resultId: action.resultId,
-                name: action.name
+                name: action.name, boards: action.boards
             }
         case 'board':
             return { ...state, board: action.board }
@@ -266,6 +266,7 @@ export function Round(props) {
                     score1: result.score1 || '',
                     score2: result.score2 || '',
                     board: result.board || '',
+                    boards: result.boards || [],
                     won: result.games_won || '',
                     lost: tournament.team_size - result.games_won
                 }
@@ -346,10 +347,7 @@ export function Round(props) {
                         {tournament?.participants?.map((row, idx) => {
                             if (row.name != 'Bye') {
                                 return (
-                                    <tr
-                                        key={row.id}
-                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
+                                    <tr  key={row.id} >
                                         <td className="text-left">{idx + 1}</td>
                                         <td component="th" scope="row">
                                             <Link to={`${row.id}`}>{row.name}</Link>

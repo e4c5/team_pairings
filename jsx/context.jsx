@@ -39,7 +39,7 @@ export function useTournamentDispatch() {
  */
 function sortTournament(tournament, participants) {
     let field = tournament.order || 'pos';
-    console.log('Sort tournament by ', field)
+    
     const reverse = field[0] == '-'
     if(reverse) {
         field = field.substr(1)

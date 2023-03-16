@@ -3,6 +3,7 @@ import { Autocomplete } from './autocomplete.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
+
 /**
  * A basic editor component
  * Whatever facebook may tell you there are some areas where
@@ -116,6 +117,7 @@ function autoCompleteCheck(name, txt) {
 }
 
 class _ScoreByTeam extends Editor {
+
     render() {
         const { current, dispatch, tournament } = this.props;
         return (
@@ -140,8 +142,9 @@ class _ScoreByTeam extends Editor {
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col'>
+                    {/* see handlechange 'name' for why how this works */}
                     <input value={current.p2?.name ? current.p2.name : ""}
-                        placeholder="Opponent" data-test-id='p2'
+                        placeholder="Opponent" data-test-id='p2' disabled
                         className='form-control' onChange={e => { }} />
                 </div>
                 <div className='col'>
@@ -172,9 +175,49 @@ class _ScoreByTeam extends Editor {
  * @returns 
  */
 class _ScoreByPlayer extends Editor {
+    /**
+     * Display the score for each board for this team.
+     * The number of row will always match the team size. However if results
+     * have not yet been entered, those rows will appear as blank.
+     * 
+     * @returns the board scores
+     */
+    boardScores() {
+        const { current, dispatch, tournament } = this.props;
+        const scores = []
+        for(let i = 0 ; i < tournament.team_size ; i++) {
+            const board = current?.boards?.[i]
+            if(current.resultId && board) {
+                if(current.p1_id == board.team1_id) {
+                    scores.push(
+                        <tr key={i}>
+                            <td>{ i + 1 }</td><td>{board.score1}</td><td>{board.score2}</td>
+                        </tr>
+                    )
+                }
+                else {
+                    scores.push(
+                        <tr key={i}>
+                            <td>{ i + 1 }</td><td>{board.score2}</td><td>{board.score1}</td>
+                        </tr>
+                    )
+                }
+            }
+            else {
+                scores.push(
+                    <tr key={i}>
+                        <td>{ i + 1 }</td><td></td><td></td>
+                    </tr>
+                )
+            }
+        }
+        return <tbody>{ scores }</tbody>
+    }
     render() {    
         const { current, dispatch, tournament } = this.props;
+        console.log(current)
         return (
+            <>
             <div className='row'>
                 <div className='col'>
                     <Autocomplete
@@ -196,6 +239,7 @@ class _ScoreByPlayer extends Editor {
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col'>
+                    {/* see handlechange 'name' for why how this works */}
                     <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
                         className='form-control' data-test-id='p2'
                         size='small' onChange={e => { }} />
@@ -214,6 +258,29 @@ class _ScoreByPlayer extends Editor {
                     </button>
                 </div>
             </div>
+            <div className='row'>
+                <div className='col-md-10 col-offset-1'>
+                    <table className='table'>
+                        { current.resultId ? 
+                            (<thead>
+                                <tr><th>Board</th>
+                                    <th>{current.name} score</th>
+                                    <th>{current.p2?.name ? current.p2.name : ""} score</th>
+                                </tr>
+                            </thead>)
+                            :
+                            (<thead>
+                                <tr><th>Board</th>
+                                    <th>Player 1 score</th>
+                                    <th>Player 2 score</th>
+                                </tr>
+                            </thead>)
+                        }
+                        { this.boardScores() }
+                    </table>
+                </div>
+            </div>
+            </>             
         )
     }
 }
