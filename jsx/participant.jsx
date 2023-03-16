@@ -121,10 +121,7 @@ export function Participants(props) {
             </thead>
             <tbody>
                 {tournament?.participants?.map((row, idx) => (
-                    <tr
-                        key={row.id}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
+                    <tr key={row.id}>
                         <td className="text-left">{row.pos}</td>
                         <td component="th" scope="row">
                             <Link to={`${row.id}`}>{row.name}</Link>
@@ -178,28 +175,29 @@ export function Participant(props) {
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
                 <h3>{participant.name}</h3>
-                <table className='table'>
-                    <thead>
-                        <tr>
-                            <th>Board</th>
-                            <th>Player</th>
-                            <th>Wins</th>
-                            <th>Margin</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {participant?.members?.map(p => (
-                            <tr key={p.id}>
-                                <td>{p.board}</td>
-                                <td>{p.name}</td>
-                                <td>{p.wins}</td>
-                                <td>{p.spread}</td>
+                {tournament?.entry_mode == 'P' && (
+                    <table className='table'>
+                        <thead>
+                            <tr>
+                                <th>Board</th>
+                                <th>Player</th>
+                                <th>Wins</th>
+                                <th>Margin</th>
                             </tr>
-                        )
-                        )}
-                    </tbody>
-                </table>
-
+                        </thead>
+                        <tbody>
+                            {participant?.members?.map(p => (
+                                <tr key={p.id}>
+                                    <td>{p.board}</td>
+                                    <td>{p.name}</td>
+                                    <td>{p.wins}</td>
+                                    <td>{p.spread}</td>
+                                </tr>
+                            )
+                            )}
+                        </tbody>
+                    </table>)
+                }
                 <ResultList results={participant.results} editScore={editScore} />
 
             </div>

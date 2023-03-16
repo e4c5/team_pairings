@@ -1,19 +1,22 @@
 import time
-import csv
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from tournament.models import Tournament, Participant, Director
+from tournament.models import Participant
 from tournament.tests.workshorse import SeleniumTest
+from tournament.tools import add_participants, random_results, add_team_members
+
+from api import swiss
 
 class TestParticipants(SeleniumTest):
         
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
+        ""
     
     def test_no_forms(self):
         """For not authenticated users the edit/create forms would not show up"""
@@ -50,13 +53,31 @@ class TestParticipants(SeleniumTest):
         time.sleep(0.2)
         self.assertEquals(0, Participant.objects.count())
 
-        
-    def delete_participants(self):
-        """Helper method to delete all participants by clicking del"""
-        driver = self.selenium
-        buttons = driver.find_elements(By.CLASS_NAME, 'bi-x-circle')
-        for button in reversed(buttons):
-            button.click()
 
-            
+    def test_participant_details(self):
+        partis = add_participants(count=10, use_faker=True, tournament=self.t1)
+        self.assertEqual(10, self.t1.participants.count())
+        driver = self.selenium
+        self.login()
+        self.get_url('/')
+
+        rnd = self.t1.rounds.get(round_no=1)
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+
+        random_results(self.t1)
+        WebDriverWait(driver, 5, 0.2).until(
+            EC.presence_of_element_located((By.LINK_TEXT, "Richmond Showdown U20"))
+        ).click()
+
+        WebDriverWait(driver, 5, 0.2).until(
+            EC.presence_of_element_located((By.LINK_TEXT, partis[0].name))
+        ).click()
+ 
+        WebDriverWait(driver, 5, 0.2).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
+        )
+        
+
 

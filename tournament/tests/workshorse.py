@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys 
+from selenium.webdriver.common.action_chains import ActionChains
 
 from tournament.models import Tournament, Director
 
@@ -98,7 +99,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
                 name.send_keys(line[0])
                 rating.send_keys(line[1])
                 btn.click()
-                time.sleep(0.1)
+                WebDriverWait(driver, 1, 0.1).until(lambda x: rating.get_attribute("value") == "")
 
         time.sleep(0.1)
             
@@ -120,3 +121,11 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         WebDriverWait(driver, 5, 0.5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
         ).click()
+
+
+    def delete_participants(self):
+        """Helper method to delete all participants by clicking del"""
+        driver = self.selenium
+        buttons = driver.find_elements(By.CLASS_NAME, 'bi-x-circle')
+        for button in reversed(buttons):
+            button.click()

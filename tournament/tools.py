@@ -18,20 +18,23 @@ def add_participants(tournament, use_faker=False, count=0, filename=""):
     when using faker the ratings will always increase from the first added
     record to the last
     """
+    participants = []
     if use_faker:
         fake = Faker()
         for i in range(count):
-            Participant.objects.create(tournament=tournament, 
+            p = Participant.objects.create(tournament=tournament, 
                 name = fake.city() + " Scrabble Club",
                 rating = i * 10 + 1)
-
+            participants.append(p)
     else:
         with open(filename) as fp:
             reader = csv.reader(fp)
 
             for line in reader:
-                Participant.objects.create(tournament=tournament, name=line[0],
+                p = Participant.objects.create(tournament=tournament, name=line[0],
                     rating=line[1])
+                participants.append(p)
+    return participants
 
 
 def add_team_members(tournament):

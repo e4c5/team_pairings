@@ -92,7 +92,7 @@ export function Tournament(props) {
 
     return (
         <div>
-            <h2>{ tournament?.name }</h2>
+            <h2><a href={tournament?.slug}>{ tournament?.name }</a></h2>
             <Participants /> 
             { addParticipant() }
             <Rounds/>
