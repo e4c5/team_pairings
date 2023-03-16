@@ -28,8 +28,9 @@ class Editor extends React.Component {
                 "X-CSRFToken": getCookie("csrftoken")
             },
             body: JSON.stringify({
-                score1: current.score1, result: current.resultId,
-                score2: current.score2, games_won: current.won, round: round_id
+                score1: current.score1, result: current.resultId, 
+                board: current.board, round: round_id,
+                score2: current.score2, games_won: current.won
             })
         }).then(resp => resp.json()).then(json => {
             dispatch({ type: 'reset' })
@@ -186,26 +187,29 @@ class _ScoreByPlayer extends Editor {
                 </div>
                 <div className='col'>
                     <input value={current.board} placeholder="Board Number" className='form-control'
+                        data-test-id='board'
                         onChange={e => this.handleChange(e, 'board')} />
                 </div>
                 <div className='col'>
-                    <input value={current.score1} placeholder="Score for player1" className='form-control'
+                    <input value={current.score1} placeholder="Score for player1"
+                        className='form-control' data-test-id='score1'
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col'>
                     <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
-                        className='form-control'
+                        className='form-control' data-test-id='p2'
                         size='small' onChange={e => { }} />
                 </div>
                 <div className='col'>
                     <input value={current.score2} placeholder="Score for player2"
-                        className='form-control' type='number'
+                        className='form-control' data-test-id='score2' 
+                        type='number'
                         onChange={e => this.handleChange(e, 'score2')} />
                 </div>
                 <div className='col'>
                     <button className='btn btn-primary'
                         disabled={current.resultId == ''}
-                        onClick={e => addScore()}>
+                        onClick={e => this.addScore()}>
                         <i className='bi-plus' ></i>
                     </button>
                 </div>

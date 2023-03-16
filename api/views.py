@@ -192,7 +192,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 instance.score1 = serializer.validated_data['score1']
                 instance.score2 = serializer.validated_data['score2']
                 instance.save()
-                return Response({'status': 'ok'})
+                
 
             broadcast({
                         "tournament_id": request.tournament.id,
@@ -202,10 +202,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
             )
 
             return Response({'status': 'ok'})
-        except models.Result.DoesNotExist:
-            for result in  models.Result.objects.all():
-                print(result.id)
-            print("We got ",request.data.get('result') )
         except:
             import traceback
             traceback.print_exc()
@@ -265,15 +261,20 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
 def get_results(round_id):
-    query = """select json_agg(r) from (     
-        select *,
-            (select to_jsonb(tp) from 
-                  ( select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc) as "pos", * 
-                        from tournament_participant ) tp where id = tr.p1_id) p1,
-            (select to_jsonb(tp) from ( select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc) as "pos", * 
-                        from tournament_participant ) tp where id = tr.p2_id) p2
-        from tournament_result tr where round_id = %s  
-    ) r"""
+    query = """
+        with parti as (
+            select rank() over(
+                order by round_wins desc, game_wins desc, spread desc, rating desc
+            ) as "pos", * 
+            from tournament_participant
+        )
+        select json_agg(r) from (
+            select *, 
+                (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
+                (select to_jsonb(parti) from parti where id = tr.p2_id) p2
+            from tournament_result tr where round_id = %s
+        ) r
+    """
     with connection.cursor() as cursor:
         cursor.execute(query, [round_id])
         resp = cursor.fetchone()[0]

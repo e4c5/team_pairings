@@ -60,7 +60,7 @@ class TestIntegrat(SeleniumTest):
             r = random.randint(0, 5)
             score1 = random.randint(350, 500) * r
             score2 = random.randint(350, 500) * (5-4)
-            self.type_score(r, score1, score2)
+            self.type_score(score1, score2, games=r)
 
 
     def test_integration(self):

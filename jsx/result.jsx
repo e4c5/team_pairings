@@ -40,7 +40,10 @@ export function Result({r, index, editScore}) {
                 <td className="text-right" >{ r.games_won } </td>
                 <td className="text-right" >{ r.score1 }</td>
                 <td>{ get_p2(r) }</td>
-                <td className="text-right">{ r.games_won !== undefined ? tournament.team_size - r.games_won : ""} </td>
+                <td className="text-right">
+                    { r.games_won === undefined || r.games_won === null 
+                        ? "" : tournament.team_size - r.games_won } 
+                </td>
                 <td className="text-right">{ r.score2 }</td>
                 <td className="text-right">
                     { editable &&

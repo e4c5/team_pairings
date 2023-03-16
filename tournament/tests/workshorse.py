@@ -60,21 +60,27 @@ class SeleniumTest(ChannelsLiveServerTestCase):
 
         self.t1 = Tournament.objects.create(name='Richmond Showdown U20', start_date='2023-02-25',
             rated=False, team_size=5, entry_mode='T', num_rounds=5)
+        self.t2 = Tournament.objects.create(name='Richmond Showdown U15', start_date='2023-02-25',
+            rated=False, team_size=5, entry_mode='P', num_rounds=5)
 
         Director.objects.create(tournament=self.t1, user=u)
+        Director.objects.create(tournament=self.t2, user=u)
 
     def get_url(self, relative_path):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))
 
 
-    def type_score(self, games, score1, score2) :
+    def type_score(self, score1, score2, *, games=None, board=None) :
         driver = self.selenium
         p2 = driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=p2]')         
         # wait for the value of the input field to change from blank to non-blank
         # that's when the react state would have finished updating.
         WebDriverWait(driver, 1, 0.1).until_not(lambda x: p2.get_attribute("value") == "")
+        if games is not None:
+            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(games);
+        else:
+            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=board]').send_keys(board);
 
-        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(games);
         driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(score1);
         driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(score2);
         driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()

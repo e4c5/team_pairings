@@ -14,7 +14,6 @@ export function Tournament(props) {
     const tournament = useTournament()
 
     useEffect(() => {
-        console.log(params.slug)
         if(tournament === null || tournament.slug != params.slug) {
             props.tournaments?.map(t => {
                 if(t.slug == params.slug) {

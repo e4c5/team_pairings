@@ -238,10 +238,15 @@ export function Round(props) {
 
     /**
      * Edit a previously entered score or add a new one.
+     * 
      * Called by the edit icon in the child component <Result/> clicking on it
      * will change the editor area to show the scores for that particular game
      * if the score had not already been entered most fields will be blank but
-     * two names for the players/teams will be filled
+     * two names for the players/teams will be filled.
+     * 
+     * Note that this does not update the results in the server. For that
+     * @see addscore in scorer.jsx 
+     * 
      * @param {*} e 
      * @param {*} index 
      */
@@ -260,6 +265,7 @@ export function Round(props) {
                     resultId: result.id, pending: [],
                     score1: result.score1 || '',
                     score2: result.score2 || '',
+                    board: result.board || '',
                     won: result.games_won || '',
                     lost: tournament.team_size - result.games_won
                 }
