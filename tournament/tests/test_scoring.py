@@ -63,6 +63,7 @@ class TestResults(SeleniumTest):
         time.sleep(1)
         self.assertEquals(Result.objects.filter(games_won=0).count(), 1)
         
+
     def test_individual_entry(self):
         """Testing a tournament where data is entered per player"""
         add_participants(self.t2, False, 18, 'api/tests/data/teams.csv')
@@ -91,23 +92,28 @@ class TestResults(SeleniumTest):
         # now we wait for the result to be posted and for updated standings to
         # come back to us through web push. If this doesn't get updated something
         # has gone wrong.
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(2)"), "4")
+        table = driver.find_element(By.ID, "results")
+        WebDriverWait(table, 5, 0.2).until(
+            EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(2)"), "0")
         )
         
         self.assertEquals(
-            '2000', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(3)").text
+            '400', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(3)").text
         )
         self.assertEquals(
-            '1500', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(6)").text
+            '500', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(6)").text
         )
 
         # add another score
         pencil = driver.find_elements(By.CLASS_NAME,'bi-pencil')[1]
         pencil.click()
         self.type_score(430, 500, board=4)
-        time.sleep(120)
-        self.assertEquals(Result.objects.filter(games_won=0).count(), 1)        
+        tr = table.find_element(By.CSS_SELECTOR, "tr:nth-of-type(2)")
+        self.assertEquals(
+            '430', tr.find_element(By.CSS_SELECTOR, "td:nth-of-type(3)").text
+        )
+        self.assertEquals(Result.objects.filter(games_won=0).count(), 2)        
+
 
     def flip(self):
         driver = self.selenium

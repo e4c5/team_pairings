@@ -174,7 +174,7 @@ export function Participant(props) {
         return (
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
-                <h3>{participant.name}</h3>
+                <h3>{participant.name} q</h3>
                 {tournament?.entry_mode == 'P' && (
                     <table className='table'>
                         <thead>

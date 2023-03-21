@@ -41,7 +41,7 @@ export function Result({r, index, editScore}) {
             return tournament.team_size - r.games_won
         }
         else {
-            const played = r.boards.length;
+            const played = r.boards?.length;
             return played - r.games_won;
         }
     }
@@ -79,7 +79,7 @@ export function Result({r, index, editScore}) {
 export function ResultList({editScore, results}) {
     if(results && results.length) {
         return (
-            <table className='table table-striped table-dark table-bordered'>
+            <table className='table table-striped table-dark table-bordered' id='results'>
                 <thead>
                     <tr>
                         <th align="left">Team 1</th>

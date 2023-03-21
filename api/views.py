@@ -261,45 +261,48 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             tournament_id = self.kwargs['tid']).order_by('-round_wins','-game_wins','-spread')
 
 def get_results(tournament, round_id):
-    if tournament.entry_mode == 'T':
-        query = """
-            with parti as (
-                select rank() over(
-                    order by round_wins desc, game_wins desc, spread desc, rating desc
-                ) as "pos", * 
-                from tournament_participant
-            )
-            select json_agg(r) from (
-                select *, 
-                    (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
-                    (select to_jsonb(parti) from parti where id = tr.p2_id) p2
-                from tournament_result tr where round_id = %s
-            ) r
-        """
-    else:
-        query = """
-            with parti as (
-                select rank() over(
-                    order by round_wins desc, game_wins desc, spread desc, rating desc
-                ) as "pos", * 
-                from tournament_participant
-            )
-            select json_agg(r) from (     
-                select *, 
-                    (select json_agg(tb) 
-                        from tournament_boardresult tb 
-                        where tb.round_id = 6 and score1 is not null
-                            and team1_id = tr.p1_id and team2_id = tr.p2_id) boards,
-                    (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
-                    (select to_jsonb(parti) from parti where id = tr.p2_id) p2
-                from tournament_result tr where round_id = 6
-            ) r
-        """
-
     with connection.cursor() as cursor:
-        cursor.execute(query, [round_id])
-        resp = cursor.fetchone()[0]
-        return resp or []
+        if tournament.entry_mode == 'T':
+            query = """
+                with parti as (
+                    select rank() over(
+                        order by round_wins desc, game_wins desc, spread desc, rating desc
+                    ) as "pos", * 
+                    from tournament_participant
+                )
+                select json_agg(r) from (
+                    select *, 
+                        (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
+                        (select to_jsonb(parti) from parti where id = tr.p2_id) p2
+                    from tournament_result tr where round_id = %s
+                ) r
+            """
+            cursor.execute(query, [round_id])
+            resp = cursor.fetchone()[0]
+            return resp or []    
+        else:
+            query = """
+                with parti as (
+                    select rank() over(
+                        order by round_wins desc, game_wins desc, spread desc, rating desc
+                    ) as "pos", * 
+                    from tournament_participant
+                )
+                select json_agg(r) from (     
+                    select *, 
+                        (select json_agg(tb) 
+                            from tournament_boardresult tb 
+                            where tb.round_id = %s and score1 is not null
+                                and team1_id = tr.p1_id and team2_id = tr.p2_id) boards,
+                        (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
+                        (select to_jsonb(parti) from parti where id = tr.p2_id) p2
+                    from tournament_result tr where round_id = %s
+                ) r
+            """
+
+            cursor.execute(query, [round_id, round_id])
+            resp = cursor.fetchone()[0]
+            return resp or []
 
 def broadcast(message):
     
