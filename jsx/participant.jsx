@@ -8,19 +8,29 @@ import { ResultList } from './result.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
+const individual = [
+    ["Rank", "pos"],
+    ["Name", "name"],
+    ["Rating", "rating"],
+    ["Won", "game_wins"],
+    ["Spread", "spread"],
+]
+
+const team = [
+    ["Rank", "pos"],
+    ["Name", "name"],
+    ["Rating", "rating"],
+    ["Round Wins", "round_wins"],
+    ["Game Wins", "game_wins"], 
+    ["Spread", "spread"],
+]
+
 export function Participants(props) {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch();
 
     const auth = document.getElementById('hh') && document.getElementById('hh').value
-    const columns = [
-        ["Rank", "pos"],
-        ["Name", "name"],
-        ["Rating", "rating"],
-        ["Round Wins", "round_wins"],
-        ["Game Wins", "game_wins"],
-        ["Spread", "spread"],
-    ]
+    const columns = props?.tournament?.team_size ? [...team ] : [...individual]
 
     if (auth) {
         columns.push(["Actions"])

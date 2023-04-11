@@ -5,7 +5,7 @@ import getCookie from './cookie.js';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import { ResultList } from './result.jsx';
 import { Confirm } from './dialog.js';
-import { ScoreByTeam, ScoreByPlayer } from './scorer.jsx'
+import { ScoreByTeam, ScoreByPlayer, IndividualTournamentScorer } from './scorer.jsx'
 
 /**
  * Initial value for the result entry form
@@ -300,10 +300,14 @@ export function Round(props) {
         if (!editable) {
             return <></>
         }
-        if (tournament.entry_mode == 'T') {
-            return <ScoreByTeam current={current} dispatch={dispatch} round={round} />
+        if(tournament.team_size) {
+            if (tournament.entry_mode == 'T') {
+                return <ScoreByTeam current={current} dispatch={dispatch} round={round} />
+            }
+            return <ScoreByPlayer current={current} dispatch={dispatch} round={round} />
         }
-        return <ScoreByPlayer current={current} dispatch={dispatch} round={round} />
+        
+        return <IndividualTournamentScorer current={current} dispatch={dispatch} round={round} />
     }
 
 

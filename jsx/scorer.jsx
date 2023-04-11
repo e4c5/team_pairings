@@ -289,6 +289,61 @@ class _ScoreByPlayer extends Editor {
     }
 }
 
+/**
+ * Scpromg for none team tournaments
+ * @returns 
+ */
+class _IndividualTournamentScorer extends Editor {
+    render() {
+        const { current, dispatch, tournament } = this.props;
+        return (
+            <div className='row'>
+                <div className='col'>
+                    <Autocomplete
+                        suggestions={current.pending} placeholder='name'
+                        value={current.name}
+                        onChange={e => this.handleChange(e, 'name')}
+                        onSelect={(e, suggestion) => this.handleChange(e, 'name', suggestion)}
+                        check={autoCompleteCheck}
+                    />
+                </div>
+                <div className='col'>
+                    <input value={current.won} placeholder="Result"
+                        className='form-control' type='number' data-test-id='games-won'
+                        onChange={e => this.handleChange(e, 'won')} disabled />
+                </div>
+                <div className='col'>
+                    <input value={current.score1} placeholder="Score for Player1" 
+                        className='form-control' data-test-id='score1'
+                        onChange={e => this.handleChange(e, 'score1')} type='number' />
+                </div>
+                <div className='col'>
+                    {/* see handlechange 'name' for why how this works */}
+                    <input value={current.p2?.name ? current.p2.name : ""}
+                        placeholder="Opponent" data-test-id='p2' disabled
+                        className='form-control' onChange={e => { }} />
+                </div>
+                <div className='col'>
+                    <input value={current.lost} placeholder="Result" disabled type='number'
+                        className='form-control' />
+                </div>
+                <div className='col'>
+                    <input value={current.score2} placeholder="Score for Player2"
+                        className='form-control' data-test-id='score2'
+                        type='number' onChange={e => this.handleChange(e, 'score2')} />
+                </div>
+                <div className='col'>
+                    <button className='btn btn-primary'
+                        disabled={current.resultId == ''}
+                        onClick={e => this.addScore()}>
+                        <i className='bi-plus' ></i>
+                    </button>
+                </div>
+            </div>
+        )
+    }
+}
+
 export function ScoreByPlayer(props) {
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
@@ -301,4 +356,11 @@ export function ScoreByTeam(props) {
     const tournamentDispatch = useTournamentDispatch()
 
     return <_ScoreByTeam tournament={tournament} {...props} />
+}
+
+export function IndividualTournamentScorer(props) {
+    const tournament = useTournament();
+    const tournamentDispatch = useTournamentDispatch()
+
+    return <_IndividualTournamentScorer tournament={tournament} {...props} />
 }

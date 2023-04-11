@@ -37,13 +37,16 @@ export function Result({r, index, editScore}) {
         if(r.games_won === undefined || r.games_won === null) {
             return ""
         }
-        if(tournament.entry_mode == 'T') {
-            return tournament.team_size - r.games_won
+        if(tournament.team_size) {
+            if(tournament.entry_mode == 'T') {
+                return tournament.team_size - r.games_won
+            }
+            else {
+                const played = r.boards?.length;
+                return played - r.games_won;
+            }
         }
-        else {
-            const played = r.boards?.length;
-            return played - r.games_won;
-        }
+        return 1 - r.games_won;
     }
 
     function resultIn() {
@@ -77,19 +80,32 @@ export function Result({r, index, editScore}) {
  * @returns 
  */
 export function ResultList({editScore, results}) {
+    const tournament = useTournament()
     if(results && results.length) {
         return (
             <table className='table table-striped table-dark table-bordered' id='results'>
                 <thead>
-                    <tr>
-                        <th align="left">Team 1</th>
-                        <th align="right">Wins</th>
-                        <th align="right">Total Score</th>
-                        <th align="left">Team 2</th>
-                        <th align="right">Wins</th>
-                        <th align="right">Total Score</th>
-                        <th align="right"></th>
-                    </tr>
+                    { tournament?.team_size ?
+                        <tr>
+                            <th align="left">Team 1</th>
+                            <th align="right">Wins</th>
+                            <th align="right">Total Score</th>
+                            <th align="left">Team 2</th>
+                            <th align="right">Wins</th>
+                            <th align="right">Total Score</th>
+                            <th align="right"></th>
+                        </tr>
+                        :
+                        <tr>
+                            <th align="left">Player 1</th>
+                            <th align="right">Result</th>
+                            <th align="right">Score</th>
+                            <th align="left">Player 2</th>
+                            <th align="left">Result</th>
+                            <th align="right">Score</th>
+                            <th align="right"></th>
+                        </tr>
+                    }
                 </thead>
                 <tbody>
                     {results.map((r, idx) => <Result key={r.id} r={r}
