@@ -40,14 +40,14 @@ class SeleniumTest(ChannelsLiveServerTestCase):
     def login(self):
         """Some actions you need to be logged in"""
         self.selenium.refresh()
-        self.get_url('/accounts/login/')
+        self.get_url('/login/')
     
-        username_input = self.selenium.find_element(By.ID,"id_login")
+        username_input = self.selenium.find_element(By.ID,"id_username")
         username_input.send_keys('admin')
         password_input = self.selenium.find_element(By.ID,"id_password")
         password_input.send_keys('12345')
         
-        self.selenium.find_element(By.CSS_SELECTOR,".primaryAction").click()
+        self.selenium.find_element(By.CSS_SELECTOR,".btn-primary").click()
         
 
     def setUp(self):

@@ -149,7 +149,7 @@ class Participant(models.Model):
         ]
 
    
-class Result(models.Model):
+class   Result(models.Model):
     """A round result.
     
     If you make any changes here, double check the update_result function which 
@@ -168,7 +168,7 @@ class Result(models.Model):
 
     # only used for team tournaments.
     # the number of games won in the round by the first player
-    games_won = models.IntegerField(blank=True, null=True)
+    games_won = models.DecimalField(blank=True, null=True, max_digits=3, decimal_places=1)
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
     

@@ -64,7 +64,7 @@ class TestResults(SeleniumTest):
         self.assertEquals(Result.objects.filter(games_won=0).count(), 1)
         
 
-    def test_individual_entry(self):
+    def test_entry_by_player(self):
         """Testing a tournament where data is entered per player"""
         add_participants(self.t2, False, 18, 'api/tests/data/teams.csv')
         add_team_members(tournament=self.t2)

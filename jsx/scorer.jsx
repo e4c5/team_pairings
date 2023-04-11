@@ -50,6 +50,26 @@ class Editor extends React.Component {
     handleChange(e, fieldName, kwargs) {
         const { current, dispatch, tournament } = this.props;
 
+        if(tournament.team_size === null && (fieldName == 'score1' || fieldName == 'score2')) {
+            if(current.score2 !== undefined && current.score2 !== undefined) {
+                const score1 = fieldName == 'score1' ? e.target.value : current.score1;
+                const score2 = fieldName == 'score2' ? e.target.value : current.score2;
+                let won = 0;
+                if(score1 == score2) {
+                    won = 0.5
+                }
+                else if(score1 > score2) {
+                    won = 1
+                }
+                else {
+                    won = 0
+                }
+                const lost = 1 - won
+                dispatch({ type: 'won', won: won })
+                dispatch({ type: 'lost', lost: lost })
+            }   
+        }
+
         if (fieldName == 'score1') {
             dispatch({ type: 'score1', score1: e.target.value })
         }
