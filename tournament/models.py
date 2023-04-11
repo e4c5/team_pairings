@@ -1,4 +1,6 @@
 import re
+import decimal
+
 from django.db import models, connection
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -149,7 +151,7 @@ class Participant(models.Model):
         ]
 
    
-class   Result(models.Model):
+class Result(models.Model):
     """A round result.
     
     If you make any changes here, double check the update_result function which 
@@ -168,7 +170,7 @@ class   Result(models.Model):
 
     # only used for team tournaments.
     # the number of games won in the round by the first player
-    games_won = models.DecimalField(blank=True, null=True, max_digits=3, decimal_places=1)
+    games_won = models.FloatField(blank=True, null=True)
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
     
@@ -275,7 +277,7 @@ def update_board_result(sender, instance, created, **kwargs):
             if player1:
                 player1.wins += 1
         elif instance.score1 == instance.score2:
-            r.games_won += 0.5         
+            r.games_won += 0.5
             if player2:
                 player2.wins +=1
 
@@ -321,7 +323,6 @@ def update_standing(pid):
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
 
-    print(q.format(pid))
     with connection.cursor() as cursor:
         cursor.execute(q.format(pid))
 
@@ -333,7 +334,8 @@ def update_team_standing(pid):
     """
     q = """
         update tournament_participant set played = a.games + b.games,
-            game_wins = a.games_won + b.games_won, spread = a.margin + b.margin
+            game_wins = a.games_won + b.games_won, 
+            round_wins = a.rounds_won + b.rounds_won, spread = a.margin + b.margin
             from (select count(*) as games, coalesce(sum(games_won),0) games_won, 
                 coalesce(sum(CASE when games_won is null THEN 0 
                                 WHEN games_won > 2.5 THEN 1 

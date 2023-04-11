@@ -4,7 +4,7 @@ from faker import Faker
 from django.db.models import Q
 
 from tournament.models import Participant, TeamMember, Tournament, BoardResult
-from tournament.models import update_standing
+from tournament.models import update_standing, update_team_standing
 
 def add_participants(tournament, use_faker=False, count=0, filename=""):
     """Adds a list of participants (teams) to a tournament
@@ -125,4 +125,7 @@ def truncate_rounds(tournament, number):
         round.save()
 
     for p in tournament.participants.all():
-        update_standing(p.id)
+        if tournament.team_size:
+            update_team_standing(p.id)
+        else:
+            update_standing(p.id)
