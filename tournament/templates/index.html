@@ -16,7 +16,9 @@
     <div id="frm" style="display: none">{{from}}</div>
     {% if request.user.is_authenticated %}
     <input type="hidden" name="hh" id="hh" value="true" />
+    {% else %} <div><a href="{% url 'login' %}">Login</a></div>
     {% endif %}
+
   </div>
 </body>
 

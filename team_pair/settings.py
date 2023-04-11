@@ -41,9 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'channels',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
     'tournament','api'
 ]
 
