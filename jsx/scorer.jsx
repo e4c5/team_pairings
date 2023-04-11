@@ -12,6 +12,7 @@ import getCookie from './cookie.js';
 class Editor extends React.Component {
     constructor(props) {
         super(props)
+        this.nextRef = undefined
     }
 
     /**
@@ -314,6 +315,11 @@ class _ScoreByPlayer extends Editor {
  * @returns 
  */
 class _IndividualTournamentScorer extends Editor {
+    constructor(props) {
+        super(props)
+        this.nextRef = React.createRef()
+    }
+
     render() {
         const { current, dispatch, tournament } = this.props;
         return (
@@ -335,6 +341,7 @@ class _IndividualTournamentScorer extends Editor {
                 <div className='col'>
                     <input value={current.score1} placeholder="Score for Player1" 
                         className='form-control' data-test-id='score1'
+                        ref={this.next}
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col'>

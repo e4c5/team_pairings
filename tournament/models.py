@@ -295,11 +295,37 @@ def update_result(sender, instance, created, **kwargs):
     """When a result instance is saved the standings need to update"""
     if not created:
         if instance.score1 or instance.score2:
-            update_standing(instance.p1_id)
-            update_standing(instance.p2_id)
+            if instance.round.tournament.team_size:
+                update_team_standing(instance.p1_id)
+                update_team_standing(instance.p2_id)
+            else:
+                update_standing(instance.p1_id)
+                update_standing(instance.p2_id)
 
 
 def update_standing(pid):
+    """Update standings for an individual tournament
+    Args: pid: participant id
+    """
+
+    q = """
+        update tournament_participant set played = a.games + b.games,
+            game_wins = a.games_won + b.games_won, 
+            spread = a.margin + b.margin
+            from 
+                (select count(*) as games, coalesce(sum(games_won), 0) games_won, 
+                    coalesce(sum(score1 - score2), 0) margin
+            from tournament_result tr where p1_id = {0} and games_won is not null) a,
+                (select count(*) as games, coalesce(sum(1 - games_won), 0) games_won, 
+                    coalesce(sum(score2 - score1), 0) margin
+            from tournament_result tr where p2_id = {0} and games_won is not null) b
+            where id = {0}"""
+
+    print(q.format(pid))
+    with connection.cursor() as cursor:
+        cursor.execute(q.format(pid))
+
+def update_team_standing(pid):
     """Execute the standing update query. for the given participant
     Args: pid: participant id
 
@@ -307,8 +333,7 @@ def update_standing(pid):
     """
     q = """
         update tournament_participant set played = a.games + b.games,
-            game_wins = a.games_won + b.games_won, 
-            round_wins = a.rounds_won + b.rounds_won, spread = a.margin + b.margin
+            game_wins = a.games_won + b.games_won, spread = a.margin + b.margin
             from (select count(*) as games, coalesce(sum(games_won),0) games_won, 
                 coalesce(sum(CASE when games_won is null THEN 0 
                                 WHEN games_won > 2.5 THEN 1 

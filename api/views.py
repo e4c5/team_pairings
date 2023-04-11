@@ -79,6 +79,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 if request.data.get('td') == request.user.username:
                     models.BoardResult.objects.filter(round=rnd).delete()
                     models.Result.objects.filter(round=rnd).delete()
+                    # unpair helper will broadcast
                     self.unpair_helper(rnd)
                     update_all_standings(request.tournament)
                     return Response({'status': 'ok'})
@@ -326,4 +327,7 @@ def update_all_standings(tournament):
         # this absolutely is not the right way but this is not a function
         # that will be used all that much and even with 200 players this
         # is still only going to take a second or two.
-        models.update_standing(p.id)
+        if tournament.team_size:
+            models.update_team_standing(p.id)
+        else:
+            models.update_standing(p.id)

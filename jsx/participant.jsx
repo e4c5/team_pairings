@@ -137,8 +137,12 @@ export function Participants(props) {
                             <Link to={`${row.id}`}>{row.name}</Link>
                         </td>
                         <td className="text-right">{row.rating}</td>
-                        <td className="text-right">{row.round_wins}</td>
-                        <td className="text-right">{row.game_wins}</td>
+                        { tournament.team_size ? 
+                            <><td className="text-right">{row.round_wins}</td>
+                                <td className="text-right">{row.game_wins}</td>
+                            </>
+                            : <td className="text-right">{row.game_wins}</td>
+                        }
                         <td className="text-right">{row.spread}</td>
                         {auth &&
                             <td className="text-right">
