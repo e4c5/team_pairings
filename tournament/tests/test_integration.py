@@ -65,8 +65,8 @@ class TestIntegration(SeleniumTest):
     
     def test_integration_of_singles(self):
         """A tournament that's not about teams"""
-        self.load_tournament("'New Year Joust'")
-        self.add_participants()
+        self.load_tournament("New Year Joust")
+        self.add_participants(faker=True, count=17)
 
     def test_integration_by_board(self):
         """Does the whole hog for a tournament where data entry is by player"""

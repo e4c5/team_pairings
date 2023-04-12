@@ -50,6 +50,18 @@ class BasicTests(APITestCase):
         self.assertIsNone(t)
 
 
+    def test_seed(self):
+        """Test that participants get the right seed"""
+        p = models.Participant.objects.create(name="bada", tournament=self.t1)
+        self.assertEqual(p.seed, 1)
+        p.name = 'renamed'
+        p.save()
+        p = models.Participant.objects.all()[0]
+        self.assertEqual(p.seed, 1)
+        p = models.Participant.objects.create(name="bada", tournament=self.t1)
+        self.assertEqual(p.seed, 2)
+
+
     def test_current_round(self):
         for i in range(5):
             models.TournamentRound.objects.create(

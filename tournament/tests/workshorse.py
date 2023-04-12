@@ -1,3 +1,4 @@
+from faker import Faker
 import time
 import csv
 import logging
@@ -92,25 +93,37 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         # would have been posted to the server , the response recieved and state updated
         WebDriverWait(driver, 1, 0.1).until(lambda x: p2.get_attribute("value") == "")
         
-    def add_participants(self):
-        """Helper method to load participants in a file by filling forms"""
+    def add_participants(self, faker=False, count=0):
+        """Helper method to load participants in a file by filling forms
+        Args: Faker: use faker instead of reading from a file
+            count: Number of records to add
+        """
         driver = self.selenium
-        with open('api/tests/data/teams.csv') as fp:
-            name = WebDriverWait(driver, 5, 0.2).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-test-id=name]'))
-            )
+        name = WebDriverWait(driver, 5, 0.2).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-test-id=name]'))
+        )
 
-            rating = driver.find_element(By.CSS_SELECTOR,'input[data-test-id=rating]')
-            btn = driver.find_element(By.CSS_SELECTOR,'button[data-test-id=add]')
-
-            reader = csv.reader(fp)
-            for line in reader:
-                name.send_keys(line[0])
-                rating.send_keys(line[1])
+        rating = driver.find_element(By.CSS_SELECTOR,'input[data-test-id=rating]')
+        btn = driver.find_element(By.CSS_SELECTOR,'button[data-test-id=add]')
+    
+        if faker:
+            fake = Faker()
+            for i in range(count):
+                name.send_keys(fake.name())
+                rating.send_keys(fake.random_int(500, 1500))
                 btn.click()
                 WebDriverWait(driver, 1, 0.1).until(lambda x: rating.get_attribute("value") == "")
+        else:
+            with open('api/tests/data/teams.csv') as fp:
+                reader = csv.reader(fp)
+                for line in reader:
+                    name.send_keys(line[0])
+                    rating.send_keys(line[1])
+                    btn.click()
+                    WebDriverWait(driver, 1, 0.1).until(lambda x: rating.get_attribute("value") == "")
 
         time.sleep(0.1)
+
             
     def pair_round(self, rnd):
         driver = self.selenium

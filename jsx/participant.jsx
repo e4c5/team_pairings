@@ -134,7 +134,9 @@ export function Participants(props) {
                     <tr key={row.id}>
                         <td className="text-left">{row.pos}</td>
                         <td component="th" scope="row">
-                            <Link to={`${row.id}`}>{row.name}</Link>
+                            <Link to={`${row.id}`}>
+                                { tournament.team_size ? row.name : `${row.name} (#${row.seed})` }
+                            </Link>
                         </td>
                         <td className="text-right">{row.rating}</td>
                         { tournament.team_size ? 

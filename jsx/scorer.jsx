@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { Autocomplete } from './autocomplete.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
@@ -12,7 +12,6 @@ import getCookie from './cookie.js';
 class Editor extends React.Component {
     constructor(props) {
         super(props)
-        this.nextRef = undefined
     }
 
     /**
@@ -317,7 +316,6 @@ class _ScoreByPlayer extends Editor {
 class _IndividualTournamentScorer extends Editor {
     constructor(props) {
         super(props)
-        this.nextRef = React.createRef()
     }
 
     render() {
@@ -334,14 +332,13 @@ class _IndividualTournamentScorer extends Editor {
                     />
                 </div>
                 <div className='col'>
-                    <input value={current.won} placeholder="Result"
+                    <input value={current.won} placeholder="Result" 
                         className='form-control' type='number' data-test-id='games-won'
                         onChange={e => this.handleChange(e, 'won')} disabled />
                 </div>
                 <div className='col'>
                     <input value={current.score1} placeholder="Score for Player1" 
-                        className='form-control' data-test-id='score1'
-                        ref={this.next}
+                        className='form-control' data-test-id='score1' ref={this.props.forward}
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col'>
@@ -385,9 +382,11 @@ export function ScoreByTeam(props) {
     return <_ScoreByTeam tournament={tournament} {...props} />
 }
 
-export function IndividualTournamentScorer(props) {
+export const IndividualTournamentScorer = forwardRef((props, ref) => {
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
 
-    return <_IndividualTournamentScorer tournament={tournament} {...props} />
-}
+    return <_IndividualTournamentScorer tournament={tournament} {...props} forward={ref} />
+});
+
+console.log('scorer 0.02')

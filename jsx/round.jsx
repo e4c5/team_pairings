@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useRef } from 'react';
 import { useParams, Link } from "react-router-dom";
 
 import getCookie from './cookie.js';
@@ -92,6 +92,9 @@ export function Round(props) {
 
     const [modal, setModal] = useState(false)
     const [code, setCode] = useState('')
+
+    /* tie this ref to the score field */
+    const ref = React.useRef(null);
 
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch()
@@ -248,7 +251,7 @@ export function Round(props) {
      * @see addscore in scorer.jsx 
      * 
      * @param {*} e 
-     * @param {*} index 
+     index 
      */
     function editScore(e, index) {
         /* Edit a score means replacing the contents of the form with the 
@@ -273,6 +276,8 @@ export function Round(props) {
                     lost: tournament.team_size - result.games_won
                 }
             })
+            ref.current.scrollIntoView({ behavior: 'smooth' });
+            ref.current.focus()
         }
     }
 
@@ -302,12 +307,12 @@ export function Round(props) {
         }
         if(tournament.team_size) {
             if (tournament.entry_mode == 'T') {
-                return <ScoreByTeam current={current} dispatch={dispatch} round={round} />
+                return <ScoreByTeam current={current} dispatch={dispatch}  round={round} />
             }
             return <ScoreByPlayer current={current} dispatch={dispatch} round={round} />
         }
         
-        return <IndividualTournamentScorer current={current} dispatch={dispatch} round={round} />
+        return <IndividualTournamentScorer current={current} dispatch={dispatch} ref={ref} round={round} />
     }
 
 
