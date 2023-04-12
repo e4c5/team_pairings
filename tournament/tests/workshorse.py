@@ -62,9 +62,12 @@ class SeleniumTest(ChannelsLiveServerTestCase):
             rated=False, team_size=5, entry_mode='T', num_rounds=5)
         self.t2 = Tournament.objects.create(name='Richmond Showdown U15', start_date='2023-02-25',
             rated=False, team_size=5, entry_mode='P', num_rounds=5)
-
+        self.t3 = Tournament.objects.create(name='New Year Joust', start_date='2023-04-23',
+            rated=False, entry_mode='P', num_rounds=9)
+        
         Director.objects.create(tournament=self.t1, user=u)
         Director.objects.create(tournament=self.t2, user=u)
+        Director.objects.create(tournament=self.t3, user=u)
 
     def get_url(self, relative_path):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))

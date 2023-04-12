@@ -62,6 +62,12 @@ class TestIntegration(SeleniumTest):
             score2 = random.randint(350, 500) * (5-4)
             self.type_score(score1, score2, games=r)
 
+    
+    def test_integration_of_singles(self):
+        """A tournament that's not about teams"""
+        self.load_tournament("'New Year Joust'")
+        self.add_participants()
+
     def test_integration_by_board(self):
         """Does the whole hog for a tournament where data entry is by player"""
         self.load_tournament("Richmond Showdown U15")

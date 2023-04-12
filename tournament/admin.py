@@ -24,7 +24,7 @@ class TDAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'user']
 
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ['tournament','name']
+    list_display = ['tournament','name','seed','round_wins','game_wins']
 
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ['team','board','name','wins','spread']

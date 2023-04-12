@@ -2,7 +2,7 @@ import re
 import decimal
 
 from django.db import models, connection
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.db.models.signals import post_save, pre_save
@@ -133,6 +133,8 @@ class Participant(models.Model):
     spread = models.IntegerField(default=0, null=True)
     offed = models.IntegerField(default=0, null=True)
     rating = models.IntegerField(default=0, null=True)
+    # to assign a number for each team or player.
+    seed = models.IntegerField()
 
     def __str__(self):
         return f'{self.name} {self.round_wins} {self.game_wins}'
@@ -360,3 +362,13 @@ def setup_tournament(sender, instance, created, **kwargs):
             TournamentRound.objects.create(tournament=instance, round_no=i,
                     pairing_system=TournamentRound.SWISS, repeats=0,
                     based_on=i - 1)
+
+
+@receiver(pre_save, sender=Participant)
+def participant_seed(sender, instance, **kwargs):
+    if not instance.pk:
+        seed = Participant.objects.filter(tournament_id=instance.tournament_id).aggregate(Max('seed'))
+        if not seed['seed__max']:
+            instance.seed = 1
+        else:
+            instance.seed = seed['seed__max'] + 1

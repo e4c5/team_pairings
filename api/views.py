@@ -164,49 +164,46 @@ class TournamentViewSet(viewsets.ModelViewSet):
         It's unlikely that this method will be invoked to create a result object 
         unless it's for manual pairing (which has not yet been implemented)
         """
-        try:
-            if request.method == 'GET':
-                return Response(
-                    get_results(request.tournament, request.query_params.get('round'))
-                )
-            
-            partial = kwargs.pop('partial', False)
-            instance = models.Result.objects.get(pk=request.data.get('result'))
 
-            if self.request.tournament.entry_mode == models.Tournament.BY_TEAM:
-                serializer = ResultSerializer(instance, data=request.data, partial=partial)
-                serializer.is_valid(raise_exception=True)
-
-                instance.score1 = serializer.validated_data['score1']
-                instance.score2 = serializer.validated_data['score2']
-                instance.games_won = serializer.validated_data['games_won']
-                instance.save()
-
-            else :
-                instance = models.BoardResult.objects.get(
-                    Q(team1=instance.p1) & Q(team2=instance.p2) & 
-                    Q(board=request.data['board'])
-                )
-                serializer = BoardResultSerializer(instance, data=request.data, partial=partial)
-                serializer.is_valid(raise_exception=True)
-
-                instance.score1 = serializer.validated_data['score1']
-                instance.score2 = serializer.validated_data['score2']
-                instance.save()
-                
-
-            broadcast({
-                        "tournament_id": request.tournament.id,
-                        "results": get_results(request.tournament, instance.round_id),
-                        "round_no": instance.round.round_no
-                    }
+        if request.method == 'GET':
+            return Response(
+                get_results(request.tournament, request.query_params.get('round'))
             )
+        
+        partial = kwargs.pop('partial', False)
+        instance = models.Result.objects.get(pk=request.data.get('result'))
 
-            return Response({'status': 'ok'})
-        except:
-            import traceback
-            traceback.print_exc()
-            raise
+        if self.request.tournament.entry_mode == models.Tournament.BY_TEAM:
+            serializer = ResultSerializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+
+            instance.score1 = serializer.validated_data['score1']
+            instance.score2 = serializer.validated_data['score2']
+            instance.games_won = serializer.validated_data['games_won']
+            instance.save()
+
+        else :
+            instance = models.BoardResult.objects.get(
+                Q(team1=instance.p1) & Q(team2=instance.p2) & 
+                Q(board=request.data['board'])
+            )
+            serializer = BoardResultSerializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+
+            instance.score1 = serializer.validated_data['score1']
+            instance.score2 = serializer.validated_data['score2']
+            instance.save()
+            
+
+        broadcast({
+                    "tournament_id": request.tournament.id,
+                    "results": get_results(request.tournament, instance.round_id),
+                    "round_no": instance.round.round_no
+                }
+        )
+
+        return Response({'status': 'ok'})
+
 
 def get_participant(pk):
     """Fetch information about a single participant.
