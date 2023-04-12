@@ -17,7 +17,11 @@ from tournament.models import Tournament, Director
 
 
 class SeleniumTest(ChannelsLiveServerTestCase):
-    
+    """
+    Helper for selenium tests
+
+    Note you will need to scroll many times look at pair round for
+    """
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -82,13 +86,14 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         WebDriverWait(driver, 1, 0.1).until_not(lambda x: p2.get_attribute("value") == "")
         if games is not None:
             driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(games);
-        else:
+        elif board is not None:
             driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=board]').send_keys(board);
 
         driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(score1);
         driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(score2);
         driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()
 
+        #time.sleep(30)
         # wait for the value of the input field to clear. That's when the data
         # would have been posted to the server , the response recieved and state updated
         WebDriverWait(driver, 1, 0.1).until(lambda x: p2.get_attribute("value") == "")

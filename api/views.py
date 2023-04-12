@@ -173,7 +173,8 @@ class TournamentViewSet(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = models.Result.objects.get(pk=request.data.get('result'))
 
-        if self.request.tournament.entry_mode == models.Tournament.BY_TEAM:
+        if (self.request.tournament.entry_mode == models.Tournament.BY_TEAM or 
+                self.request.tournament.entry_mode == models.Tournament.NON_TEAM):
             serializer = ResultSerializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
 

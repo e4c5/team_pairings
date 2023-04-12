@@ -59,34 +59,24 @@ def random_results(tournament):
     rnd = tournament.rounds.filter(paired=True).order_by('-round_no')[0]
     fake = Faker()
     for result in rnd.results.select_related('p1','p2').all():
-        if tournament.entry_mode == Tournament.BY_PLAYER:
+        if tournament.entry_mode == Tournament.NON_TEAM:
+            # this is not a team tournament
+            if not result.score1 and not result.score2:
+                result.score1 = fake.random_int(290, 550)
+                result.score2 = fake.random_int(290, 550)
+                if result.score1 == result.score2:
+                    result.games_won = 0.5
+                if result.score1 > result.score2:
+                    result.games_won = 1
+                else:
+                    result.games_won = 0
+
+                result.save()
+
+        elif tournament.entry_mode == Tournament.BY_PLAYER:
             # results entered per each player
             mid = tournament.team_size // 2
-            if result.p2.name == 'Bye':
-                # player 1 got a bye
-                for i in range(tournament.team_size):
-                    b = BoardResult.objects.get(
-                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
-                    )
-                    if i <= mid:
-                        b.score1, b.score2 = 100, 0
-                    else:
-                        b.score1, b.score2 = 0, 100
-                    b.save()
-
-            elif result.p1.name == 'Bye':
-                # player 2 got a bye
-                for i in range(tournament.team_size):
-                    b = BoardResult.objects.get(
-                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
-                    )
-                    if i <= mid:
-                        b.score1, b.score2 = 0, 100
-                    else:
-                        b.score1, b.score2 = 100, 0
-                    b.save()
-
-            else:
+            if not result.score1 and not result.score2:
                 for i in range(tournament.team_size):
                     b = BoardResult.objects.get(
                         Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
@@ -94,16 +84,9 @@ def random_results(tournament):
                     b.score1 = fake.random_int(290, 550)
                     b.score2 = fake.random_int(290, 550)
                     b.save()
+                result.save()
         else:
-            if result.p1.name == 'Bye':
-                result.score1 = 0
-                result.games_won =2
-                result.score2 = 300
-            elif result.p2.name == 'Bye':
-                result.score2 = 0
-                result.games_won =3
-                result.score1 = 300
-            else:
+            if not result.score1 and not result.score2:
                 result.score1 = fake.random_int(900, 2500)
                 result.score2 = fake.random_int(900, 2500)
                 result.games_won = fake.random_int(0, 5)
@@ -111,7 +94,7 @@ def random_results(tournament):
                     if result.score1 < result.score2:
                         result.score1, result.score2 = result.score2, result.score1
 
-            result.save()
+                result.save()
 
 
 def truncate_rounds(tournament, number):

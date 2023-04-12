@@ -17,7 +17,10 @@ class Tournament(models.Model):
     '''
     BY_TEAM = 'T'
     BY_PLAYER = 'P'
-    DATA_ENTRY_CHOICES = ((BY_TEAM, 'By Team'), (BY_PLAYER, 'By Player'))
+    NON_TEAM = 'S'
+
+    DATA_ENTRY_CHOICES = ((BY_TEAM, 'By Team'), (NON_TEAM, 'Individual Tournament'),
+                          (BY_PLAYER, 'By Player'))
 
     start_date = models.TextField()
     name = models.TextField()
@@ -58,6 +61,59 @@ class Tournament(models.Model):
     def get_absolute_url(self):
         return "/tournament/{0}/".format(self.slug)
     
+    
+    def score_bye(self, result):
+        """The bye result should be entered automatically"""
+        
+        if not self.team_size:
+            # this is for an individual tournament
+            if result.p1.name == 'Bye':
+                result.score1 = 0
+                result.score2 = 100
+            else:
+                result.score1 = 100
+                result.score2 = 0
+
+        elif self.entry_mode == Tournament.BY_PLAYER:
+            # team tournament where results for each individual player is tracked
+            rnd = result.round
+            if result.p2.name == 'Bye':
+                # team1 1 got a bye
+                mid = self.team_size // 2
+                for i in range(self.team_size):
+                    b = BoardResult.objects.get(
+                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
+                    )
+                    if i <= mid:
+                        b.score1, b.score2 = 100, 0
+                    else:
+                        b.score1, b.score2 = 0, 100
+                    b.save()
+
+            elif result.p1.name == 'Bye':
+                # player 2 got a bye
+                for i in range(self.team_size):
+                    b = BoardResult.objects.get(
+                        Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
+                    )
+                    if i <= mid:
+                        b.score1, b.score2 = 0, 100
+                    else:
+                        b.score1, b.score2 = 100, 0
+                    b.save()
+        else:
+            # tournament where we don't bother about the results of each individual
+            if result.p2.name == 'Bye':
+                # team 1 got the bye
+                result.score1 = 300
+                result.score2 = 0
+                result.games_won = 3
+            else:
+                result.score2 = 300
+                result.score1 = 0
+                result.games_won = 2
+                
+        result.save()
     @property
     def current_round(self):
         '''
@@ -76,6 +132,9 @@ class Tournament(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = self.tournament_slug(self.name)
+
+        if not self.team_size:
+            self.entry_mode = Tournament.NON_TEAM
             
         super().save(*args, **kwargs)
 
