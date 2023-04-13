@@ -38,7 +38,7 @@ class BasicTests(APITestCase, Helper):
         
         resp = self.client.delete(f'/api/tournament/{self.t1.id}/pair/')
         self.assertEquals(resp.status_code, 403)
-        
+      
         
     def test_pair_empty(self):
         """Cannot pair a tournament unless you have participants in it!"""
@@ -79,14 +79,28 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(res[0].p1.id, p1.id)
         self.assertEqual(res[0].p2.id, bye.id)
 
+class ByesTests(APITestCase, Helper):
 
+    def setUp(self) -> None:
+        self.create_tournaments();
+        return super().setUp()
+        
     def test_switch_off_odd(self):
         """What happens to the bye when a player is switched off?
         If the tournament previously had an odd number (excluding the bye) 
         then the bye is take off. Similiar if the number of humans was even
-        the by has to be added.
+        the bye has to be added.
         """
         self.add_players(self.t1, 11)
+        self.assertEquals(11, Participant.objects.filter(tournament=self.t1).count())
+
+        # grab the lowest rated player before we do the pairing. AFterwards
+        # that will turn out to be the bye
+
+        lowest = Participant.objects.filter(
+            tournament=self.t1
+        ).order_by('rating')[0]
+
         rnd = self.t1.rounds.get(round_no=1)
         sp = swiss.SwissPairing(rnd)
         sp.make_it()
@@ -96,12 +110,12 @@ class BasicTests(APITestCase, Helper):
         self.assertEquals(12, Participant.objects.filter(tournament=self.t1).count())
         
         # the bye should have been assignmed to the player with the lowest rating
-        lowest = Participant.objects.filter(
-            tournament=self.t1
-        ).order_by('rating')[0]
-        self.assertEqual('Bye', 
-            Result.objects.filter(round=rnd).get(p2=lowest).p2.name
-        )
+        byeResult = Result.objects.filter(round=rnd).get( Q(p2=lowest) | Q(p1=lowest))
+        self.assertIn('Bye', [byeResult.p1.name, byeResult.p2.name])
+        # because of the bye, he should now have a score of a 300 and a round win
+        lowest.refresh_from_db()
+        self.assertEquals(300, lowest.spread)
+        self.assertEquals(3, lowest.game_wins)
 
         # need results
         self.assertRaises(ValueError, swiss.SwissPairing, self.t1.rounds.get(round_no=2))
@@ -113,7 +127,7 @@ class BasicTests(APITestCase, Helper):
         sp.make_it()
         sp.save()
 
-        # No need of a by at this stage
+        # No need of a bye at this stage
         self.assertEquals(12, Participant.objects.filter(tournament=self.t1).count())
 
         # now we fill up with results.
@@ -137,9 +151,9 @@ class BasicTests(APITestCase, Helper):
 
     def test_switch_off_even(self):
         """What happens to the bye when a player is switched off?
-        If the tournament previously an even number of players not counting
+        If the tournament previously had an even number of players not counting
         the bye, when we switch off one of the players the total number of
-        active players shoudld remain at 12 due to the bye being created/.
+        active players shoudld remain unchanged due to the bye being created/.
         """
         self.add_players(self.t1, 12)
         rnd = self.t1.rounds.get(round_no=1)
@@ -157,6 +171,11 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(11, Participant.objects.filter(offed=False).count())
         self.assertEqual(1, Participant.objects.filter(offed=True).count())
 
+        # grab the player with the lowest position
+        lowest = Participant.objects.filter(
+            tournament=self.t1
+        ).exclude(name='Bye').order_by('round_wins', 'game_wins','spread','-rating')[0]
+
         rnd = self.t1.rounds.get(round_no=2)
         sp = swiss.SwissPairing(rnd)
         sp.make_it()
@@ -165,14 +184,7 @@ class BasicTests(APITestCase, Helper):
         # now the number increases by one
         self.assertEqual(12, Participant.objects.filter(offed=False).count())
 
-        # the bye should have been assignmed to the player with the lowest pos
-        parties = Participant.objects.filter(
-            tournament=self.t1
-        ).exclude(name='Bye').order_by(
-            'round_wins','game_wins', 'spread'
-        )
-        lowest = parties[0]
-
+        # the bye should have been assigned to the player with the lowest pos
         result = Result.objects.get(
             (Q(p1=lowest) | Q(p2=lowest)) & Q(round=rnd)
         )
@@ -229,12 +241,54 @@ class BasicTests(APITestCase, Helper):
         # round3 cannot be paired
         self.assertRaises(ValueError, swiss.SwissPairing, rnd3)
 
-    def speed_pair(self, rnd):
-        """Pair using swiss and add results"""
-        sp = swiss.SwissPairing(rnd)
-        sp.make_it()
-        sp.save()
-        self.add_results(rnd.tournament)
+
+class TruncationTests(APITestCase, Helper):
+
+    def setUp(self) -> None:
+        self.create_tournaments();
+        return super().setUp()
+    
+    def test_truncate_standings(self):
+        """Truncate should effect the participant objects"""
+
+        self.add_players(self.t1, 10)
+        self.add_players(self.t2, 10)
+        rnd1_1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        rnd1_2 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=1)
+        self.speed_pair(rnd1_1)
+        self.speed_pair(rnd1_2)
+
+        # boiler plate out of the way. We should have 10 results (5 each 
+        # for the two tournaments). The number of teams with 1 win in each
+        # tournament should also be 5
+        self.assertEqual(Result.objects.count(), 10)
+        winners = self.t1.participants.filter(round_wins=1).count()
+        self.assertEquals(winners, 5)
+
+        self.assertEqual(BoardResult.objects.count(), 25)
+        winners = self.t2.participants.filter(round_wins=1).count()
+        self.assertEquals(winners, 5)
+
+        # quickly fill up the round 2 for the first tournament.
+        rnd2_1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+        self.speed_pair(rnd2_1)
+        
+        self.assertEqual(Result.objects.count(), 15)
+        winners = self.t1.participants.filter(round_wins=2).count()
+        self.assertGreater(BoardResult.objects.count(), 1)
+
+        # now we will truncate the second round that we just created above.
+        self.client.login(username='sri', password='12345')
+        resp = self.client.post(
+            f'/api/tournament/{self.t1.id}/truncate/',
+            {'td': 'sri', 'id': rnd2_1.id})
+        
+        self.assertEqual(resp.data['status'],'ok')
+        
+        self.assertEqual(Result.objects.count(), 10)
+
+        winners = self.t1.participants.filter(round_wins=1).count()
+        self.assertEquals(winners, 5)
 
 
     @patch('api.views.broadcast')
@@ -304,6 +358,12 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(403, resp.status_code)
 
 
+class DataEntryTests(APITestCase, Helper):
+
+    def setUp(self) -> None:
+        self.create_tournaments();
+        return super().setUp()
+    
     @patch('api.views.broadcast')
     def test_enter_results_by_board(self, m):
         """Entering results by board should update standings"""
@@ -359,49 +419,6 @@ class BasicTests(APITestCase, Helper):
         r.refresh_from_db()
         self.assertEqual(r.score1, 100)
         self.assertEqual(r.score2, 200)
-
-
-    def test_truncate_standings(self):
-        """Truncate should effect the participant objects"""
-
-        self.add_players(self.t1, 10)
-        self.add_players(self.t2, 10)
-        rnd1_1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
-        rnd1_2 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=1)
-        self.speed_pair(rnd1_1)
-        self.speed_pair(rnd1_2)
-
-        # boiler plate out of the way. We should have 10 results (5 each 
-        # for the two tournaments). The number of teams with 1 win in each
-        # tournament should also be 5
-        self.assertEqual(Result.objects.count(), 10)
-        winners = self.t1.participants.filter(round_wins=1).count()
-        self.assertEquals(winners, 5)
-
-        self.assertEqual(BoardResult.objects.count(), 25)
-        winners = self.t2.participants.filter(round_wins=1).count()
-        self.assertEquals(winners, 5)
-
-        # quickly fill up the round 2 for the first tournament.
-        rnd2_1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
-        self.speed_pair(rnd2_1)
-        
-        self.assertEqual(Result.objects.count(), 15)
-        winners = self.t1.participants.filter(round_wins=2).count()
-        self.assertGreater(BoardResult.objects.count(), 1)
-
-        # now we will truncate the second round that we just created above.
-        self.client.login(username='sri', password='12345')
-        resp = self.client.post(
-            f'/api/tournament/{self.t1.id}/truncate/',
-            {'td': 'sri', 'id': rnd2_1.id})
-        
-        self.assertEqual(resp.data['status'],'ok')
-        
-        self.assertEqual(Result.objects.count(), 10)
-
-        winners = self.t1.participants.filter(round_wins=1).count()
-        self.assertEquals(winners, 5)
 
 
     @patch('api.views.broadcast')

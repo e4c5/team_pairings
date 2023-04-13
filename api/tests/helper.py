@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-
+from api import swiss
 from tournament.models import Tournament, Director, Participant
 from tournament.tools import add_participants, random_results, add_team_members
 
@@ -42,3 +42,11 @@ class Helper:
         
     def add_results(self, tournament):
         random_results(tournament)
+
+    
+    def speed_pair(self, rnd):
+        """Pair using swiss and add results"""
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+        self.add_results(rnd.tournament)

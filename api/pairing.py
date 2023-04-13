@@ -96,8 +96,9 @@ class Pairing:
             if not self.bye:
                 # this tournament does not already have a configured by lets
                 # create one.
-                bye = Participant.objects.create(
-                    name='Bye', rating=0, tournament=self.tournament
+                bye, _ = Participant.objects.get_or_create(
+                    name='Bye', tournament=self.tournament,
+                    defaults = {'name': 'Bye', 'rating': 0,  'tournament': self.tournament}
                 )
                 self.bye = {'name': 'Bye', 
                     'rating': 0, 'opponents': [], 'player': bye,
@@ -124,8 +125,15 @@ class Pairing:
                     return
 
     def order_players(self, players):
+        """Sort the players
+        First by round_wins (represented by score in the dictionary)
+            then by number of games won (for individual tournaments round_wins wont matter)
+            then by the spread
+            finally by the rating
+        """
         sorted_players = sorted(players, reverse=True,
-                                key=lambda player: (player['score'], player['game_wins'], player['spread']))
+                                key=lambda player: (player['score'], player['game_wins'],
+                                                    player['spread'], player['rating']))
         return sorted_players
 
     def save(self):
@@ -135,7 +143,7 @@ class Pairing:
                                       p1=pair[0]['player'], p2=pair[1]['player'])
             if r.p1.name == 'Bye' or r.p2.name == 'Bye':
                 self.tournament.score_bye(r)
-                
+
             if self.tournament.entry_mode == Tournament.BY_PLAYER:
                 for i in range(self.tournament.team_size):
                     BoardResult.objects.create(
