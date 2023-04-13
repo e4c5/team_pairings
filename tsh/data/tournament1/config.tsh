@@ -1,0 +1,63 @@
+﻿division a a.t
+
+config event_name = "Wouldnt you like to know"
+
+config event_date = "February 19, 2020"
+
+
+config assign_firsts = 1 
+config bye_spread = 1
+config final_draw = 1
+config check_by_winner = 1
+config pairing_system = 'auto'
+
+autopair a 0 1 ns 0 0 a
+autopair a 1 2 ns 0 1 a
+autopair a 2 3 ns 0 2 a
+autopair a 3 4 ns 0 3 a
+
+autopair a 4 5 ns 0 4 a
+autopair a 5 6 ns 0 5 a 
+autopair a 6 7 ns 0 6 a
+autopair a 7 8 ns 0 7 a
+autopair a 8 9 ns 0 8 a
+autopair a 9 10 ns 3 9 a
+autopair a 10 11 ns 3 10 a
+autopair a 11 12 ns 3 11 a 
+autopair a 12 13 ns 3 12 a
+autopair a 13 14 ns 3 13 a
+autopair a 14 15 ns 3 14 a
+autopair a 15 16 ns 3 15 a
+autopair a 16 17 ns 3 16 a
+autopair a 17 18 ns 3 17 a 
+
+config spread_cap = [200, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700]
+config rating_system = 'aus'
+config max_rounds = 18
+prize rank 1 a 25pts
+prize rank 2 a 20pts	
+prize rank 3 a 17pts	
+prize rank 4 a 14pts	
+prize rank 5 a 12pts	
+prize rank 6 a 10pts	
+prize rank 7 a 8pts	
+prize rank 8 a 6pts	
+prize rank 9 a 4pts	
+prize rank 10 a 3pts	
+prize rank 11 a 2pts	
+prize rank 12 a 1pt
+prize highwin 1 a 'Potential Trophy & Certificate at yearend'
+
+config no_index_tally_slips = 1
+config no_text_files = 1
+config no_boards = 1
+config gibson = 1
+config gibson = 'strict'
+config prize_bands{'A'} = [1, 12]
+config html_index_recent_first = 1
+config show_inactive = 1
+
+config next_round_style = 'half'
+config swiss_order = ['auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto','auto']
+
+
