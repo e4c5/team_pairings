@@ -356,7 +356,7 @@ export function Round(props) {
                 <table className='table'>
                     <tbody>
                         {tournament?.participants?.map((row, idx) => {
-                            if (row.name != 'Bye') {
+                            if (row.name != 'Bye' && row.name != 'Absent') {
                                 return (
                                     <tr  key={row.id} >
                                         <td className="text-left">{idx + 1}</td>

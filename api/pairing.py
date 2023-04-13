@@ -21,7 +21,9 @@ class Pairing:
     count the number of active players and enable disable the bye 
     accordingly.
 
-    The participant labelld as the bye does not have a rank or position. 
+    The participant labelled as the bye does not have a rank or position. 
+    Bye has a counterpart calle 'Absent', she gets paired against 'swiched off'
+    players. 
     '''
 
     def __init__(self, rnd):
@@ -49,7 +51,8 @@ class Pairing:
 
         players = Participant.objects.select_related(
             ).filter(tournament=self.tournament
-            ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
+            ).exclude(offed=True).exclude(name='Absent'
+            ).order_by('round_wins', '-game_wins', '-spread')
 
         if rnd.based_on > 0:
             # this round has a predecessor that needs to be completed.
@@ -94,7 +97,7 @@ class Pairing:
 
         if len(self.players) % 2 == 1:
             if not self.bye:
-                # this tournament does not already have a configured by lets
+                # this tournament does not already have a configured bye lets
                 # create one.
                 bye, _ = Participant.objects.get_or_create(
                     name='Bye', tournament=self.tournament,
@@ -108,7 +111,22 @@ class Pairing:
                 # we have a bye but the number is odd, that means a withdrawal
                 self.players.remove(self.bye)
                 self.bye = None
+        self.absentees()
 
+
+    def absentees(self):
+        """Assign a forfeit loss to people who are switched off"""
+        players = Participant.objects.select_related(
+            ).filter(tournament=self.tournament).filter(offed=True)
+        
+        for player in players:
+            bye, _ = Participant.objects.get_or_create(
+                    name='Absent', tournament=self.tournament,
+                    defaults = {'name': 'Absent', 'rating': 0,  'tournament': self.tournament}
+            )
+            Result.objects.create(p1=player, p2=bye, score1=0, score2=100,
+                                  round=self.rnd, games_won=0)
+            
     def assign_bye(self):
         """Assign the bye to the lowest rank player"""
         if not self.bye:
@@ -117,12 +135,13 @@ class Pairing:
         players = self.order_players(self.players)
 
         for player in reversed(players):
-            if 'Bye' not in player['opponents']:
-                if player['name'] != 'Bye':
+            if player['name'] != 'Bye' and player['name'] != 'Absent':
+                if 'Bye' not in player['opponents']:
                     self.pairs.append([player, self.bye])
                     self.players.remove(player)
                     self.players.remove(self.bye)
                     return
+
 
     def order_players(self, players):
         """Sort the players

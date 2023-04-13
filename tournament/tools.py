@@ -84,7 +84,8 @@ def random_results(tournament):
                     b.score1 = fake.random_int(290, 550)
                     b.score2 = fake.random_int(290, 550)
                     b.save()
-                result.save()
+                # no need to save result here. Post save event for BoardResult
+                # takes care of that
         else:
             if not result.score1 and not result.score2:
                 result.score1 = fake.random_int(900, 2500)

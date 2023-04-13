@@ -48,14 +48,6 @@ class SwissPairing(Pairing):
 
         return self.pairs
 
-    def get_detailed_pairings(self):
-        pairs = []
-        for pair in self.s:
-            pairs.append(pair)
-            pairs.append(pair[1], pair[0])
-
-        return sorted(pairs, reverse=True, key=lambda x: (x[0]['score'], x[0]['spread']))
-
 
     def pair_first_round(self):
         sorted_players = self.order_players(self.players)
@@ -193,11 +185,6 @@ class SwissPairing(Pairing):
 
         return player1, player2
 
-    def find_player_by_name(self, name):
-        for player in self.players:
-            if player['name'] == name:
-                return player
-        return None
 
     # B.1, B.2
     def find_possible_opponents(self, current_player, group, skip_color_pref=False):

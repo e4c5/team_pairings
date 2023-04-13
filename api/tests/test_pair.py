@@ -39,7 +39,25 @@ class BasicTests(APITestCase, Helper):
         resp = self.client.delete(f'/api/tournament/{self.t1.id}/pair/')
         self.assertEquals(resp.status_code, 403)
       
-        
+    
+    def test_impossible(self):
+        self.add_players(self.t2, 4)
+        rnd1 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=1)
+        self.speed_pair(rnd1)
+        rnd2 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=2)
+        self.speed_pair(rnd2)
+        self.assertEqual(Result.objects.count(), 4)
+
+        # cannot be paired without repeates
+        rnd3 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=3)
+        self.speed_pair(rnd3)
+        self.assertEqual(Result.objects.count(), 6)
+
+        rnd4 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=4)
+        self.speed_pair(rnd4)
+        self.assertEqual(Result.objects.count(), 6)
+
+
     def test_pair_empty(self):
         """Cannot pair a tournament unless you have participants in it!"""
         self.client.login(username='sri', password='12345')
@@ -88,8 +106,7 @@ class ByesTests(APITestCase, Helper):
     def test_switch_off_odd(self):
         """What happens to the bye when a player is switched off?
         If the tournament previously had an odd number (excluding the bye) 
-        then the bye is take off. Similiar if the number of humans was even
-        the bye has to be added.
+        then the bye is taken off. 
         """
         self.add_players(self.t1, 11)
         self.assertEquals(11, Participant.objects.filter(tournament=self.t1).count())
@@ -116,6 +133,7 @@ class ByesTests(APITestCase, Helper):
         lowest.refresh_from_db()
         self.assertEquals(300, lowest.spread)
         self.assertEquals(3, lowest.game_wins)
+        self.assertEquals(1, lowest.round_wins)
 
         # need results
         self.assertRaises(ValueError, swiss.SwissPairing, self.t1.rounds.get(round_no=2))
@@ -149,11 +167,61 @@ class ByesTests(APITestCase, Helper):
             self.assertTrue(result.p1.name != 'Bye' and result.p2.name != 'Bye')
 
 
+    def test_forfeit(self):
+        """Forfeited games should have a -100 spread for the player"""
+        self.add_players(self.t1, 6)
+        rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        self.speed_pair(rnd1)
+        # two players get switched off
+        ff1 = self.t1.participants.all()[0]
+        ff1.offed = True
+        ff1.save()
+        ff2 = self.t1.participants.all()[1]
+        ff2.offed = True
+        ff2.save()
+
+        rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+        self.speed_pair(rnd2)
+
+        # we had six, two are switch off, so two real pairings + 2 of 
+        # absents
+        self.assertEqual(4, rnd2.results.count())
+
+        # All the players, including those that got switched off should be
+        # marked as having played two games
+        for p in self.t1.participants.all():
+            self.assertEqual(p.played, 2)
+            
+        # the switched off players should have 100 points lower than earlier
+        self.assertEqual(ff1.spread, self.t1.participants.all()[0].spread+100)
+        self.assertEqual(ff2.spread, self.t1.participants.all()[1].spread+100)
+
+        # switch them both back on
+        ff1.refresh_from_db()
+        ff1.offed = False
+        ff2.refresh_from_db()
+        ff2.offed = False
+        ff1.save()
+        ff2.save()
+        rnd3 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=3)
+        self.speed_pair(rnd3)
+
+        # there should be no byes, and there should be no absents
+        for result in rnd3.results.all():
+            self.assertNotIn(result.p1.name, ['Absent','Bye'])
+            self.assertNotIn(result.p2.name, ['Absent','Bye'])
+
+
     def test_switch_off_even(self):
         """What happens to the bye when a player is switched off?
+        
         If the tournament previously had an even number of players not counting
         the bye, when we switch off one of the players the total number of
-        active players shoudld remain unchanged due to the bye being created/.
+        active players shoudld remain unchanged due to the bye being created.
+
+        However the player that got switched off get a forfeit loss, so we need
+        to add another kind of bye - into the game. This 'losing bye' is named
+        as 'Absent'
         """
         self.add_players(self.t1, 12)
         rnd = self.t1.rounds.get(round_no=1)
@@ -182,7 +250,7 @@ class ByesTests(APITestCase, Helper):
         sp.save()
 
         # now the number increases by one
-        self.assertEqual(12, Participant.objects.filter(offed=False).count())
+        self.assertEqual(13, Participant.objects.filter(offed=False).count())
 
         # the bye should have been assigned to the player with the lowest pos
         result = Result.objects.get(

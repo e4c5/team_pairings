@@ -112,7 +112,7 @@ class Tournament(models.Model):
                 result.score2 = 300
                 result.score1 = 0
                 result.games_won = 2
-                
+
         result.save()
     @property
     def current_round(self):
@@ -356,7 +356,7 @@ def update_board_result(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Result)
 def update_result(sender, instance, created, **kwargs):
     """When a result instance is saved the standings need to update"""
-    if not created:
+    if not created or instance.p1.name in ['Absent','Bye'] or instance.p2.name in ['Absent','Bye']:
         if instance.score1 or instance.score2:
             if instance.round.tournament.team_size:
                 update_team_standing(instance.p1_id)
