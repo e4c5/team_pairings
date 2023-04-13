@@ -9,7 +9,7 @@ def tsh_import(f):
     Method is invoked by the live_data webview. Doesn't save anything
     to the database. Returns a python dictionary
     '''
-    players = [{'name': 'bye'}]
+    players = [{'name': 'Bye', 'seed': 0}]
     rounds = 0;
 
     with open(f) as fp:
@@ -66,7 +66,7 @@ def tsh_import(f):
                         p12 = ['3'] * (len(rank)+1)
 
                 players.append({'name': name, 'opponents' :opponents,'scores':scores,
-                    'p12': p12, 'rank': rank,'newr': newr, 'off': offed, 'seed': seed,
+                    'p12': p12, 'rank': rank,'newr': newr, 'off': offed, 'seed': seed + 1,
                     'old_rating': rating})
                 
                 if len(scores) > rounds :

@@ -425,7 +425,7 @@ def setup_tournament(sender, instance, created, **kwargs):
 
 @receiver(pre_save, sender=Participant)
 def participant_seed(sender, instance, **kwargs):
-    if not instance.pk:
+    if not instance.pk and instance.seed is None:
         seed = Participant.objects.filter(tournament_id=instance.tournament_id).aggregate(Max('seed'))
         if not seed['seed__max']:
             instance.seed = 1
