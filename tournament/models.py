@@ -138,6 +138,24 @@ class Tournament(models.Model):
             
         super().save(*args, **kwargs)
 
+        
+    def update_all_standings(self):
+        """Updates all the standings for the current tournament.
+        Args: tournament: A tournament object
+        This is specially usefull when a round is truncated.
+        see also: update_standings
+        """
+
+        for p in self.participants.all():
+            # this absolutely is not the right way but this is not a function
+            # that will be used all that much and even with 200 players this
+            # is still only going to take a second or two.
+            if self.team_size:
+                update_team_standing(p.id)
+            else:
+                update_standing(p.id)
+
+
 
 class TournamentRound(models.Model):
     """Represents a tournament round configuration"""
@@ -379,10 +397,14 @@ def update_standing(pid):
                 (select count(*) as games, coalesce(sum(games_won), 0) games_won, 
                     coalesce(sum(score1 - score2), 0) margin
             from tournament_result tr where p1_id = {0} and games_won is not null) a,
-                (select count(*) as games, coalesce(sum(1 - games_won), 0) games_won, 
+                (select count(*) as games, 
+                    coalesce(sum(CASE WHEN score2 = 0 THEN 0 ELSE 1 - games_won END), 0) games_won, 
                     coalesce(sum(score2 - score1), 0) margin
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
+
+    if pid == 590:
+        print(q.format(pid))
 
     with connection.cursor() as cursor:
         cursor.execute(q.format(pid))
@@ -391,7 +413,7 @@ def update_team_standing(pid):
     """Execute the standing update query. for the given participant
     Args: pid: participant id
 
-    Also see api.views.update_all_standings
+    Also see Tournament.update_all_standings
     """
     q = """
         update tournament_participant set played = a.games + b.games,

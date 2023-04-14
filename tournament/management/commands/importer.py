@@ -51,7 +51,14 @@ class Command(BaseCommand):
                         score2, score1 = score1, score2
 
                     if score1 == score2:
-                        win = 0.5
+                        if opponent == 0:
+                            # tsh has this feature where a person can be switched off without
+                            # a forfeit. I do not believe this to be a good idea. it can give
+                            # someone an undue advantage to be absent for a few rounds and then
+                            # comeback later.
+                            win = 0
+                        else:
+                            win = 0.5
                     elif score1 > score2:
                         win = 1
                     else:
@@ -66,3 +73,5 @@ class Command(BaseCommand):
                             "round_id" : rounds[idx]
                         }
                     )
+
+        self.t.update_all_standings()
