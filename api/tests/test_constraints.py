@@ -86,7 +86,7 @@ class BasicTests(APITransactionTestCase, Helper):
         b.team1 = p4
         
         # trying to save a mismatched pair. Team 1 did not play team2!
-        self.assertRaises(Result.DoesNotExist, b.save)
+        self.assertRaises(IndexError, b.save)
 
         r = Result.objects.get(p1=p1)
         b.team1 = r.p1

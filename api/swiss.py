@@ -204,7 +204,7 @@ class SwissPairing(Pairing):
                                 if player['name'] == opponent:
                                     count += 1
                             
-                            if count < self.rnd.repeats:
+                            if count <= self.rnd.repeats:
                                 rest.append(player)
 
         if len(rest) == 0:

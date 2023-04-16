@@ -118,14 +118,10 @@ class Pairing:
         """Assign a forfeit loss to people who are switched off"""
         players = Participant.objects.select_related(
             ).filter(tournament=self.tournament).filter(offed=True)
-        
+
         for player in players:
-            bye, _ = Participant.objects.get_or_create(
-                    name='Absent', tournament=self.tournament,
-                    defaults = {'name': 'Absent', 'rating': 0,  'tournament': self.tournament}
-            )
-            Result.objects.create(p1=player, p2=bye, score1=0, score2=100,
-                                  round=self.rnd, games_won=0)
+            player.mark_absent(self.rnd)
+                
             
     def assign_bye(self):
         """Assign the bye to the lowest rank player"""

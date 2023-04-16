@@ -1,3 +1,4 @@
+from faker import Faker
 from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -5,7 +6,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from tournament.models import BoardResult, Participant, TournamentRound, Director, Result
+from tournament.models import BoardResult, Participant, TournamentRound, Tournament, Result
 from tournament.tools import add_participants
 
 from api import swiss
@@ -40,10 +41,22 @@ class BasicTests(APITestCase, Helper):
         self.assertEquals(resp.status_code, 403)
       
     
-    def test_impossible(self):
+    def test_repeats_random_deterministic_scores(self):
+        """Some rounds cannot be paired unless a repeat is allowed"""
+        Faker.seed(11111)
+        self.pair_with_repeats()
+
+    def test_repeats_random_scores(self):
+        """Some rounds cannot be paired unless a repeat is allowed"""
+
+        self.pair_with_repeats()
+
+    def pair_with_repeats(self):
+        self.assertIsNone(self.t2.get_last_completed())
         self.add_players(self.t2, 4)
         rnd1 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=1)
         self.speed_pair(rnd1)
+        self.assertEquals(rnd1, self.t2.get_last_completed())
         rnd2 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=2)
         self.speed_pair(rnd2)
         self.assertEqual(Result.objects.count(), 4)
@@ -56,6 +69,18 @@ class BasicTests(APITestCase, Helper):
         rnd4 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=4)
         self.speed_pair(rnd4)
         self.assertEqual(Result.objects.count(), 6)
+
+        # allow one repeat and this can be paired
+        rnd4.repeats = 1
+        rnd4.save();
+        self.speed_pair(rnd4)
+        self.assertEqual(Result.objects.count(), 8)
+
+        # paring one more round should be possible
+        rnd5 = TournamentRound.objects.filter(tournament=self.t2).get(round_no=5)
+        rnd5.repeats = 1
+        self.speed_pair(rnd5)
+        self.assertEqual(Result.objects.count(), 10)
 
 
     def test_pair_empty(self):
@@ -77,6 +102,7 @@ class BasicTests(APITestCase, Helper):
 
     def test_simple_swiss(self):
         """Round 1 pairing for a tiny swiss tournament"""
+        self.assertIsNone(self.t1.get_last_completed())
         rnd = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
         sp = swiss.SwissPairing(rnd)
         # no participants
@@ -96,6 +122,8 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(res.count(), 1)
         self.assertEqual(res[0].p1.id, p1.id)
         self.assertEqual(res[0].p2.id, bye.id)
+        self.assertEqual(rnd, self.t1.get_last_completed())
+
 
 class ByesTests(APITestCase, Helper):
 
@@ -167,6 +195,94 @@ class ByesTests(APITestCase, Helper):
             self.assertTrue(result.p1.name != 'Bye' and result.p2.name != 'Bye')
 
 
+    def test_singles_odd(self):
+        """Testing an individual tournament with an odd number of players"""
+        self.t3 = Tournament.objects.create(name='Joust', start_date='2023-02-25',
+            rated=False, entry_mode='S', num_rounds=5)
+        
+        self.add_players(self.t3, 5)
+        rnd = self.t3.rounds.get(round_no=1)
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+
+        # we have paired the first round. There should be 3 Result objects in
+        # the database and we should have one of them to be the bye
+        self.assertEquals(3, Result.objects.count())
+        bye = Result.objects.get( Q(p1__name='Bye') | Q(p2__name='Bye') )
+        self.assertIsNotNone(bye.score1)
+        self.assertIsNotNone(bye.score2)
+
+        if(bye.p1.name == 'bye'):
+            self.assertEquals(bye.score1, 0)
+            self.assertEquals(bye.score2, 100)
+        else:
+            self.assertEquals(bye.score1, 100)
+            self.assertEquals(bye.score2, 0)
+
+        self.add_results(self.t3)
+
+        # now switch off one of the players
+        p = self.t3.participants.all()[0]
+        p.offed = True
+        p.save()
+
+        rnd = self.t3.rounds.get(round_no=2)
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+
+        # Second round has been paired and that round should not have a bye
+        bye = Result.objects.filter(round=rnd
+                                    ).filter(Q(p1__name=bye) | Q(p2__name=bye))
+        self.assertEqual(0, bye.count())
+
+
+    def test_singles_even(self):
+        """Stat a singles tournament with even number, switch off one later"""
+        self.t3 = Tournament.objects.create(name='Joust', start_date='2023-02-25',
+            rated=False, entry_mode='S', num_rounds=5)
+        
+        self.add_players(self.t3, 6)
+        rnd = self.t3.rounds.get(round_no=1)
+        self.speed_pair(rnd)
+        
+        # now switch off one of the players
+        p = self.t3.participants.all()[0]
+        p.offed = True
+        p.save()
+
+        # pair the second round
+        rnd = self.t3.rounds.get(round_no=2)
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+
+        # Now there are 4 pairing objects. 4 players have been paired against
+        # themselves (that's 2).The fifth player has been switched off so he
+        # is marked as absent (that's 3) and the sixth player gets a bye
+
+        self.assertEquals(4, Result.objects.filter(round=rnd).count())
+        bye = Result.objects.get( Q(p1__name='Bye') | Q(p2__name='Bye') )
+        self.assertIsNotNone(bye.score1)
+        self.assertIsNotNone(bye.score2)
+
+        if(bye.p1.name == 'bye'):
+            self.assertEquals(bye.score1, 0)
+            self.assertEquals(bye.score2, 100)
+        else:
+            self.assertEquals(bye.score1, 100)
+            self.assertEquals(bye.score2, 0)
+
+        ff = Result.objects.filter(round=rnd).get( Q(p1=p) | Q(p2=p) )
+        if ff.p1 == p:
+            self.assertEquals(ff.score1, 0)
+            self.assertEquals(ff.score2, 100)
+        else:
+            self.assertEquals(ff.score1, 100)
+            self.assertEquals(ff.score2, 0)
+
+
     def test_forfeit(self):
         """Forfeited games should have a -100 spread for the player"""
         self.add_players(self.t1, 6)
@@ -181,6 +297,8 @@ class ByesTests(APITestCase, Helper):
         ff2.save()
 
         rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+        # may need a repeat to make pairing possible
+        rnd2.repeats = 1
         self.speed_pair(rnd2)
 
         # we had six, two are switch off, so two real pairings + 2 of 
@@ -236,6 +354,7 @@ class ByesTests(APITestCase, Helper):
         p = Participant.objects.filter(tournament=self.t1)[3]
         p.offed = True
         p.save()
+        
         self.assertEqual(11, Participant.objects.filter(offed=False).count())
         self.assertEqual(1, Participant.objects.filter(offed=True).count())
 
@@ -259,6 +378,21 @@ class ByesTests(APITestCase, Helper):
         
         self.assertTrue('Bye' == result.p1.name or 'Bye' == result.p2.name)
 
+
+    def test_late_comer(self):
+        add_participants(self.t1, True, 4)
+        rnd1 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=1)
+        rnd2 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=2)
+        rnd3 = TournamentRound.objects.filter(tournament=self.t1).get(round_no=3)
+
+        self.speed_pair(rnd1)    
+        self.speed_pair(rnd2)    
+        self.speed_pair(rnd3)    
+
+        self.assertEquals(Result.objects.count(), 6)
+        add_participants(self.t1, True, 1)
+        self.assertEquals(Result.objects.count(), 9)
+        
     def test_two_player(self):
         add_participants(self.t1, True, 4)
 

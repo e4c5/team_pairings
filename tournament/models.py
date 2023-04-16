@@ -114,18 +114,15 @@ class Tournament(models.Model):
                 result.games_won = 2
 
         result.save()
-    @property
-    def current_round(self):
+    
+    def get_last_completed(self):
         '''
-        Returns the current round
-        
-        That is the round that is in progress. None if the tournament has concluded. 
+        Returns the last round for which all results are in
         '''
         try:
-            if self.rounds.all()[0].results.count() > 0:
-                rnd = self.rounds.filter(roundresult__score_for=None).order_by('-round_no')[0]
-                return rnd.round_no
-            return 0
+            paired = self.rounds.filter(paired=True)
+            results = Result.objects.exclude(score1=None).exclude(score2=None).filter(round__in=paired)
+            return results.order_by('-round__round_no')[0].round
         except IndexError:
             return None
         
@@ -213,6 +210,14 @@ class Participant(models.Model):
     # to assign a number for each team or player.
     seed = models.IntegerField()
 
+    def mark_absent(self, rnd):
+        bye, _ = Participant.objects.get_or_create(
+                        name='Absent', tournament=rnd.tournament,
+                        defaults = {'name': 'Absent', 'rating': 0,  'tournament': rnd.tournament}
+        ) 
+        Result.objects.create(p1=self, p2=bye, score1=0, score2=100,
+                                    round=rnd, games_won=0)
+        
     def __str__(self):
         return f'{self.name} {self.round_wins} {self.game_wins}'
     
@@ -344,9 +349,9 @@ def update_board_result(sender, instance, created, **kwargs):
             player1 = None
             player2 = None
 
-        r = Result.objects.get(
+        r = Result.objects.filter(
             (Q(p1=instance.team1) & Q(p2=instance.team2)) 
-        )
+        ).order_by('-round__round_no')[0]
 
         if r.games_won is None:
             r.games_won = 0
@@ -457,3 +462,16 @@ def participant_seed(sender, instance, **kwargs):
                 instance.seed = 1
             else:
                 instance.seed = seed['seed__max'] + 1
+
+
+@receiver(post_save, sender=Participant)
+def participant_absent(sender, instance, created, **kwargs):
+    if not created:
+        return
+    if instance.name == 'Bye' or instance.name == 'Absent':
+        return
+    
+    last = instance.tournament.get_last_completed()
+    if last:
+        for rnd in instance.tournament.rounds.filter(round_no__lte=last.round_no):
+            instance.mark_absent(rnd)

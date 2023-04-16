@@ -62,15 +62,6 @@ class BasicTests(APITestCase):
         self.assertEqual(p.seed, 2)
 
 
-    def test_current_round(self):
-        for i in range(5):
-            models.TournamentRound.objects.create(
-                tournament=self.t1, round_no=i+1,
-                pairing_system='SWISS',repeats=0,based_on=i,
-            )
-        self.assertEqual(0, self.t1.current_round)
-
-
     def test_list(self):
         '''Test that the team list is created correctly'''
         response = self.client.get('/api/tournament/',format='json')
