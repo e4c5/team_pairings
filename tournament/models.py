@@ -215,6 +215,7 @@ class Participant(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.round_wins} {self.game_wins}'
+    
     class Meta:
         unique_together = ['name','tournament']
 
@@ -448,8 +449,11 @@ def setup_tournament(sender, instance, created, **kwargs):
 @receiver(pre_save, sender=Participant)
 def participant_seed(sender, instance, **kwargs):
     if not instance.pk and instance.seed is None:
-        seed = Participant.objects.filter(tournament_id=instance.tournament_id).aggregate(Max('seed'))
-        if not seed['seed__max']:
-            instance.seed = 1
+        if instance.name == 'Bye':
+            instance.seed = 0
         else:
-            instance.seed = seed['seed__max'] + 1
+            seed = Participant.objects.filter(tournament_id=instance.tournament_id).aggregate(Max('seed'))
+            if not seed['seed__max']:
+                instance.seed = 1
+            else:
+                instance.seed = seed['seed__max'] + 1

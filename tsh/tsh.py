@@ -2,7 +2,28 @@ import re
 import traceback
 import json
 
-from django.db import transaction
+def tsh_export(tournament, fname):
+    with open(fname, 'w') as out:
+        for participant in tournament.participants.order_by('seed'):
+            if participant.seed == 0:
+                continue
+
+            opponents = []
+            scores = []
+            for result in participant.p1.order_by('round__round_no'):
+                opponents.append(str(result.p2.seed))
+                scores.append(str(result.score1))
+
+            for result in participant.p2.order_by('round__round_no'):
+                opponents.append(str(result.p1.seed))
+                scores.append(str(result.score2))
+
+            print("{0:25s}{1:3d} {2}; {3}; {4}".format(
+                participant.name, participant.rating, " ".join(opponents),
+                " ".join(scores),
+                "off 0;" if participant.offed else ""
+            ), file=out)
+
 
 def tsh_import(f):
     ''' Used for processing the contents of a.t files.
