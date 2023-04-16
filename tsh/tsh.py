@@ -1,6 +1,6 @@
 import re
-import traceback
-import json
+from django.db.models import Q
+from tournament.models import Result
 
 def tsh_export(tournament, fname):
     with open(fname, 'w') as out:
@@ -10,13 +10,17 @@ def tsh_export(tournament, fname):
 
             opponents = []
             scores = []
-            for result in participant.p1.order_by('round__round_no'):
-                opponents.append(str(result.p2.seed))
-                scores.append(str(result.score1))
-
-            for result in participant.p2.order_by('round__round_no'):
-                opponents.append(str(result.p1.seed))
-                scores.append(str(result.score2))
+            results = Result.objects.filter( 
+                Q(p1=participant) | Q(p2=participant)
+            ).order_by('round__round_no')
+            
+            for result in results:
+                if result.p1 == participant:
+                    opponents.append(str(result.p2.seed))
+                    scores.append(str(result.score1))
+                else:
+                    opponents.append(str(result.p1.seed))
+                    scores.append(str(result.score2))
 
             print("{0:25s}{1:3d} {2}; {3}; {4}".format(
                 participant.name, participant.rating, " ".join(opponents),
