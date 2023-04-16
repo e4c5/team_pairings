@@ -195,6 +195,17 @@ class SwissPairing(Pairing):
                 if 'pair' not in player or player['pair'] is False:
                     if player['name'] not in current_player['opponents']:
                         rest.append(player)
+                    else:
+                        # already played lets find out if we are within the number
+                        # of repeats that are allowed for this pair
+                        if self.rnd.repeats:
+                            count = 0
+                            for opponent in current_player['opponents']:
+                                if player['name'] == opponent:
+                                    count += 1
+                            
+                            if count < self.rnd.repeats:
+                                rest.append(player)
 
         if len(rest) == 0:
             return []

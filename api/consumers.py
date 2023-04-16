@@ -22,7 +22,7 @@ class Watcher(WebsocketConsumer):
     # Receive message from WebSocket
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print(1,text_data_json)
+
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(

@@ -50,7 +50,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 ) rounds
             from tournament_tournament tt where id = %s 	   
         ) f """
-        print(query % kwargs['pk'])
+        
         with connection.cursor() as cursor:
             cursor.execute(query, [kwargs['pk']])
             return Response( cursor.fetchone()[0])
