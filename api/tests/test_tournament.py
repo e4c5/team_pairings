@@ -29,6 +29,7 @@ class BasicTests(APITestCase):
         # creating a new tournament creates as many rounds as needed automatically
         # but the creat happens in setup
         self.assertEqual(models.TournamentRound.objects.count(), 10)
+        self.assertEqual(str(self.t1), "Richmond Showdown U20")
 
 
     def test_retrieve(self):

@@ -71,6 +71,7 @@ class Tournament(models.Model):
                 result.score1 = 0
                 result.score2 = 100
             else:
+                result.games_won = 1
                 result.score1 = 100
                 result.score2 = 0
 
@@ -364,7 +365,8 @@ def update_board_result(sender, instance, created, **kwargs):
         elif instance.score1 == instance.score2:
             r.games_won += 0.5
             if player2:
-                player2.wins +=1
+                player2.wins +=0.5
+                player1.wins +=0.5
 
         r.score1 += instance.score1
         r.score2 += instance.score2
@@ -408,9 +410,6 @@ def update_standing(pid):
                     coalesce(sum(score2 - score1), 0) margin
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
-
-    if pid == 590:
-        print(q.format(pid))
 
     with connection.cursor() as cursor:
         cursor.execute(q.format(pid))

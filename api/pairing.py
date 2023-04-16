@@ -156,15 +156,15 @@ class Pairing:
         for pair in self.pairs:
             r = Result.objects.create(round=self.rnd,
                                       p1=pair[0]['player'], p2=pair[1]['player'])
-            if r.p1.name == 'Bye' or r.p2.name == 'Bye':
-                self.tournament.score_bye(r)
-
             if self.tournament.entry_mode == Tournament.BY_PLAYER:
                 for i in range(self.tournament.team_size):
                     BoardResult.objects.create(
                         board=i + 1, team1=r.p1, team2=r.p2, round=self.rnd
                     )
             results.append(r)
+            if r.p1.name == 'Bye' or r.p2.name == 'Bye':
+                self.tournament.score_bye(r)
+
 
         self.rnd.paired = True
         self.rnd.save()
