@@ -156,9 +156,19 @@ class Pairing:
     def save(self):
         results = []
         for pair in self.pairs:
-            r = Result.objects.create(round=self.rnd,
-                                      starting=pair[0]['player'],
-                                      p1=pair[0]['player'], p2=pair[1]['player'])
+            r = Result(round=self.rnd,
+                      p1=pair[0]['player'], p2=pair[1]['player']
+            )
+            if r.p1.name != 'Bye' and r.p2.name != 'Bye':
+                # nope this and the similiar condition below cannot be merged.
+                # they are both needed because saving a result is actually a
+                # two step process. Pleae refer to the comments in the result
+                # class
+
+                r.starting=pair[0]['player']
+            
+            r.save()
+
             if self.tournament.entry_mode == Tournament.BY_PLAYER:
                 for i in range(self.tournament.team_size):
                     BoardResult.objects.create(

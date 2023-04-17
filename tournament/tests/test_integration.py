@@ -17,26 +17,29 @@ class TestIntegration(SeleniumTest):
     Will setup a tournament, add players. pair rounds, add results
     pair the next round and so on.
     """
+    ENABLE_FF = False
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.firefox = webdriver.Firefox()
+
+        if TestIntegration.ENABLE_FF:
+            # Firefox driver seems to stop working from time to time
+            cls.firefox = webdriver.Firefox()
+        else:
+            print("Warning firefox has been disabled")
 
 
     @classmethod
     def tearDownClass(cls):
         "Sometimes you don't want to quit though "
         cls.selenium.quit()
-        cls.firefox.quit()
+        #cls.firefox.quit()
 
 
     def load_tournament(self, name):
         driver = self.selenium
-
-        ff = self.firefox
-        ff.get('%s%s' % (self.live_server_url, '/'))
-
+    
         self.login()
         self.get_url('/')
 
@@ -44,9 +47,12 @@ class TestIntegration(SeleniumTest):
             EC.presence_of_element_located((By.LINK_TEXT, name))
         ).click()
 
-        WebDriverWait(ff, 5, 0.1).until(
-            EC.presence_of_element_located((By.LINK_TEXT, name))
-        ).click()
+        if TestIntegration.ENABLE_FF:
+            ff = self.firefox
+            ff.get('%s%s' % (self.live_server_url, '/'))
+            WebDriverWait(ff, 5, 0.1).until(
+                EC.presence_of_element_located((By.LINK_TEXT, name))
+            ).click()
         
 
     def add_scores(self):

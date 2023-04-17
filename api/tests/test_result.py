@@ -90,6 +90,9 @@ class BasicTests(TestCase, Helper):
         self.assertNotEqual(p1.played, 0)
         self.assertNotEqual(p1.spread, 0)
 
+        # there should be exactly one player who has gone first
+        self.assertEqual(1, Participant.objects.filter(white=1).count())
+
     def test_edit_board_result(self):
         self.add_players(self.t2, 2)
         rnd = self.t2.rounds.all()[0]
@@ -172,5 +175,32 @@ class BasicTests(TestCase, Helper):
         # ensures that there is a 0.5 in there 
         self.assertEquals( (r.p2.game_wins * 2) % 2, 1)
         self.assertEquals( (r.p1.game_wins * 2) % 2, 1)
+
+
+    def test_score_bye_t(self):
+        """targeted at the score by method in Tournament"""
+        bye = Participant.objects.create(name="Bye", tournament=self.t1)
+        p1, = self.add_players(self.t1, 1)
+        
+        self.assertEquals(p1.game_wins, 0)
+        r = Result.objects.create(p1=p1, p2=bye, round=self.t1.rounds.all()[0])
+        self.t1.score_bye(r)
+        p1.refresh_from_db()
+        self.assertEquals(0, p1.white)
+        self.assertEqual(3, p1.game_wins)
+        self.assertEqual(1, p1.round_wins)
+
+
+    def test_score_bye_s(self):
+        bye = Participant.objects.create(name="Bye", tournament=self.t3)
+        p1, = self.add_players(self.t3, 1)
+        self.assertEquals(p1.game_wins, 0)
+        r = Result.objects.create(p1=p1, p2=bye, round=self.t1.rounds.all()[0])
+        self.t1.score_bye(r)
+        p1.refresh_from_db()
+        self.assertEquals(0, p1.white)
+        self.assertEqual(3, p1.game_wins)
+        self.assertEqual(1, p1.round_wins)
+
 
 

@@ -337,8 +337,6 @@ def result_presave(sender, instance, **kwargs):
         instance.p1, instance.p2 = instance.p2, instance.p1 
         if instance.games_won:
             instance.score1, instance.score2 = instance.score2, instance.score1
-        if instance.starting is not None:
-            instance.starting = instance.p1
 
 
 @receiver(pre_save, sender=BoardResult)
