@@ -64,14 +64,19 @@ class Command(BaseCommand):
                     else:
                         win = 0
 
+                    defaults = {
+                        "p1": p1, "p2": p2,
+                        "score1" : score1, "score2": score2, 
+                        "games_won": win, 
+                        "round_id" : rounds[idx]
+                    }
+
+                    if result['p12'][idx] == '1':
+                        defaults['starting'] = p1
+
                     Result.objects.get_or_create(
                         p1=p1, p2=p2,round_id=rounds[idx],
-                        defaults = {
-                            "p1": p1, "p2": p2,
-                            "score1" : score1, "score2": score2, 
-                            "games_won": win, 
-                            "round_id" : rounds[idx]
-                        }
+                        defaults=defaults
                     )
 
         self.t.update_all_standings()

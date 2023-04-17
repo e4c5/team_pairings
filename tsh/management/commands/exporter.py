@@ -19,4 +19,5 @@ class Command(BaseCommand):
             self.t = Tournament.objects.get(pk=options.get('tournament_id')
             ).select_related('participants')
 
-        tsh.tsh_export(self.t, options['tsh_file'])
+        with open(options['tsh_file'], 'w') as out:
+            tsh.tsh_export(self.t, out)
