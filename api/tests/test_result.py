@@ -8,7 +8,7 @@ from api import swiss
 from api.tests.helper import Helper
 
 class BasicTests(TestCase, Helper):
-    """Testing the various read and write permissions"""
+    """Testing result objects mostly and their signals"""
     
     def setUp(self) -> None:
         """Creates the fixtures.

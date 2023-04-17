@@ -244,7 +244,16 @@ class Result(models.Model):
     """A round result.
     
     If you make any changes here, double check the update_result function which 
-    is a signal for post_save
+    is a signal for post_save.
+
+    When a round is paired, a result entry will be created for each pairin with
+    score1 and score2 being set to null.
+
+    Immidiately after these records created the pairing class will add scores 
+    for the byes and the absentees. Afterwards the remainder will be filled by 
+    tournament directors.
+    
+    So this is a two step process, keep that in mind when writing tests.
     """
     round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name='results')
     # the fact that this is called p1 does not mean this player goes first
@@ -328,6 +337,8 @@ def result_presave(sender, instance, **kwargs):
         instance.p1, instance.p2 = instance.p2, instance.p1 
         if instance.games_won:
             instance.score1, instance.score2 = instance.score2, instance.score1
+        if instance.starting is not None:
+            instance.starting = instance.p1
 
 
 @receiver(pre_save, sender=BoardResult)
@@ -367,25 +378,24 @@ def update_board_result(sender, instance, created, **kwargs):
         r = Result.objects.filter(
             (Q(p1=instance.team1) & Q(p2=instance.team2)) 
         ).order_by('-round__round_no')[0]
+        
+        r.games_won = 0
+        r.score1 = 0
+        r.score2 = 0
+        boards = BoardResult.objects.filter(
+            Q(round=instance.round) & Q(team1=r.p1) & Q(team2=r.p2)
+        ).exclude(Q(score1=None) | Q(score2=None))
 
-        if r.games_won is None:
-            r.games_won = 0
-            r.score1 = 0
-            r.score2 = 0
-        if instance.score1 > instance.score2:
-            r.games_won +=1            
-            if player1:
-                player1.wins += 1
-        elif instance.score1 == instance.score2:
-            r.games_won += 0.5
-            if player2:
-                player2.wins +=0.5
-                player1.wins +=0.5
+        for b in boards:
+            if b.score1 > b.score2:
+                r.games_won += 1
+            elif b.score1 == b.score2:
+                r.games_won += 0.5
+            r.score1 += b.score1
+            r.score2 += b.score2
 
-        r.score1 += instance.score1
-        r.score2 += instance.score2
         r.save()
-
+        
         if player1 and player2:
             player1.spread += (instance.score1 - instance.score2)
             player2.spread -= (instance.score1 - instance.score2)
@@ -396,7 +406,7 @@ def update_board_result(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Result)
 def update_result(sender, instance, created, **kwargs):
     """When a result instance is saved the standings need to update"""
-    if not created or instance.p1.name in ['Absent','Bye'] or instance.p2.name in ['Absent','Bye']:
+    if (not created or instance.p1.name in ['Absent','Bye'] or instance.p2.name in ['Absent','Bye']):
         if instance.score1 or instance.score2:
             if instance.round.tournament.team_size:
                 update_team_standing(instance.p1_id)
@@ -414,16 +424,16 @@ def update_standing(pid):
     q = """
         update tournament_participant set played = a.games + b.games,
             game_wins = a.games_won + b.games_won, 
-            spread = a.margin + b.margin, whites = a.whites + b.whites
+            spread = a.margin + b.margin, white = a.white + b.white
             from 
-                (select count(*) as games, coalesce(sum(games_won), 0) games_won, 
+                (select count(*) as games, coalesce(sum(games_won),0) games_won, 
                     coalesce(sum(score1 - score2), 0) margin, 
-                    sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
+                    count(CASE WHEN starting_id = {0} THEN 1 ELSE NULL END) white
             from tournament_result tr where p1_id = {0} and games_won is not null) a,
                 (select count(*) as games, 
                     coalesce(sum(CASE WHEN score2 = 0 THEN 0 ELSE 1 - games_won END), 0) games_won, 
-                    coalesce(sum(score2 - score1), 0) margin
-                    sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
+                    coalesce(sum(score2 - score1), 0) margin,
+                    count(CASE WHEN starting_id = {0} THEN 1 ELSE NULL END) white
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
 
@@ -438,21 +448,21 @@ def update_team_standing(pid):
     """
     q = """
         update tournament_participant set played = a.games + b.games,
-            game_wins = a.games_won + b.games_won, whites = a.whites + b.whites,
+            game_wins = a.games_won + b.games_won, white = a.white + b.white,
             round_wins = a.rounds_won + b.rounds_won, spread = a.margin + b.margin
             from (select count(*) as games, coalesce(sum(games_won),0) games_won, 
                 coalesce(sum(CASE when games_won is null THEN 0 
                                 WHEN games_won > 2.5 THEN 1 
                                 WHEN games_won = 2.5 THEN .5 else 0 end), 0) rounds_won,
                 coalesce(sum(score1 - score2),0) margin,
-                sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
+                coalesce(sum(CASE WHEN starting_id = {0} THEN 1 ELSE 0 END),0) white
             from tournament_result tr where p1_id = {0} and games_won is not null) a,
             (select count(*) as games, coalesce(sum(5 - games_won),0) games_won, 
                 coalesce(sum(CASE WHEN games_won IS NULL THEN 0 
                          WHEN games_won < 2.5 THEN 1 
                          WHEN games_won = 2.5 THEN .5 else 0 END),0) rounds_won,
                 coalesce(sum(score2 - score1),0) margin,
-                sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
+                coalesce(sum(CASE WHEN starting_id = {0} THEN 1 ELSE 0 END),0) white
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
 

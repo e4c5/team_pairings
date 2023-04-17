@@ -143,18 +143,21 @@ class Pairing:
         """Sort the players
         First by round_wins (represented by score in the dictionary)
             then by number of games won (for individual tournaments round_wins wont matter)
-            then by the spread
+            then by the spread, then the number of times they have gone first
             finally by the rating
         """
         sorted_players = sorted(players, reverse=True,
                                 key=lambda player: (player['score'], player['game_wins'],
-                                                    player['spread'], player['rating']))
+                                                    player['spread'],
+                                                    player['player'].white or 0,
+                                                    player['rating']))
         return sorted_players
 
     def save(self):
         results = []
         for pair in self.pairs:
             r = Result.objects.create(round=self.rnd,
+                                      starting=pair[0]['player'],
                                       p1=pair[0]['player'], p2=pair[1]['player'])
             if self.tournament.entry_mode == Tournament.BY_PLAYER:
                 for i in range(self.tournament.team_size):
@@ -169,3 +172,17 @@ class Pairing:
         self.rnd.paired = True
         self.rnd.save()
         return results
+
+    
+    def get_color_preferences(self, player):
+        """Find which 'color' the player should be assigned
+        white means he goes first and black means second.
+        
+        A color preference that's negative means this player should go first
+        in the next game (if possible) a color preference that's positive 
+        means he has to go second
+        """
+        whites = player['player'].white
+        blacks = player['player'].played - whites
+
+        return blacks - whites

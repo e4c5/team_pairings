@@ -58,16 +58,27 @@ class BasicTests(APITransactionTestCase, Helper):
         self.assertRaises(IntegrityError, r.save)
 
 
+    def test_score(self):
+        p1, p2, p3, p4 = self.add_players(self.t1, 4)
+        # this should be flipped at the time of saving
+        Result.objects.create(p1=p2, p2=p1, score1=400, score2=500, 
+                              round=self.t1.rounds.all()[0],games_won=1
+                              )
+        self.t1.update_all_standings()
+        p1.refresh_from_db()
+        p2.refresh_from_db()
+        
+        self.assertEquals(p1.game_wins, 1)
+        self.assertEquals(p2.game_wins, 4)
+        
+        self.assertEquals(p1.spread, 100)
+        self.assertEqual(p1.white, 0)
+        self.assertEqual(p2.white, 0)
+        
+
     def test_board_result(self):
         """Test that border result team1, team2 are ordered"""
-        p1 = Participant(name='aa', rating=11, tournament=self.t1)
-        p2 = Participant(name='bb', rating=11, tournament=self.t1)
-        p3 = Participant(name='cc', rating=11, tournament=self.t1)
-        p4 = Participant(name='dd', rating=11, tournament=self.t1)
-        p1.save()
-        p2.save()
-        p3.save()
-        p4.save()
+        p1, p2, p3, p4 = self.add_players(self.t1, 4)
 
         rnd = self.t1.rounds.all()[0]
         sp = swiss.SwissPairing(rnd)

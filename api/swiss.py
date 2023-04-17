@@ -109,9 +109,7 @@ class SwissPairing(Pairing):
                 if len(without_opponents) == 1:
                     without_opponents[0]['downfloater'] = True
                     downfloaters.append(without_opponents[0])
-
-            if len(downfloaters) > 0 and lowest_group == group_score:
-                pass
+          
         pass
 
     # D 1.1 Homogenius transposition
@@ -159,13 +157,10 @@ class SwissPairing(Pairing):
         return group
 
     def return_with_color_preferences(self, playerA, playerB):
+        """Given two players orders them so that the first guy goes first"""
         player1, player2 = self.order_players([playerA, playerB])
         player1_pref = self.get_color_preferences(player1)
         player2_pref = self.get_color_preferences(player2)
-        player1_switched_color = self.get_switched_color_for_latest_game(
-            player1)
-        player2_switched_color = self.get_switched_color_for_latest_game(
-            player2)
 
         if player1_pref <= -2 or player2_pref >= 2:
             return player1, player2
@@ -175,16 +170,12 @@ class SwissPairing(Pairing):
             return player2, player1
         elif player1_pref == 1 or player2_pref == -1:
             return player2, player1
-        elif player1_switched_color and player1_switched_color == 'W':
-            return player1, player2
-        elif player2_switched_color and player2_switched_color == 'W':
-            return player2, player1
 
         return player1, player2
 
 
     # B.1, B.2
-    def find_possible_opponents(self, current_player, group, skip_color_pref=False):
+    def find_possible_opponents(self, current_player, group):
         rest = []
 
         for player in group:
@@ -207,21 +198,5 @@ class SwissPairing(Pairing):
         if len(rest) == 0:
             return []
 
-        # B.2
-        # TODO: Top scored players
-        color_pref = self.get_color_preferences(current_player)
-        if abs(color_pref) >= 2 and skip_color_pref is False:
-            for player in rest:
-                opponent_color_pref = self.get_color_preferences(player)
-                if opponent_color_pref == color_pref:
-                    rest.remove(player)
-                    continue
-
         return rest
-
-    def get_color_preferences(self, player):
-        return 0
-
-    def get_switched_color_for_latest_game(self, player):
-        return None
 

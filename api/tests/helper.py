@@ -33,7 +33,7 @@ class Helper:
 
 
     def add_players(self, tournament, count):
-        add_participants(tournament, use_faker=True, count=count)
+        return add_participants(tournament, use_faker=True, count=count)
 
 
     def add_team_members(self, tournament):

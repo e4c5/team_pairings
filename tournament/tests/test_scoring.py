@@ -13,7 +13,7 @@ class TestResults(SeleniumTest):
    
     @classmethod
     def tearDownClass(cls):
-        #cls.selenium.quit()
+        cls.selenium.quit()
         ""
 
     def load_tournament(self, name):
