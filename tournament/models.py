@@ -211,6 +211,9 @@ class Participant(models.Model):
     # to assign a number for each team or player.
     seed = models.IntegerField()
 
+    # how many times did this player go first
+    white = models.IntegerField(default=0)
+
     def mark_absent(self, rnd):
         bye, _ = Participant.objects.get_or_create(
                         name='Absent', tournament=rnd.tournament,
@@ -301,6 +304,17 @@ class BoardResult(models.Model):
             ),
         ]
 
+#
+# almost all the code in the next section can be converted into triggers but
+# I have my reasons for not doing so. One of the more important being making
+# sure there is high levels of code coverage. Well triggers you can't get a
+# coverage report AFAIK.
+#
+# The other obvious reason to keep the code here in signals rather than 
+# triggers is that triggers are much much harder to debug.
+#
+# Primary drawback of this approach of course is that if someone manually
+# edits the db, these signals will not be fired.
 
 @receiver(pre_save, sender=Result)
 def result_presave(sender, instance, **kwargs):
@@ -400,14 +414,16 @@ def update_standing(pid):
     q = """
         update tournament_participant set played = a.games + b.games,
             game_wins = a.games_won + b.games_won, 
-            spread = a.margin + b.margin
+            spread = a.margin + b.margin, whites = a.whites + b.whites
             from 
                 (select count(*) as games, coalesce(sum(games_won), 0) games_won, 
-                    coalesce(sum(score1 - score2), 0) margin
+                    coalesce(sum(score1 - score2), 0) margin, 
+                    sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
             from tournament_result tr where p1_id = {0} and games_won is not null) a,
                 (select count(*) as games, 
                     coalesce(sum(CASE WHEN score2 = 0 THEN 0 ELSE 1 - games_won END), 0) games_won, 
                     coalesce(sum(score2 - score1), 0) margin
+                    sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
 
@@ -422,19 +438,21 @@ def update_team_standing(pid):
     """
     q = """
         update tournament_participant set played = a.games + b.games,
-            game_wins = a.games_won + b.games_won, 
+            game_wins = a.games_won + b.games_won, whites = a.whites + b.whites,
             round_wins = a.rounds_won + b.rounds_won, spread = a.margin + b.margin
             from (select count(*) as games, coalesce(sum(games_won),0) games_won, 
                 coalesce(sum(CASE when games_won is null THEN 0 
                                 WHEN games_won > 2.5 THEN 1 
                                 WHEN games_won = 2.5 THEN .5 else 0 end), 0) rounds_won,
-                coalesce(sum(score1 - score2),0) margin
+                coalesce(sum(score1 - score2),0) margin,
+                sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
             from tournament_result tr where p1_id = {0} and games_won is not null) a,
             (select count(*) as games, coalesce(sum(5 - games_won),0) games_won, 
                 coalesce(sum(CASE WHEN games_won IS NULL THEN 0 
                          WHEN games_won < 2.5 THEN 1 
                          WHEN games_won = 2.5 THEN .5 else 0 END),0) rounds_won,
-                coalesce(sum(score2 - score1),0) margin
+                coalesce(sum(score2 - score1),0) margin,
+                sum(CASE WHEN starting = {0} THEN 1 ELSE 0 END) whites
             from tournament_result tr where p2_id = {0} and games_won is not null) b
             where id = {0}"""
 

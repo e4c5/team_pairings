@@ -59,6 +59,9 @@ def tsh_import(f):
                     itms = obj[1:]
                     
                     if obj_name == 'p12':
+                        # A value of 1,2 means the obvious, 0 means the play had a bye
+                        # when it's three they tossed for it
+                        
                         p12 = itms
                     elif obj_name == 'newr':
                         newr = d.strip().split(' ')[1:]

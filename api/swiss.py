@@ -27,9 +27,6 @@ class SwissPairing(Pairing):
         if len(self.players) == 0:
             raise ValueError('No players')
 
-        if len(self.players) % 2 == 1:
-            raise ValueError('Odd number of players')
-
         self.assign_bye()
 
         brackets = {}
