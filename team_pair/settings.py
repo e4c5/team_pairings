@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'channels',
-    'tournament','api'
+    'tournament','api','tsh'
 ]
 
 MIDDLEWARE = [
