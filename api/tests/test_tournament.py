@@ -104,10 +104,12 @@ class BasicTests(APITestCase):
         self.assertEquals(2, len(resp.data), resp.data)
 
         models.Tournament.objects.update(private=True)
+        resp = self.client.get('/api/tournament/')
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(0, len(resp.data), resp.data)
 
         self.client.login(username='testuser', password='12345')        
+        resp = self.client.get('/api/tournament/')
         models.Tournament.objects.update(private=True)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(1, len(resp.data), resp.data)

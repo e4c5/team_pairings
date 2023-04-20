@@ -93,7 +93,9 @@ class BasicTests(TestCase, Helper):
         # there should be exactly one player who has gone first
         self.assertEqual(1, Participant.objects.filter(white=1).count())
 
+
     def test_edit_board_result(self):
+        """Add results for all the boards and then edit one"""
         self.add_players(self.t2, 2)
         rnd = self.t2.rounds.all()[0]
 
@@ -101,6 +103,9 @@ class BasicTests(TestCase, Helper):
         sp.make_it()
         sp.save()
 
+        r = Result.objects.all()[0]
+        self.assertEqual(f"{r.p1.name} vs {r.p2.name}", str(r))
+        
         for b in BoardResult.objects.all():
             b.score1 = 200
             b.score2 = 200
@@ -114,16 +119,23 @@ class BasicTests(TestCase, Helper):
         b.score2 = 300
         b.save()
 
-
         p2.refresh_from_db()
-        self.assertEquals(p2.round_wins, 1)
-        self.assertEquals(p2.game_wins, 3)
-        self.assertEquals(p2.spread, 100)
-
         p1.refresh_from_db()
-        self.assertEquals(p1.round_wins, 0)
-        self.assertEquals(p1.game_wins, 2)
-        self.assertEquals(p1.spread, -100)
+        if b.team1 == p1:
+            self.assertEquals(p2.round_wins, 1)
+            self.assertEquals(p2.game_wins, 3)
+            self.assertEquals(p2.spread, 100)
+            self.assertEquals(p1.round_wins, 0)
+            self.assertEquals(p1.game_wins, 2)
+            self.assertEquals(p1.spread, -100)
+        else:
+            self.assertEquals(p1.round_wins, 1)
+            self.assertEquals(p1.game_wins, 3)
+            self.assertEquals(p1.spread, 100)
+
+            self.assertEquals(p2.round_wins, 0)
+            self.assertEquals(p2.game_wins, 2)
+            self.assertEquals(p2.spread, -100)
 
 
     def test_edit_bye(self):
