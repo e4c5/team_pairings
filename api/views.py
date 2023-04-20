@@ -28,9 +28,17 @@ def index(request):
 class TournamentViewSet(viewsets.ModelViewSet):
     """CRUD for tournaments"""
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = models.Tournament.objects.all()
     serializer_class = TournamentSerializer
 
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return models.Tournament.objects.filter(
+                Q(director__user=self.request.user) | Q(private=False)
+            )
+        else:
+            return models.Tournament.objects.filter(private=False)
+        
     def retrieve(self, request, *args, **kwargs):
         # funnily enough if you use to_jsonb in the outermost query below
         # psycopg2 gives you a string instead of a dict

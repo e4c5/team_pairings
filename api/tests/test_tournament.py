@@ -97,3 +97,17 @@ class BasicTests(APITestCase):
         
         self.assertEquals(resp.status_code, 403)
         
+    def test_private(self):
+        """Only owners can see their tournaments in the list"""
+        resp = self.client.get('/api/tournament/')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(2, len(resp.data), resp.data)
+
+        models.Tournament.objects.update(private=True)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(0, len(resp.data), resp.data)
+
+        self.client.login(username='testuser', password='12345')        
+        models.Tournament.objects.update(private=True)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(1, len(resp.data), resp.data)

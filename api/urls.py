@@ -19,7 +19,7 @@ from rest_framework import routers
 from api import views
 
 router = routers.SimpleRouter()
-router.register('tournament', views.TournamentViewSet)
+router.register('tournament', views.TournamentViewSet, basename='tournament')
 router.register('tournament/(?P<tid>\d+)/participant', views.ParticipantViewSet, 'participant')
 
 urlpatterns = router.urls

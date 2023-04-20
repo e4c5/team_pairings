@@ -36,6 +36,9 @@ class Tournament(models.Model):
 
     num_rounds = models.IntegerField()
 
+    # this is tournament a private one?
+    private = models.BooleanField(default=False)
+
     @classmethod    
     def tournament_slug(self, name):
         ''' Slugify tournament names so that we can use them in links '''
