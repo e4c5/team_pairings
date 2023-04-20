@@ -75,8 +75,6 @@ class SwissPairing(Pairing):
                     continue
 
                 opponents = self.find_possible_opponents(player, group)
-#                if group_score == 1.5:
-#                    print(opponents)
 
                 # C.1: B.1, B.2
                 if len(opponents) == 0:
@@ -98,7 +96,6 @@ class SwissPairing(Pairing):
                     self.pairs.append([playerW, playerB])
                     playerW['pair'] = True
                     playerB['pair'] = True
-                    pass
 
             without_opponents = [
                 pl for pl in group if 'pair' not in pl or pl['pair'] is False]
@@ -110,7 +107,6 @@ class SwissPairing(Pairing):
                     without_opponents[0]['downfloater'] = True
                     downfloaters.append(without_opponents[0])
           
-        pass
 
     # D 1.1 Homogenius transposition
     def pair_group_with_transposition(self, group):
@@ -156,24 +152,7 @@ class SwissPairing(Pairing):
 
         return group
 
-    def return_with_color_preferences(self, playerA, playerB):
-        """Given two players orders them so that the first guy goes first"""
-        player1, player2 = self.order_players([playerA, playerB])
-        player1_pref = self.get_color_preferences(player1)
-        player2_pref = self.get_color_preferences(player2)
-
-        if player1_pref <= -2 or player2_pref >= 2:
-            return player1, player2
-        elif player1_pref == -1 or player2_pref == 1:
-            return player1, player2
-        elif player1_pref >= 2 or player2_pref <= -2:
-            return player2, player1
-        elif player1_pref == 1 or player2_pref == -1:
-            return player2, player1
-
-        return player1, player2
-
-
+   
     # B.1, B.2
     def find_possible_opponents(self, current_player, group):
         rest = []

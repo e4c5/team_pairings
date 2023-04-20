@@ -1,59 +1,33 @@
 # king of the hill pairing
 from tournament.models import Result, Participant
 
-class KOTH:
+from api.pairing import Pairing
+
+class Koth(Pairing):
+    '''King of the Hill Pairing (sucks)'''
 
     def __init__(self, rnd):
         ''' Creates swiss pairing for the given round
         Arguments: 
             rnd: a TournamentRound instance.
         '''
-        self.pairs = []
-        self.tournament = rnd.tournament
-        self.players = []
-        self.rnd = rnd
-        self.next_round = rnd.round_no
 
-        qs = Result.objects.exclude(p1__name='Bye'
-                                    ).filter(round__round_no__lt=rnd.round_no
-                                             ).select_related('p1', 'p2', 'round')
+        super().__init__(rnd)
 
-        players = Participant.objects.select_related().filter(tournament_id=self.tournament
-                                                              ).exclude(offed=True).order_by('round_wins', '-game_wins', '-spread')
-        for pl in players:
-            opponents = []
-            spread = 0
-            wins = 0
 
-            if pl.name != 'Bye':
-                games = qs.filter(Q(p1=pl) | Q(p2=pl)).order_by('-round')
-                opponents = []
-                for game in games:
-                    if game.p1.id == pl.id:
-                        opponents.append(game.p2)
-                    else:
-                        opponents.append(game.p1)
+    def make_it(self):
+        if len(self.players) == 0:
+            raise ValueError('No players')
 
-                self.players.append(
-                    {'name': pl.name,
-                     'spread': pl.spread,
-                     'rating': pl.rating,
-                     'player': pl,
-                     'game_wins': pl.game_wins,
-                     'score': pl.round_wins,
-                     'opponents': opponents
-                     }
-                )
+        self.assign_bye()
 
-        # A.3
-        brackets = {}
-        for player in self.players:
-            if player['score'] not in brackets:
-                brackets[player['score']] = []
-            brackets[player['score']].append(player)
-        self.brackets = brackets
+        sorted_players = self.order_players(self.players)
+        for i in range(0, len(sorted_players), 2):
+            player = sorted_players[i]
+            opponent = sorted_players[i + 1]
+            p1, p2 = self.return_with_color_preferences(player, opponent)
+            self.pairs.append([p1, p2])
 
-    def save(self):
-        for pair in self.pairs:
-            Result.objects.create(round=self.rnd,
-                                  p1=pair[0]['player'], p2=pair[1]['player'])
+        return self.pairs
+    
+   

@@ -52,7 +52,7 @@ class Pairing:
         players = Participant.objects.select_related(
             ).filter(tournament=self.tournament
             ).exclude(offed=True).exclude(name='Absent'
-            ).order_by('round_wins', '-game_wins', '-spread')
+            ).order_by('-round_wins', '-game_wins', '-spread','-rating')
 
         if rnd.based_on > 0:
             # this round has a predecessor that needs to be completed.
@@ -196,3 +196,21 @@ class Pairing:
         blacks = player['player'].played - whites
 
         return blacks - whites
+    
+
+    def return_with_color_preferences(self, playerA, playerB):
+        """Given two players orders them so that the first guy goes first"""
+        player1, player2 = self.order_players([playerA, playerB])
+        player1_pref = self.get_color_preferences(player1)
+        player2_pref = self.get_color_preferences(player2)
+
+        if player1_pref <= -2 or player2_pref >= 2:
+            return player1, player2
+        elif player1_pref == -1 or player2_pref == 1:
+            return player1, player2
+        elif player1_pref >= 2 or player2_pref <= -2:
+            return player2, player1
+        elif player1_pref == 1 or player2_pref == -1:
+            return player2, player1
+
+        return player1, player2

@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from tournament.models import BoardResult, Participant, TournamentRound, Tournament, Result
 from tournament.tools import add_participants
 
-from api import swiss
+from api import swiss, koth
 from api.tests.helper import Helper
 
 class BasicTests(APITestCase, Helper):
@@ -649,4 +649,33 @@ class DataEntryTests(APITestCase, Helper):
         resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(200, resp.status_code)
         self.assertEqual('ok', resp.data['status'])
+
+
+class KothTests(APITestCase, Helper):
+    def setUp(self) -> None:
+        self.create_tournaments();
+
+    def test_odd(self):
+        self.t1.rounds.update(pairing_system=TournamentRound.KOTH)
+        self.add_players(self.t1, 5)
+        self.speed_pair(self.t1.rounds.all()[0])
+
+        self.assertEquals(Result.objects.count(), 3)
+
+        for result in Result.objects.all()[0:2]:
+            self.assertEqual(result.p1.seed + 1, result.p2.seed)
+
+        self.speed_pair(self.t1.rounds.all()[1])
+        self.assertEquals(Result.objects.count(), 6)
+
+        p1, p2 = Participant.objects.order_by('-round_wins','-game_wins','-spread')[0:2]
+
+        rnd = self.t1.rounds.all()[2]
+        sp = koth.Koth(rnd)
+        sp.make_it()
+        sp.save()
+
+        r = Result.objects.filter( Q(p1=p1) | Q(p2=p1)).get(round=rnd)
+        self.assertTrue( (r.p1 == p1 and r.p2 == p2) or (r.p2 == p1 and r.p1 == p2) )
+
 
