@@ -102,6 +102,7 @@ export function Tournament(props) {
 
 export function Tournaments(props) {
     const id = useParams();
+    const auth = document.getElementById('hh') && document.getElementById('hh').value
 
     return (
         <div>
@@ -114,9 +115,9 @@ export function Tournaments(props) {
                 </li>) 
             }
             </ul>
-
+            { auth && <Link to="/new">New Tournament</Link> }
         </div>
     )
 }
 
-console.log('Tournament 0.03')
+console.log('Tournament 0.03.1')

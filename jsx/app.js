@@ -6,9 +6,10 @@ import {
     useNavigate
 } from "react-router-dom";
 
-import { Participant, Participants } from "./participant.jsx"
+import { Participant} from "./participant.jsx"
 import { Tournament, Tournaments } from "./tournament.jsx"
-import { Round, Rounds } from "./round.jsx"
+import { Round } from "./round.jsx"
+import { TournamentEditor } from './editor.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 
 /**
@@ -32,6 +33,10 @@ import { useTournament, useTournamentDispatch } from './context.jsx';
  */
 export default function App() {
     const [tournaments, setTournaments] = useState()
+    const [tournamentBeingEdited, setTournamentBeingEdited] = useState({
+        name: '', start_date: ''
+    })
+
     const tournament = useTournament()
     const dispatch = useTournamentDispatch();
     const navigate = useNavigate()
@@ -123,9 +128,21 @@ export default function App() {
         }
     }, [tournaments])
 
+    function saveTournament(e) {
+        e.preventDefault()
+        console.log('Save tournament')
+    }
+
     return (
         <Routes>
             <Route path="/" element={<Tournaments tournaments={tournaments} />}></Route>
+            <Route path="/new" 
+                element={
+                    <TournamentEditor tournament={tournamentBeingEdited} 
+                        tournamentChanged={setTournamentBeingEdited} 
+                        saveTournament={saveTournament} />
+                }>
+            </Route>
             <Route path="/:slug" >
                 <Route path=""
                     element={<Tournament tournaments={tournaments} />}
