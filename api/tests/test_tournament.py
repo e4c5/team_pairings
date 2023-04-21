@@ -1,4 +1,5 @@
 import csv
+import json
 
 from unittest.mock import patch
 from django.urls import reverse
@@ -30,6 +31,42 @@ class BasicTests(APITestCase):
         # but the creat happens in setup
         self.assertEqual(models.TournamentRound.objects.count(), 10)
         self.assertEqual(str(self.t1), "Richmond Showdown U20")
+
+    
+    def test_update_tournament(self):
+        """Updates a tournament wtih a POST"""
+        resp = self.client.get(f'/api/tournament/{self.t1.id}/')
+        t = resp.data
+        del t['participants']
+        t['rounds'][1]['pairing_system'] = 'KOTH'
+        print(json.dumps(t))
+        self.assertEquals(len(t['rounds']), 5)
+
+        resp = self.client.put(f'/api/tournament/{self.t1.id}/', json.dumps(t) , format='json')
+        self.assertEquals(resp.status_code, 403)
+        self.client.login(username='testuser', password='12345')
+        
+        resp = self.client.put(f'/api/tournament/{self.t1.id}/', t)
+        self.assertEquals(resp.status_code, 200)
+        
+        rnd = self.t1.rounds.get(round_no=1)
+        self.assertEquals(rnd.pairing_system, 'KOTH')
+
+    def test_create_post(self):
+        """Send a POST to the http end point to create a tournament.
+        Needs to be an authenticated user"""
+        resp = self.client.post('/api/tournament/', {
+            'name': 'joust', 'rounds': 10, 'date': '2023-04-23'
+        })
+        self.assertEquals(resp.status_code, 403)
+        
+        self.client.login(username='testuser', password='12345')
+        resp = self.client.get('/api/tournament/')
+
+        resp = self.client.post('/api/tournament/', {
+            'name': 'joust', 'num_rounds': 10, 'start_date': '2023-04-23'
+        })
+        self.assertEquals(resp.status_code, 201, resp.data)
 
 
     def test_retrieve(self):
@@ -74,6 +111,10 @@ class BasicTests(APITestCase):
     @patch('api.views.broadcast')
     def test_add_teams(self, m):
         with open('api/tests/data/teams.csv') as fp:
+            resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
+                    {"name": 'aa', "rating":  100})
+            self.assertEqual(403, resp.status_code)
+             
             self.client.login(username='testuser', password='12345')
             reader = csv.reader(fp)
             for line in reader:

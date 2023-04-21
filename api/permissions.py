@@ -9,13 +9,13 @@ class IsAuthenticatedOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-
+        
         if request.user and request.user.is_authenticated:
             if hasattr(request, 'tournament'):
                 td = request.tournament.director_set.filter(user=request.user)
                 if td.exists():
                     return True
-
+            return request.get_full_path() == '/api/tournament/' and request.method == 'POST'
         return False                        
 
 

@@ -2,8 +2,14 @@ from rest_framework import serializers
 from tournament.models import Tournament, TournamentRound, Participant,\
      Result, BoardResult
 
-class TournamentSerializer(serializers.ModelSerializer):
-    is_editable = serializers.SerializerMethodField()
+class TournamentRoundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TournamentRound
+        fields = '__all__'
+
+
+class TournamentDetailSerializer(serializers.ModelSerializer):
+    rounds = TournamentRoundSerializer(many=True, required=False)
 
     def get_is_editable(self, obj):
         if hasattr(obj, 'editable'):
@@ -13,13 +19,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = '__all__' #['id', 'start_date','name','rated','slug']
-
-    
-class TournamentRoundSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TournamentRound
-        fields = '__all__'
+        fields = ['id', 'start_date','name','rated','slug', 'rounds', 'num_rounds']
 
     
 class ParticipantSerializer(serializers.ModelSerializer):
