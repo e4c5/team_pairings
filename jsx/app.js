@@ -47,7 +47,11 @@ export default function App() {
         /**
          * For real time updates use websockets.
          */
-        const ws = new WebSocket(`ws://${location.host}/ws/`)
+        let wssUrl = window.location.protocol == 'https' 
+            ? `wss://${location.host}/ws/`
+            : `ws://${location.host}/ws/`
+
+        const ws = new WebSocket(wssUrl)
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
             console.log(obj)

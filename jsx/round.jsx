@@ -276,8 +276,8 @@ export function Round(props) {
                     lost: tournament.team_size - result.games_won
                 }
             })
-            ref.current.scrollIntoView({ behavior: 'smooth' });
-            ref.current.focus()
+            ref.current?.scrollIntoView({ behavior: 'smooth' });
+            ref.current?.focus()
         }
     }
 
