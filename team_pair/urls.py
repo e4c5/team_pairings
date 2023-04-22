@@ -28,7 +28,7 @@ urlpatterns = [
          auth_views.LoginView.as_view(template_name='account/login.html'),
         name='login'
     ),
-    path('loout/', auth_views.LoginView.as_view()),
+    path('logout/', auth_views.LogoutView.as_view()),
     path('change-password/', 
          auth_views.PasswordChangeView.as_view(template_name='account/change-password.html')
     ),

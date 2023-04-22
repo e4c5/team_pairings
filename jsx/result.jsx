@@ -52,10 +52,10 @@ export function Result({r, index, editScore}) {
     function resultIn() {
         return (
             <tr>
-                <td >{ get_p1(r) }</td>
+                <td >{ get_p1(r)} #{r.p1.seed}  {`${r.p1_id == r.starting_id ? " (first) " : ""}` }</td>
                 <td className="text-right" >{ r.games_won } </td>
                 <td className="text-right" >{ r.score1 }</td>
-                <td>{ get_p2(r) }</td>
+                <td>{ get_p2(r) } #{r.p2.seed} {`${r.p2_id == r.starting_id ? " (first) " : ""}` }</td>
                 <td className="text-right">
                     { gamesLost(r) } 
                 </td>

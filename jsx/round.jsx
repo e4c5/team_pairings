@@ -318,7 +318,6 @@ export function Round(props) {
 
     const roundDetails = getRoundDetails()
     if (roundDetails?.paired) {
-
         return (
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
