@@ -77,7 +77,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -125,7 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/pairing/static/'
+STATIC_ROOT = '/var/www/pairing/static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -133,3 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL='/'
 LOGOUT_REDIRECT_URL='/'
+
+CORS_ORIGIN_WHITE_LIST = [ 'https://live.scrabble.lk']
+CSRF_TRUSTED_ORIGINS = [ 'https://live.scrabble.lk']
+

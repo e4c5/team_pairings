@@ -19,3 +19,5 @@ team_pair/settings_local.py
 geckodriver.log
 
 tournament/static/js/
+sttic
+static
