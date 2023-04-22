@@ -51,6 +51,8 @@ export default function App() {
             ? `wss://${location.host}/ws/`
             : `ws://${location.host}/ws/`
 
+        console.log(wssUrl)
+
         const ws = new WebSocket(wssUrl)
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)

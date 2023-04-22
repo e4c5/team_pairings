@@ -6,3 +6,4 @@ django-allauth
 psycopg2-binary
 channels-redis
 selenium
+Faker
