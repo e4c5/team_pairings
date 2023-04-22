@@ -47,7 +47,7 @@ export default function App() {
         /**
          * For real time updates use websockets.
          */
-        let wssUrl = window.location.protocol == 'https' 
+        let wssUrl = window.location.protocol == 'https:' 
             ? `wss://${location.host}/ws/`
             : `ws://${location.host}/ws/`
 
