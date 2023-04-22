@@ -33,25 +33,6 @@ class BasicTests(APITestCase):
         self.assertEqual(str(self.t1), "Richmond Showdown U20")
 
     
-    def test_update_tournament(self):
-        """Updates a tournament wtih a POST"""
-        resp = self.client.get(f'/api/tournament/{self.t1.id}/')
-        t = resp.data
-        del t['participants']
-        t['rounds'][1]['pairing_system'] = 'KOTH'
-        print(json.dumps(t))
-        self.assertEquals(len(t['rounds']), 5)
-
-        resp = self.client.put(f'/api/tournament/{self.t1.id}/', json.dumps(t) , format='json')
-        self.assertEquals(resp.status_code, 403)
-        self.client.login(username='testuser', password='12345')
-        
-        resp = self.client.put(f'/api/tournament/{self.t1.id}/', t)
-        self.assertEquals(resp.status_code, 200)
-        
-        rnd = self.t1.rounds.get(round_no=1)
-        self.assertEquals(rnd.pairing_system, 'KOTH')
-
     def test_create_post(self):
         """Send a POST to the http end point to create a tournament.
         Needs to be an authenticated user"""

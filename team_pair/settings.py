@@ -26,7 +26,7 @@ SECRET_KEY = settings_local.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['live.scrabble.lk']
+ALLOWED_HOSTS = ['live.scrabble.lk', 'localhost']
 
 
 # Application definition
@@ -136,4 +136,4 @@ LOGOUT_REDIRECT_URL='/'
 
 CORS_ORIGIN_WHITE_LIST = [ 'https://live.scrabble.lk']
 CSRF_TRUSTED_ORIGINS = [ 'https://live.scrabble.lk']
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
