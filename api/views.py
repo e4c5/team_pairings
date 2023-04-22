@@ -280,13 +280,13 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     serializer_class = ParticipantSerializer
 
     def perform_create(self, serializer):
-        instance = serializer.save(tournament_id=self.kwargs['tid'])
+        instance = serializer.save(tournament_id=self.request.tournament.id)
         p = serializer.data
         p['id'] = instance.pk
         p['seed'] = instance.seed
         broadcast({
             "participant": p,
-            "tournament_id": self.kwargs['tid']
+            "tournament_id": self.request.tournament.id
         })
 
     def retrieve(self, request, pk=None, **kwargs):
