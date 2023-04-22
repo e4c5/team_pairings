@@ -1,10 +1,6 @@
-import csv
-import asyncio
+from unittest.mock import patch
 
-from django.urls import reverse
 from django.contrib.auth.models import User
-
-from rest_framework import status
 from rest_framework.test import APITestCase
 
 from tournament import models
@@ -51,7 +47,8 @@ class BasicTests(APITestCase):
         self.assertEquals(resp.status_code, 403)
         
 
-    def test_write_allowed(self):
+    @patch('api.views.broadcast')
+    def test_write_allowed(self, _):
         """The tournament director should have write access"""
 
         self.assertEqual(self.t1.start_date,'2023-02-25')        
@@ -61,7 +58,7 @@ class BasicTests(APITestCase):
         # edit this tournaments name and start date
         self.client.login(username='sri', password='12345')
         resp = self.client.put(f'/api/tournament/{self.t1.id}/',
-            {"start_date": "2022-01-01", "name": "changed"})
+            {"start_date": "2022-01-01", "name": "changed", "num_rounds": 5})
         
         self.assertEqual(200, resp.status_code)
         t = models.Tournament.objects.get(pk=self.t1.pk)

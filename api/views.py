@@ -12,8 +12,8 @@ from rest_framework.response import Response
 
 from tournament import models
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
-        TournamentDetailSerializer,
         TournamentRoundSerializer, ResultSerializer, BoardResultSerializer)
+
 from api.swiss import SwissPairing
 from api.permissions import IsAuthenticatedOrReadOnly
 
@@ -40,24 +40,18 @@ class TournamentViewSet(viewsets.ModelViewSet):
         else:
             return models.Tournament.objects.filter(private=False)
         
+
+    def perform_create(self, serializer):
+        t = serializer.save()
+        models.Director.objects.create(tournament=t, user=self.request.user)
+
+    
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-
-        try:        
-            for rnd in json.loads(request.data['rounds']):
-                serializer = TournamentRoundSerializer(rnd)
-                if serializer.is_valid():
-                    #pk = rnd.pop('id')
-                    #models.TournamentRound.filter(pk=pk).update(**rnd)
-                    serializer.update()
-        except:
-            # tournament edit is broken
-            print('attend to this in views.TournamentViewSet')
-
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
@@ -91,12 +85,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
             cursor.execute(query, [kwargs['pk']])
             return Response( cursor.fetchone()[0])
 
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return TournamentDetailSerializer
-        
-        return super().get_serializer_class()
-    
+   
     @action(detail=True, methods=['post'])
     def truncate(self, request,pk, **kwargs):
         """Deletes the last round of a tournament.
@@ -291,8 +280,14 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     serializer_class = ParticipantSerializer
 
     def perform_create(self, serializer):
-        serializer.save(tournament_id=self.kwargs['tid'])
-        broadcast({"participant": serializer.data})
+        instance = serializer.save(tournament_id=self.kwargs['tid'])
+        p = serializer.data
+        p['id'] = instance.pk
+        p['seed'] = instance.seed
+        broadcast({
+            "participant": p,
+            "tournament_id": self.kwargs['tid']
+        })
 
     def retrieve(self, request, pk=None, **kwargs):
         return Response(get_participant(pk))

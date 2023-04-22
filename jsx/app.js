@@ -33,9 +33,6 @@ import { useTournament, useTournamentDispatch } from './context.jsx';
  */
 export default function App() {
     const [tournaments, setTournaments] = useState()
-    const [tournamentBeingEdited, setTournamentBeingEdited] = useState({
-        name: '', start_date: ''
-    })
 
     const tournament = useTournament()
     const dispatch = useTournamentDispatch();
@@ -51,7 +48,6 @@ export default function App() {
             ? `wss://${location.host}/ws/`
             : `ws://${location.host}/ws/`
 
-        console.log(wssUrl)
 
         const ws = new WebSocket(wssUrl)
         ws.onmessage = function (e) {
@@ -144,9 +140,7 @@ export default function App() {
             <Route path="/" element={<Tournaments tournaments={tournaments} />}></Route>
             <Route path="/new" 
                 element={
-                    <TournamentEditor tournament={tournamentBeingEdited} 
-                        tournamentChanged={setTournamentBeingEdited} 
-                        saveTournament={saveTournament} />
+                    <TournamentEditor />
                 }>
             </Route>
             <Route path="/:slug" >

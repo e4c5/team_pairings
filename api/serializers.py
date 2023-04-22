@@ -7,21 +7,6 @@ class TournamentRoundSerializer(serializers.ModelSerializer):
         model = TournamentRound
         fields = '__all__'
 
-
-class TournamentDetailSerializer(serializers.ModelSerializer):
-    rounds = TournamentRoundSerializer(many=True, required=False)
-
-    def get_is_editable(self, obj):
-        if hasattr(obj, 'editable'):
-            return obj.editable
-        return True
-
-
-    class Meta:
-        model = Tournament
-        fields = ['id', 'start_date','name','rated','slug', 'rounds', 'num_rounds']
-
-    
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
@@ -48,7 +33,8 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = ['id', 'start_date','name','rated','slug', 'is_editable']
+        fields = ['id', 'start_date','name','rated','slug',
+                   'is_editable', 'num_rounds']
 
     
 class BoardResultSerializer(serializers.Serializer):
