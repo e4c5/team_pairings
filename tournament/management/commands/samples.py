@@ -24,7 +24,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         u = User.objects.get(username=options['user'])
         if options.get('delete'):
-            for name in [f'{u.username} Eighteen Rounds', f'{u.username} Five Rounder']:
+            tournaments = [f'{u.username} Eighteen Rounds', 
+                          f'{u.username} Five Rounder', f'{u.username} small']
+            for name in tournaments:
                 t = Tournament.objects.get(name=name)
                 for rnd in t.rounds.order_by('round_no'):
                     Result.objects.filter(round=rnd).delete()
@@ -51,3 +53,12 @@ class Command(BaseCommand):
             )
             Director.objects.create(tournament=five, user=u)
             add_participants(five, count=100, use_faker=True)
+
+            five = Tournament.objects.create(
+                name=f"{u.username} Small",
+                num_rounds=5, start_date=date.today(),
+                private=True
+            )
+            Director.objects.create(tournament=five, user=u)
+            add_participants(five, count=10, use_faker=True)
+            
