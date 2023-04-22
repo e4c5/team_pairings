@@ -86,7 +86,12 @@ def tsh_import(f):
 
 def save_to_db(tournament, results):
     # pass one create the database records for the participants.
-    rounds = [rnd.pk for rnd in tournament.rounds.order_by('round_no')]
+    rounds = []
+    for rnd in tournament.rounds.order_by('round_no'):
+        rounds.append(rnd.pk)
+        rnd.paired = True
+        rnd.save()
+        
     participants = []
     for result in results:
         p, _ = Participant.objects.get_or_create(

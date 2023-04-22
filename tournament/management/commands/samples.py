@@ -25,7 +25,7 @@ class Command(BaseCommand):
         u = User.objects.get(username=options['user'])
         if options.get('delete'):
             tournaments = [f'{u.username} Eighteen Rounds', 
-                          f'{u.username} Five Rounder', f'{u.username} small']
+                          f'{u.username} Five Rounder', f'{u.username} Small']
             for name in tournaments:
                 t = Tournament.objects.get(name=name)
                 for rnd in t.rounds.order_by('round_no'):
