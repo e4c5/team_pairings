@@ -46,13 +46,18 @@ class TournamentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        
-        for rnd in json.loads(request.data['rounds']):
-            serializer = TournamentRoundSerializer(rnd)
-            if serializer.is_valid():
-                #pk = rnd.pop('id')
-                #models.TournamentRound.filter(pk=pk).update(**rnd)
-                serializer.update()
+
+        try:        
+            for rnd in json.loads(request.data['rounds']):
+                serializer = TournamentRoundSerializer(rnd)
+                if serializer.is_valid():
+                    #pk = rnd.pop('id')
+                    #models.TournamentRound.filter(pk=pk).update(**rnd)
+                    serializer.update()
+        except:
+            # tournament edit is broken
+            print('attend to this in views.TournamentViewSet')
+
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
