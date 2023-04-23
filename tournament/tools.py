@@ -35,8 +35,8 @@ def add_participants(tournament, use_faker=False, count=0, filename=""):
     else:
         with open(filename) as fp:
             reader = csv.reader(fp)
-
             for line in reader:
+                print(line)
                 p = Participant.objects.create(tournament=tournament, name=line[0],
                     rating=line[1])
                 participants.append(p)

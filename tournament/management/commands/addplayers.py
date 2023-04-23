@@ -11,9 +11,10 @@ class Command(BaseCommand):
         
         parser.add_argument('--tournament', help="The name of the tournament")
         parser.add_argument('--tournament_id', help="The id of the tournament")
-        parser.add_argument('--add-teams', type=int,
+        parser.add_argument('--add-participants', type=int,
                 help='Add this many teams to the tournament')
         parser.add_argument('--add-members', action='store_true')
+        parser.add_argument('--file', help="the path to the csv file with players")
 
 
     def handle(self, *args, **options):
@@ -23,12 +24,11 @@ class Command(BaseCommand):
         else:
             self.t = Tournament.objects.get(pk=options.get('tournament_id'))
 
-        if options.get('add_teams'):
+        if options.get('add_participants'):
             if options.get('faker'):
                 add_participants(self.t, use_faker=True, count=options.get('add_teams'))
             else:
-                t = Tournament.get_by_name("richmond scrabble showdown u20",'')
-                add_participants(self.t, False, filename="api/tests/data/teams.csv")
+                add_participants(self.t, False, filename=options["file"])
 
         if options.get('add_members'):
             add_team_members(self.t)
