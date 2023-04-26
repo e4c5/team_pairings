@@ -107,14 +107,20 @@ def save_to_db(tournament, results):
     for result in results:
         if result['name'] != 'Bye':
             for idx in range(len(result['opponents'])):
-                score1 = int(result['scores'][idx])
+                if idx < len(result['opponents']) -1:
+                    score1 = int(result['scores'][idx])
+                else:
+                    score1 = None
                 opponent = int(result['opponents'][idx])
             
                 if opponent == 0:
                     score2 = 0
                 else:
-                    score2 = int(results[opponent]['scores'][idx])
-                
+                    if idx < len(result['opponents']) -1:
+                        score2 = int(results[opponent]['scores'][idx])
+                    else:
+                        score2 = None
+
                 p1 = participants[result['seed']]
                 p2 = participants[opponent]
 
@@ -131,7 +137,7 @@ def save_to_db(tournament, results):
                         win = 0
                     else:
                         win = 0.5
-                elif score1 > score2:
+                elif score1 is not None and score2 is not None and score1 > score2:
                     win = 1
                 else:
                     win = 0
