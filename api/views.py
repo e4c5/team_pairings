@@ -149,7 +149,9 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     "tournament_id": request.tournament.id
                 }
         )
+        
         return Response({'status': 'ok'})
+        
 
 
     def unpair_helper(self, rnd):

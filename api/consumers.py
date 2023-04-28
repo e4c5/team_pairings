@@ -1,37 +1,40 @@
 import json
 
 from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 
-class Watcher(WebsocketConsumer):
-    def connect(self):
+class Watcher(AsyncWebsocketConsumer):
+    async def connect(self):
         # Join room group
-        self.accept()
-        async_to_sync(self.channel_layer.group_add)(
+        await self.accept()
+        await self.channel_layer.group_add(
             'chat', self.channel_name
         )
 
-        
+        # i am guessing there is a bug in the ChannelsLiveServerTestCase 
+        # unless some message is sent on the socket at the start, some tests
+        # fail even though if you tried the exact same steps manually in the
+        # browser it would still work.
+        await self.channel_layer.group_send(
+            'chat', {"type": "chat_message", "message": "Hello!"}
+        )
 
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
+        await self.channel_layer.group_discard(
             'chat', self.channel_name
         )
+        super().disconnect()
 
     # Receive message from WebSocket
-    def receive(self, text_data): 
-        text_data_json = json.loads(text_data)
-
-
+    async def receive(self, text_data): 
         # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
+        await self.channel_layer.group_send(
             'chat', {"type": "chat_message", "message": text_data}
         )
 
     # Receive message from room group
-    def chat_message(self, event):
-
+    async def chat_message(self, event):
         # Send message to WebSocket
-        self.send(text_data=json.dumps(event['message']))
+        await self.send(text_data=json.dumps(event['message']))
