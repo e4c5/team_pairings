@@ -13,7 +13,7 @@ class TestResults(SeleniumTest):
    
     @classmethod
     def tearDownClass(cls):
-        cls.selenium.quit()
+        #cls.selenium.quit()
         ""
 
     def load_tournament(self, name):
@@ -30,6 +30,7 @@ class TestResults(SeleniumTest):
         add_participants(self.t3, True, 5)
         driver = self.load_tournament('New Year Joust')
         
+        self.assertEqual(Result.objects.count(), 0)
         self.pair_round('1')
 
         WebDriverWait(driver, 5, 0.2).until(

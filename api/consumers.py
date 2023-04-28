@@ -7,11 +7,12 @@ from channels.generic.websocket import WebsocketConsumer
 class Watcher(WebsocketConsumer):
     def connect(self):
         # Join room group
+        self.accept()
         async_to_sync(self.channel_layer.group_add)(
             'chat', self.channel_name
         )
 
-        self.accept()
+        
 
     def disconnect(self, close_code):
         # Leave room group
@@ -20,7 +21,7 @@ class Watcher(WebsocketConsumer):
         )
 
     # Receive message from WebSocket
-    def receive(self, text_data):
+    def receive(self, text_data): 
         text_data_json = json.loads(text_data)
 
 
