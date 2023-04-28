@@ -16,26 +16,18 @@ class TestResults(SeleniumTest):
         #cls.selenium.quit()
         ""
 
-    def load_tournament(self, name):
-        driver = self.selenium
-        self.login()
-        self.get_url('/')
-
-        WebDriverWait(driver, 5, 0.1).until(
-            EC.presence_of_element_located((By.LINK_TEXT, name))
-        ).click()
-        return driver
-
     def test_singles_entry(self):
         add_participants(self.t3, True, 5)
         driver = self.load_tournament('New Year Joust')
         
         self.assertEqual(Result.objects.count(), 0)
+        
         self.pair_round('1')
 
-        WebDriverWait(driver, 5, 0.2).until(
+        WebDriverWait(driver, 5, 0.1).until(
             EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
         )
+         
         self.assertEqual(3, Result.objects.count())
         pencils = driver.find_elements(By.CLASS_NAME, "bi-pencil")
 
@@ -46,24 +38,20 @@ class TestResults(SeleniumTest):
         self.type_score(497, 315)
 
         self.pair_round('2')
-        time.sleep(10)
+        
+
 
     def test_team_entry(self):
         """Testing a tournament where data is entered per team"""
         add_participants(self.t1, False, 18, 'api/tests/data/teams.csv')
-        driver = self.selenium
-        self.login()
-        self.get_url('/')
-        
         self.assertEqual(19, TournamentRound.objects.count())
         self.assertEqual(18, Participant.objects.count())
+
+        self.load_tournament("Richmond Showdown U20")
         
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.presence_of_element_located((By.LINK_TEXT, "Richmond Showdown U20"))
-        ).click()
-
         self.pair_round('1')
-
+        driver = self.selenium
+        
         pencil = WebDriverWait(driver, 5, 0.2).until(
             EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
         )

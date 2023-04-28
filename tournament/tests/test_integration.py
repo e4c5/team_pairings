@@ -17,7 +17,7 @@ class TestIntegration(SeleniumTest):
     Will setup a tournament, add players. pair rounds, add results
     pair the next round and so on.
     """
-    ENABLE_FF = False
+
 
     @classmethod
     def setUpClass(cls):
@@ -36,24 +36,6 @@ class TestIntegration(SeleniumTest):
         cls.selenium.quit()
         #cls.firefox.quit()
 
-
-    def load_tournament(self, name):
-        driver = self.selenium
-    
-        self.login()
-        self.get_url('/')
-
-        WebDriverWait(driver, 5, 0.1).until(
-            EC.presence_of_element_located((By.LINK_TEXT, name))
-        ).click()
-
-        if TestIntegration.ENABLE_FF:
-            ff = self.firefox
-            ff.get('%s%s' % (self.live_server_url, '/'))
-            WebDriverWait(ff, 5, 0.1).until(
-                EC.presence_of_element_located((By.LINK_TEXT, name))
-            ).click()
-        
 
     def add_scores(self):
         driver = self.selenium
