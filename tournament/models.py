@@ -157,7 +157,6 @@ class Tournament(models.Model):
                 update_standing(p.id)
 
 
-
 class TournamentRound(models.Model):
     """Represents a tournament round configuration"""
     ROUND_ROBIN = "ROUND_ROBIN"
@@ -430,12 +429,12 @@ def update_standing(pid):
                 (select count(*) as games, coalesce(sum(games_won),0) games_won, 
                     coalesce(sum(score1 - score2), 0) margin, 
                     count(CASE WHEN starting_id = {0} THEN 1 ELSE NULL END) white
-            from tournament_result tr where p1_id = {0} and games_won is not null) a,
+            from tournament_result tr where p1_id = {0} and score1 is not null and score2 is not null) a,
                 (select count(*) as games, 
                     coalesce(sum(CASE WHEN score2 = 0 THEN 0 ELSE 1 - games_won END), 0) games_won, 
                     coalesce(sum(score2 - score1), 0) margin,
                     count(CASE WHEN starting_id = {0} THEN 1 ELSE NULL END) white
-            from tournament_result tr where p2_id = {0} and games_won is not null) b
+            from tournament_result tr where p2_id = {0}  and score1 is not null and score2 is not null) b
             where id = {0}"""
 
     with connection.cursor() as cursor:

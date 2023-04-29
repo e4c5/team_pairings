@@ -1,5 +1,7 @@
 import re
 from django.db.models import Q
+from django.db import transaction
+
 from tournament.models import Result, Participant
 
 def tsh_export(tournament, out):
@@ -84,7 +86,17 @@ def tsh_import(f):
         
         return players
 
+@transaction.atomic
 def save_to_db(tournament, results):
+    """Save TSH results to DB.
+    We use transactions for two reason, because it's a lot faster than auto
+    commit and sould the import fail, the old data is preserved.
+    Args: tournament: the tournament to import into
+          results: results parsed from tsh
+    """
+    Result.objects.filter(round__tournament=tournament).delete()
+    tournament.participants.all().delete()
+
     # pass one create the database records for the participants.
     rounds = []
     for rnd in tournament.rounds.order_by('round_no'):
@@ -107,7 +119,7 @@ def save_to_db(tournament, results):
     for result in results:
         if result['name'] != 'Bye':
             for idx in range(len(result['opponents'])):
-                if idx < len(result['opponents']) -1:
+                if idx <= len(result['scores']) -1:
                     score1 = int(result['scores'][idx])
                 else:
                     score1 = None
@@ -116,7 +128,7 @@ def save_to_db(tournament, results):
                 if opponent == 0:
                     score2 = 0
                 else:
-                    if idx < len(result['opponents']) -1:
+                    if idx <= len(result['scores']) -1:
                         score2 = int(results[opponent]['scores'][idx])
                     else:
                         score2 = None
@@ -128,19 +140,20 @@ def save_to_db(tournament, results):
                     p2, p1 = p1, p2
                     score2, score1 = score1, score2
 
-                if score1 == score2:
-                    if opponent == 0:
-                        # tsh has this feature where a person can be switched off without
-                        # a forfeit. I do not believe this to be a good idea. it can give
-                        # someone an undue advantage to be absent for a few rounds and then
-                        # comeback later.
-                        win = 0
+                if score1 is not None and score2 is not None:
+                    if score1 == score2:
+                        if opponent == 0:
+                            # tsh has this feature where a person can be switched off without
+                            # a forfeit. I do not believe this to be a good idea. it can give
+                            # someone an undue advantage to be absent for a few rounds and then
+                            # comeback later.
+                            win = 0
+                        else:
+                            win = 0.5
+                    elif score1 > score2:
+                        win = 1
                     else:
-                        win = 0.5
-                elif score1 is not None and score2 is not None and score1 > score2:
-                    win = 1
-                else:
-                    win = 0
+                        win = 0
 
                 defaults = {
                     "p1": p1, "p2": p2,
