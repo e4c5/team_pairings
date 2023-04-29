@@ -79,6 +79,7 @@ ASGI_APPLICATION = 'team_pair.asgi.application'
 # Database
 # see settings_local.py
 DATABASES = settings_local.DATABASES
+CHANNEL_LAYERS = settings_local.CHANNEL_LAYERS
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

@@ -200,6 +200,7 @@ export function Round(props) {
                 },
                 body: JSON.stringify({id: round_id})
             }).then(resp => resp.json()).then(json => {
+                
                 if (json.status !== "ok") {
                     setError(json.message)
                 }

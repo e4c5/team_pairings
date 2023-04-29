@@ -52,7 +52,7 @@ export default function App() {
         const ws = new WebSocket(wssUrl)
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
-            
+            console.log(obj)
             if (obj.participant) {
                 // add a new participant to the event
                 dispatch(
@@ -154,3 +154,5 @@ export default function App() {
         </Routes>
     )
 }
+
+console.log('App.js 0.1')

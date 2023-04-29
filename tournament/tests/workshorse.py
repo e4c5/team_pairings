@@ -22,6 +22,8 @@ class SeleniumTest(ChannelsLiveServerTestCase):
 
     Note you will need to scroll many times look at pair round for
     """
+    ENABLE_FF = False
+    
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -42,6 +44,25 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         logger = logging.getLogger('django.channels')
         logger.setLevel(logging.DEBUG)
 
+
+    def load_tournament(self, name):
+        driver = self.selenium
+    
+        self.login()
+        self.get_url('/')
+
+        WebDriverWait(driver, 5, 0.1).until(
+            EC.presence_of_element_located((By.LINK_TEXT, name))
+        ).click()
+
+        if SeleniumTest.ENABLE_FF:
+            ff = self.firefox
+            ff.get('%s%s' % (self.live_server_url, '/'))
+            WebDriverWait(ff, 5, 0.1).until(
+                EC.presence_of_element_located((By.LINK_TEXT, name))
+            ).click()
+        return driver
+    
     def login(self):
         """Some actions you need to be logged in"""
         self.selenium.refresh()
