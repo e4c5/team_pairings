@@ -203,7 +203,25 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(1, p1.round_wins)
 
 
+    def test_score_by_t_order(self):
+        """Call score by with the first, second flipped
+        see test_score_by_t above"""
+
+        bye = Participant.objects.create(name="Bye", tournament=self.t1)
+        p1, = self.add_players(self.t1, 1)
+        self.assertEquals(str(p1), f'{p1.name} 0 0')
+
+        self.assertEquals(p1.game_wins, 0)
+        r = Result.objects.create(p2=p1, p1=bye, round=self.t1.rounds.all()[0])
+        self.t1.score_bye(r)
+        p1.refresh_from_db()
+        self.assertEquals(0, p1.white)
+        self.assertEqual(3, p1.game_wins)
+        self.assertEqual(1, p1.round_wins)
+
+
     def test_score_bye_s(self):
+        """Test direct assign of bye in an individual tournament"""
         bye = Participant.objects.create(name="Bye", tournament=self.t3)
         p1, = self.add_players(self.t3, 1)
         self.assertEquals(p1.game_wins, 0)
@@ -214,5 +232,18 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
 
-
+    
+    def test_score_bye_s_flipped(self):
+        """Test direct assign of bye in an individual tournament p1, p2 flip"""
+        bye = Participant.objects.create(name="Bye", tournament=self.t3)
+        p1, = self.add_players(self.t3, 1)
+        self.assertEquals(str(p1), f'{p1.name} 0 0')
+        self.assertEquals(p1.game_wins, 0)
+        r = Result.objects.create(p2=p1, p1=bye, round=self.t1.rounds.all()[0])
+        self.t1.score_bye(r)
+        p1.refresh_from_db()
+        self.assertEquals(0, p1.white)
+        self.assertEqual(3, p1.game_wins)
+        self.assertEqual(1, p1.round_wins)
+        self.assertEquals(str(p1), f'{p1.name} 1.0 3.0')
 

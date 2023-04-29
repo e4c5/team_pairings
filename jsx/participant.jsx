@@ -25,6 +25,12 @@ const team = [
     ["Spread", "spread"],
 ]
 
+/**
+ * Component for displaying a list of participants
+ * A participant maybe a team for a team tournament.
+ * @param {*} props 
+ * @returns 
+ */
 export function Participants(props) {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch();
@@ -169,21 +175,34 @@ export function Participants(props) {
     );
 }
 
-export function Participant(props) {
+/**
+ * Display information about a single participant.
+ * @param {*} props 
+ * @returns 
+ */
+export function Participant() {
     const params = useParams();
     const [participant, setParticipant] = useState()
     const tournament = useTournament()
 
     useEffect(() => {
         if (participant == null && tournament) {
-            fetch(`/api/tournament/${tournament.id}/participant/${params.id}/`).then(resp => resp.json()).then(json => {
+            fetch(`/api/tournament/${tournament.id}/participant/${params.id}/`)
+            .then(resp => resp.json())
+            .then(json => {
+                // when the participants record is retrieved it may not be in 
+                // sorted order. When sorting , we can assume that the round id
+                // will be in the same order as the round number. Thats because
+                // when a tournament is created all it's rounds are created at
+                // the same time and in order.
+                json.results.sort( (a, b) => a.round_id - b.round_id)
                 setParticipant(json)
             })
         }
     }, [tournament, participant])
 
     function editScore(e) {
-
+        console.log('editscore')
     }
 
     if (participant) {

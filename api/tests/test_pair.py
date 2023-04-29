@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from tournament.models import BoardResult, Participant, TournamentRound, Tournament, Result
-from tournament.tools import add_participants
+from tournament.tools import add_participants, truncate_rounds
 
 from api import swiss, koth
 from api.tests.helper import Helper
@@ -88,6 +88,11 @@ class BasicTests(APITestCase, Helper):
         self.speed_pair(rnd5)
         self.assertEqual(Result.objects.count(), 10)
 
+        # lets truncate everything
+        truncate_rounds(self.t2, 0)
+        self.assertEqual(0, Result.objects.filter(round__tournament=self.t2).count())
+
+
     def test_pair_empty(self):
         """Cannot pair a tournament unless you have participants in it!"""
         self.client.login(username='sri', password='12345')
@@ -134,6 +139,8 @@ class BasicTests(APITestCase, Helper):
 
 
 class ByesTests(APITestCase, Helper):
+    """Test byes and absentees.
+    Also see test_result.py"""
 
     def setUp(self) -> None:
         self.create_tournaments()
