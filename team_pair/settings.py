@@ -73,16 +73,6 @@ TEMPLATES = [
     },
 ]
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("redis", 6379)],
-        },
-    },
-}
-
-
 WSGI_APPLICATION = 'team_pair.wsgi.application'
 ASGI_APPLICATION = 'team_pair.asgi.application'
 
