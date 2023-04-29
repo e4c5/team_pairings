@@ -25,7 +25,7 @@ class Watcher(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(
             'chat', self.channel_name
         )
-        super().disconnect()
+        super().disconnect(close_code)
 
     # Receive message from WebSocket
     async def receive(self, text_data): 
