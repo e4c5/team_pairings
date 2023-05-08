@@ -67,33 +67,32 @@ class Pairing:
 
         # fetch all previous round results so that we know of all the 
         # old pairings
-        qs = Result.objects.filter(round__round_no__lt=rnd.round_no
-                                   ).select_related('p1', 'p2', 'round')
+        qs = Result.objects.filter(
+                Q(round__round_no__lt=rnd.round_no) &
+                Q(round__tournament=rnd.tournament)
+            ).select_related('p1', 'p2', 'round')
 
+        d = {}
         for pl in players:
-            opponents = []
-
-            games = qs.filter(Q(p1=pl) | Q(p2=pl)).order_by('-round')
-            opponents = []
-            for game in games:
-                if game.p1.id == pl.id:
-                    opponents.append(game.p2.name)
-                else:
-                    opponents.append(game.p1.name)
-
             record = {'name': pl.name,
                       'spread': pl.spread,
                       'rating': pl.rating,
                       'player': pl,
                       'game_wins': pl.game_wins,
                       'score': pl.round_wins,
-                      'opponents': opponents
+                      'opponents': []
                       }
-            self.players.append(record)
-
+            d[pl.id] = record
             if pl.name == 'Bye':
                 self.bye = record
 
+        for r in qs:
+            if r.p1.name != 'Absent' and r.p2.name != 'Absent':
+                if not r.p2.offed and not r.p1.offed:
+                    d[r.p2.pk]['opponents'].append(r.p1.name)
+                    d[r.p1.pk]['opponents'].append(r.p2.name)
+
+        self.players = list(d.values())
 
         if len(self.players) % 2 == 1:
             if not self.bye:

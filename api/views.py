@@ -1,8 +1,9 @@
+import time
 import json
 from asgiref.sync import async_to_sync
 
 from django.shortcuts import render
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Q
 from channels.layers import get_channel_layer
 
@@ -113,6 +114,8 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     # unpair helper will broadcast
                     self.unpair_helper(rnd)
                     request.tournament.update_all_standings()
+
+
                     return Response({'status': 'ok'})
                 else:
                     return Response({'status': 'error', 'message': 'confirmation code needed'})
@@ -125,31 +128,38 @@ class TournamentViewSet(viewsets.ModelViewSet):
         """Pairs the given round.
         Possible only if there is at least 2 players in this tournament and
         has not been paired already."""
-        if models.Result.objects.filter(round_id=request.data['id']).exists():
-            return Response({'status': 'error', 'message': 'already paired'})
+        t1 = time.time()
+        with transaction.atomic():
+            if models.Result.objects.filter(round_id=request.data['id']).exists():
+                return Response({'status': 'error', 'message': 'already paired'})
 
-        rnd = models.TournamentRound.objects.get(id=request.data['id'])
-        count = rnd.tournament.participants.count()
-        if count < 2:
-            return Response({'status': 'error',
-                 'message': 'A tournament needs at least two player'})
-        p = SwissPairing(rnd)
-        p.make_it()
-        results = p.save()
-        res_serializer = ResultSerializer(results, many=True)
-        rnd_serializer = TournamentRoundSerializer(rnd)
+            rnd = models.TournamentRound.objects.get(id=request.data['id'])
+            count = rnd.tournament.participants.count()
+            if count < 2:
+                return Response({'status': 'error',
+                    'message': 'A tournament needs at least two player'})
+            p = SwissPairing(rnd)
+            p.make_it()
+            results = p.save()
+            res_serializer = ResultSerializer(results, many=True)
+            rnd_serializer = TournamentRoundSerializer(rnd)
 
-        rnd.paired = True
-        rnd.save()
+            rnd.paired = True
+            rnd.save()
 
-        broadcast({
-                    "round": rnd_serializer.data,
-                    "results": res_serializer.data,
-                    "participants": get_participants(request.tournament.id),
-                    "tournament_id": request.tournament.id
-                }
-        )
+            broadcast({
+                        "round": rnd_serializer.data,
+                        "results": res_serializer.data,
+                        "participants": get_participants(request.tournament.id),
+                        "tournament_id": request.tournament.id
+                    }
+            )
+            
+        for query in connection.queries:
+            print(query)
         
+        t2 = time.time()
+        print(t2 - t1, len(list(connection.queries)))
         return Response({'status': 'ok'})
         
 
@@ -274,7 +284,9 @@ def get_participants(tid):
 
     with connection.cursor() as cursor:
         cursor.execute(query, [tid])
-        return cursor.fetchone()[0]
+        resp = cursor.fetchone()[0]
+        #print(json.dumps(resp))
+        return resp
 
 
 class ParticipantViewSet(viewsets.ModelViewSet):
