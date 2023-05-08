@@ -154,7 +154,7 @@ class Tournament(models.Model):
             if self.team_size:
                 update_team_standing(p.id)
             else:
-                update_standing(p.id)
+                update_standing()
 
 
 class TournamentRound(models.Model):
@@ -412,33 +412,46 @@ def update_result(sender, instance, created, **kwargs):
                 update_team_standing(instance.p1_id)
                 update_team_standing(instance.p2_id)
             else:
-                update_standing(instance.p1_id)
-                update_standing(instance.p2_id)
+                update_standing(instance)
 
 
-def update_standing(pid):
+def update_standing(result=None):
     """Update standings for an individual tournament
     Args: pid: participant id
     """
-
-    q = """
-        update tournament_participant set played = a.games + b.games,
-            game_wins = a.games_won + b.games_won, 
-            spread = a.margin + b.margin, white = a.white + b.white
-            from 
-                (select count(*) as games, coalesce(sum(games_won),0) games_won, 
-                    coalesce(sum(score1 - score2), 0) margin, 
-                    count(CASE WHEN starting_id = {0} THEN 1 ELSE NULL END) white
-            from tournament_result tr where p1_id = {0} and score1 is not null and score2 is not null) a,
-                (select count(*) as games, 
-                    coalesce(sum(CASE WHEN score2 = 0 THEN 0 ELSE 1 - games_won END), 0) games_won, 
-                    coalesce(sum(score2 - score1), 0) margin,
-                    count(CASE WHEN starting_id = {0} THEN 1 ELSE NULL END) white
-            from tournament_result tr where p2_id = {0}  and score1 is not null and score2 is not null) b
-            where id = {0}"""
+    print("update")
+    q = """UPDATE tournament_participant tp
+            SET played = (
+                SELECT COUNT(*)
+                FROM tournament_result tr
+                WHERE tr.p1_id = tp.id
+                OR tr.p2_id = tp.id
+            ),
+                game_wins = (
+                SELECT SUM(CASE WHEN tr.p1_id = tp.id THEN tr.games_won ELSE 0 END)
+                FROM tournament_result tr
+                WHERE tr.p1_id = tp.id
+                OR tr.p2_id = tp.id
+            ),
+                spread = (
+                SELECT SUM(CASE WHEN tr.p1_id = tp.id THEN tr.score1 - tr.score2 ELSE 0 END)
+                FROM tournament_result tr
+                WHERE tr.p1_id = tp.id
+                OR tr.p2_id = tp.id
+            ),
+                white = (
+                SELECT COUNT(CASE WHEN tr.starting_id = tp.id THEN 1 END)
+                FROM tournament_result tr
+                WHERE tr.p1_id = tp.id
+                OR tr.p2_id = tp.id
+            )"""
+    
+    if result:
+        q += f"where id = {result.p1_id} or id = {result.p2_id}"
 
     with connection.cursor() as cursor:
-        cursor.execute(q.format(pid))
+        cursor.execute(q)
+
 
 def update_team_standing(pid):
     """Execute the standing update query. for the given participant
