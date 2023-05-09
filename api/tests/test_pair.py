@@ -259,6 +259,8 @@ class ByesTests(APITestCase, Helper):
 
     def test_singles_even(self):
         """Stat a singles tournament with even number, switch off one later"""
+        Faker.seed(5678)
+        
         self.t3 = Tournament.objects.create(name='Joust', start_date='2023-02-25',
                                             rated=False, entry_mode='S', num_rounds=5)
 
@@ -280,7 +282,7 @@ class ByesTests(APITestCase, Helper):
         # Now there are 4 pairing objects. 4 players have been paired against
         # themselves (that's 2).The fifth player has been switched off so he
         # is marked as absent (that's 3) and the sixth player gets a bye
-
+           
         self.assertEquals(4, Result.objects.filter(round=rnd).count())
         bye = Result.objects.get(Q(p1__name='Bye') | Q(p2__name='Bye'))
         self.assertIsNotNone(bye.score1)

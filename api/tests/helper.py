@@ -32,7 +32,7 @@ class Helper:
         Director.objects.create(tournament=self.t2, user=user)
 
 
-    def add_players(self, tournament, count):
+    def  add_players(self, tournament, count):
         return add_participants(tournament, use_faker=True, count=count)
 
 

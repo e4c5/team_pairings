@@ -245,5 +245,5 @@ class BasicTests(TestCase, Helper):
         self.assertEquals(0, p1.white)
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
-        self.assertEquals(str(p1), f'{p1.name} 1.0 3.0')
+        self.assertEquals(str(p1), f'{p1.name} 3.0 300')
 

@@ -51,8 +51,7 @@ class Pairing:
 
         players = Participant.objects.select_related(
             ).filter(tournament=self.tournament
-            ).exclude(offed=True).exclude(name='Absent'
-            ).order_by('-round_wins', '-game_wins', '-spread','-rating')
+            ).exclude(name='Absent')
 
         if rnd.based_on > 0:
             # this round has a predecessor that needs to be completed.
@@ -74,17 +73,23 @@ class Pairing:
 
         d = {}
         for pl in players:
-            record = {'name': pl.name,
-                      'spread': pl.spread,
-                      'rating': pl.rating,
-                      'player': pl,
-                      'game_wins': pl.game_wins,
-                      'score': pl.round_wins,
-                      'opponents': []
-                      }
-            d[pl.id] = record
-            if pl.name == 'Bye':
-                self.bye = record
+            if pl.offed:
+                pl.mark_absent(self.rnd)
+            else:
+                record = {'name': pl.name,
+                        'spread': pl.spread,
+                        'rating': pl.rating,
+                        'player': pl,
+                        'pair': False,
+                        'game_wins': pl.game_wins,
+                        'score': pl.round_wins,
+                        'opponents': []
+                        }
+                if self.tournament.team_size is None:
+                    record['score'] = pl.game_wins
+                d[pl.id] = record
+                if pl.name == 'Bye':
+                    self.bye = record
 
         for r in qs:
             if r.p1.name != 'Absent' and r.p2.name != 'Absent':
@@ -102,7 +107,7 @@ class Pairing:
                     name='Bye', tournament=self.tournament,
                     defaults = {'name': 'Bye', 'rating': 0,  'tournament': self.tournament}
                 )
-                self.bye = {'name': 'Bye', 
+                self.bye = {'name': 'Bye', 'pair': False,
                     'rating': 0, 'opponents': [], 'player': bye,
                     'score': 0, 'game_wins':-1, 'spread': -1}
                 self.players.append(self.bye)
@@ -110,24 +115,13 @@ class Pairing:
                 # we have a bye but the number is odd, that means a withdrawal
                 self.players.remove(self.bye)
                 self.bye = None
-        self.absentees()
 
-
-    def absentees(self):
-        """Assign a forfeit loss to people who are switched off"""
-        players = Participant.objects.select_related(
-            ).filter(tournament=self.tournament).filter(offed=True)
-
-        for player in players:
-            player.mark_absent(self.rnd)
-                
             
     def assign_bye(self):
         """Assign the bye to the lowest rank player"""
+        players = self.order_players(self.players)
         if not self.bye:
             return
-
-        players = self.order_players(self.players)
 
         for player in reversed(players):
             if player['name'] != 'Bye' and player['name'] != 'Absent':
@@ -143,16 +137,17 @@ class Pairing:
         First by round_wins (represented by score in the dictionary)
             then by number of games won (for individual tournaments round_wins wont matter)
             then by the spread, then the number of times they have gone first
-            finally by the rating
+            finally by the rating. The list is sorted in place but also returned
         """
-        sorted_players = sorted(players, reverse=True,
+        players.sort(reverse=True,
                                 key=lambda player: (player['score'], player['game_wins'],
                                                     player['spread'],
                                                     player['player'].white or 0,
                                                     player['rating']))
-        return sorted_players
+        return players
 
     def save(self):
+        
         results = []
         for pair in self.pairs:
             r = Result(round=self.rnd,

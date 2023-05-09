@@ -38,10 +38,8 @@ class SwissPairing(Pairing):
 
         if self.next_round == 1:
             self.pair_first_round()
-        elif self.next_round % 2 == 0:
-            self.pair_even_round()
-        elif self.next_round % 2 == 1:
-            self.pair_odd_round()
+        else:
+            self.pair_other_round()
 
         return self.pairs
 
@@ -54,13 +52,8 @@ class SwissPairing(Pairing):
             self.pairs.append(
                 [sorted_players[index], sorted_players[S1count+index]])
 
-    def pair_odd_round(self):
-        self.pair_even_round()
-
-    def pair_even_round(self):
+    def pair_other_round(self):
         sorted_brackets_keys = sorted(self.brackets, reverse=True)
-        highest_group = sorted_brackets_keys[0]
-        lowest_group = sorted_brackets_keys[-1:]
         downfloaters = []
 
         for group_score in sorted_brackets_keys:
@@ -71,7 +64,7 @@ class SwissPairing(Pairing):
 
             downfloaters = []
             for player in group:
-                if 'pair' in player and player['pair']:
+                if player.get('pair'):
                     continue
 
                 opponents = self.find_possible_opponents(player, group)
@@ -97,12 +90,10 @@ class SwissPairing(Pairing):
                     playerW['pair'] = True
                     playerB['pair'] = True
 
-            without_opponents = [
-                pl for pl in group if 'pair' not in pl or pl['pair'] is False]
+            without_opponents = [pl for pl in group if pl['pair'] is False]
             if len(without_opponents) > 2:
                 self.pair_group_with_transposition(without_opponents)
-                without_opponents = [
-                    pl for pl in group if 'pair' not in pl or pl['pair'] is False]
+                without_opponents = [pl for pl in group if pl['pair'] is False]
                 if len(without_opponents) == 1:
                     without_opponents[0]['downfloater'] = True
                     downfloaters.append(without_opponents[0])
@@ -159,7 +150,7 @@ class SwissPairing(Pairing):
 
         for player in group:
             if current_player != player:
-                if 'pair' not in player or player['pair'] is False:
+                if player['pair'] is False:
                     if player['name'] not in current_player['opponents']:
                         rest.append(player)
                     else:
@@ -173,9 +164,6 @@ class SwissPairing(Pairing):
                             
                             if count <= self.rnd.repeats:
                                 rest.append(player)
-
-        if len(rest) == 0:
-            return []
 
         return rest
 
