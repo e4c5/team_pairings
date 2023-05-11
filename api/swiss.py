@@ -29,6 +29,42 @@ class SwissPairing(Pairing):
 
         self.assign_bye()
 
+        self.find_brackets()
+
+        if self.next_round == 1:
+            self.pair_first_round()
+        else:
+            self.pair_other_round()
+            required = len(self.players) // 2
+            if self.bye:
+                required += 1
+            if len(self.pairs) < required:
+                if self.bye:
+                    b = self.pairs[0]
+                    self.pairs = [b]
+                else:
+                    self.pairs = []
+                self.find_brackets()
+                print('REDO NEEDED')
+                
+                for player in self.players:
+                    player['pair'] = False
+                    player['downfloater'] = False
+                    sorted_brackets_keys = sorted(self.brackets, reverse=True)
+                
+                for k in sorted_brackets_keys:
+                    if len(self.brackets[k]) > 2:
+                        self.brackets[k][0], self.brackets[k][1] = self.brackets[k][1], self.brackets[k][0]
+                        break
+                
+                self.pair_other_round()
+                if len(self.pairs) < required:
+                    print('REDO FAILED')
+
+
+        return self.pairs
+
+    def find_brackets(self):
         brackets = {}
         for player in self.players:
             if player['score'] not in brackets:
@@ -36,15 +72,10 @@ class SwissPairing(Pairing):
             brackets[player['score']].append(player)
         self.brackets = brackets
 
-        if self.next_round == 1:
-            self.pair_first_round()
-        else:
-            self.pair_other_round()
-
-        return self.pairs
-
-
     def pair_first_round(self):
+        """Pairs the first round.
+        At this point you should have forfeited all absent players and the bye
+        should have been assigned."""
         sorted_players = self.order_players(self.players)
         S1count = len(self.players) // 2
 
@@ -53,6 +84,10 @@ class SwissPairing(Pairing):
                 [sorted_players[index], sorted_players[S1count+index]])
 
     def pair_other_round(self):
+        """Pairs the second round onwards.
+        At this point you should have forfeited all absent players and the bye
+        should have been assigned."""
+
         sorted_brackets_keys = sorted(self.brackets, reverse=True)
         downfloaters = []
 
@@ -82,7 +117,7 @@ class SwissPairing(Pairing):
                     playerW['pair'] = True
                     playerB['pair'] = True
                 elif len(opponents) > 1 and 'downfloater' in player and player['downfloater']:
-                    sorted_players = self.order_players(opponents)
+                    sorted_players = opponents
                     sorted_players[0]['upfloater'] = True
                     playerW, playerB = self.return_with_color_preferences(
                         player, sorted_players[0])
@@ -101,7 +136,7 @@ class SwissPairing(Pairing):
 
     # D 1.1 Homogenius transposition
     def pair_group_with_transposition(self, group):
-        sorted_players = self.order_players(group)
+        sorted_players = group
         S1count = len(sorted_players) // 2
         S2count = len(sorted_players) - S1count
         S1 = sorted_players[:S1count]
