@@ -39,28 +39,26 @@ class SwissPairing(Pairing):
             if self.bye:
                 required += 1
             if len(self.pairs) < required:
+                # the pairing was not completed. Collapse the first two brackets
                 if self.bye:
                     b = self.pairs[0]
                     self.pairs = [b]
                 else:
                     self.pairs = []
                 self.find_brackets()
-                print('REDO NEEDED')
-                
                 for player in self.players:
                     player['pair'] = False
                     player['downfloater'] = False
-                    sorted_brackets_keys = sorted(self.brackets, reverse=True)
-                
-                for k in sorted_brackets_keys:
-                    if len(self.brackets[k]) > 2:
-                        self.brackets[k][0], self.brackets[k][1] = self.brackets[k][1], self.brackets[k][0]
-                        break
+
+                if self.bye:
+                    self.pairs = [self.pairs[0]]
+                else:
+                    self.pairs = []
+                sorted_brackets_keys = sorted(self.brackets, reverse=True)
+                self.brackets[sorted_brackets_keys[0]].extend(self.brackets[sorted_brackets_keys[1]])
+                self.brackets[sorted_brackets_keys[1]] = []
                 
                 self.pair_other_round()
-                if len(self.pairs) < required:
-                    print('REDO FAILED')
-
 
         return self.pairs
 
