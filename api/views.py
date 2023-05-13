@@ -150,13 +150,12 @@ class TournamentViewSet(viewsets.ModelViewSet):
             broadcast({
                         "round": rnd_serializer.data,
                         "results": res_serializer.data,
-                        "participants": get_participants(request.tournament.id),
                         "tournament_id": request.tournament.id
                     }
             )
             
-        for query in connection.queries:
-            print(query)
+        #for query in connection.queries:
+        #    print(query)
         
         t2 = time.time()
         print(t2 - t1, len(list(connection.queries)))
