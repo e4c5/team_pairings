@@ -66,7 +66,7 @@ function sortTournament(tournament, participants) {
     return [...participants]
 }
 
-function tournamentReducer(state, action) {
+export function tournamentReducer(state, action) {
     // i keep typing this as action instead of type!! so ....
     const type = action.type || action.action;
     switch (type) {
