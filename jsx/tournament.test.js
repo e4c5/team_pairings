@@ -2,6 +2,22 @@ import { tournamentReducer } from './context'
 // Jest unit test
 
 describe('Tournament Reducer', () => {
+    it('should replace participants list', () => {
+        const state = {}
+        const action = {
+            type: 'participants',
+            participants : [
+                {id: 1, name: 'John Doe', pos: 2},
+                {id: 2, name: 'Jane Doe', pos: 1}
+            ]
+        }
+        const result = tournamentReducer(state, action);
+        expect(result.participants).toEqual([
+            {id: 2, name: 'Jane Doe', pos: 1},
+            {id: 1, name: 'John Doe', pos: 2}
+        ])
+    });
+    
     it('should handle adding a participant', () => {
         // given
         const state = {

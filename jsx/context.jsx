@@ -117,6 +117,7 @@ export function tournamentReducer(state, action) {
         }
 
         case 'changed': {
+            // is this used?
             return state.map(t => {
                 if (t.id === action.task.id) {
                     return action.task;
@@ -156,7 +157,8 @@ export function tournamentReducer(state, action) {
         }
 
         case 'addRound': {
-            const rounds = [...state.rounds]
+            // is this used?
+            const rounds = [...state.rounds, action.round]
             return { ...state, rounds: rounds }
         }
 
