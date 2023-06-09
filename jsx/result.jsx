@@ -52,6 +52,7 @@ export function Result({r, index, editScore}) {
     function resultIn() {
         return (
             <tr>
+                <td>{ r.table ? r.table : ""}</td>
                 <td >{ get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id ? " (first) " : ""}` }</td>
                 <td className="text-right" >{ r.games_won } </td>
                 <td className="text-right" >{ r.score1 }</td>
@@ -97,6 +98,7 @@ export function ResultList({editScore, results}) {
                         </tr>
                         :
                         <tr>
+                            <th align="right">Table</th>
                             <th align="left">Player 1</th>
                             <th align="right">Result</th>
                             <th align="right">Score</th>

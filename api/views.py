@@ -158,7 +158,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
         #    print(query)
         
         t2 = time.time()
-        print(t2 - t1, len(list(connection.queries)))
+        #print(t2 - t1, len(list(connection.queries)))
         return Response({'status': 'ok'})
         
 
@@ -222,6 +222,10 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
             instance.score1 = serializer.validated_data['score1']
             instance.score2 = serializer.validated_data['score2']
+            if serializer.validated_data.get('p1'):
+                instance.p1 = serializer.validated_data['p1']
+                instance.p2 = serializer.validated_data['p2']
+
             instance.games_won = serializer.validated_data['games_won']
             instance.save()
 
@@ -346,6 +350,7 @@ def get_results(tournament, round_id):
                         (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
                         (select to_jsonb(parti) from parti where id = tr.p2_id) p2
                     from tournament_result tr where round_id = %s
+                    order by CASE WHEN "table" = 0 THEN 1000 ELSE "table" END
                 ) r
             """
 

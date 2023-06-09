@@ -147,20 +147,24 @@ class Pairing:
         return players
 
     def save(self):
-        
+        table = 0
         results = []
         for pair in self.pairs:
             r = Result(round=self.rnd,
                       p1=pair[0]['player'], p2=pair[1]['player']
             )
-            if r.p1.name != 'Bye' and r.p2.name != 'Bye':
+            if (r.p1.name != 'Bye' and r.p2.name != 'Bye') and (
+                r.p1.name != 'Absent' and r.p2.name != 'Absent'
+            ):
                 # nope this and the similiar condition below cannot be merged.
                 # they are both needed because saving a result is actually a
                 # two step process. Pleae refer to the comments in the result
                 # class
 
                 r.starting=pair[0]['player']
-            
+                table += 1
+                r.table = table
+
             r.save()
 
             if self.tournament.entry_mode == Tournament.BY_PLAYER:

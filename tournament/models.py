@@ -262,9 +262,9 @@ class Result(models.Model):
     """
     round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name='results')
     # the fact that this is called p1 does not mean this player goes first
-    p1 = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='p1')   
+    p1 = models.ForeignKey(Participant, on_delete=models.PROTECT, related_name='p1',blank=True)   
     # p2 doesn't mean going second
-    p2 = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='p2')   
+    p2 = models.ForeignKey(Participant,on_delete=models.PROTECT, related_name='p2', blank=True)   
 
     # The starting player, a non null entry means that player identified
     # goes first. Null means they toss for it. 
@@ -276,7 +276,8 @@ class Result(models.Model):
     games_won = models.FloatField(blank=True, null=True)
     score1 = models.IntegerField(blank=True, null=True)
     score2 = models.IntegerField(blank=True, null=True)
-    
+    table = models.IntegerField(default=0)
+
     def __str__(self):
         if self.score1:
             return f"{self.p1.name} {self.score1} vs {self.p2.name} {self.score2}"
@@ -340,7 +341,9 @@ def result_presave(sender, instance, **kwargs):
     """
     if instance.p1 and instance.p1.id > instance.p2.id:
         instance.p1, instance.p2 = instance.p2, instance.p1 
-        if instance.games_won:
+        if instance.score1 and instance.score2:
+            m = instance.round.tournament.team_size or 1
+            instance.games_won = m - instance.games_won
             instance.score1, instance.score2 = instance.score2, instance.score1
 
 
