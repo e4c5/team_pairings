@@ -16,10 +16,46 @@ class TestResults(SeleniumTest):
         #cls.selenium.quit()
         ""
 
-    def test_singles_entry(self):
-        add_participants(self.t3, True, 5)
+    def test_autocomplete(self):
+        """Test data entry with autocomplete"""
+        add_participants(self.t3, True, 6, seed=10)
         driver = self.load_tournament('New Year Joust')
+        self.assertEqual(Result.objects.count(), 0)
+        self.pair_round('1')
+        WebDriverWait(driver, 5, 0.1).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
+        )
+        self.assertEqual(3, Result.objects.count())
+        field = driver.find_element(By.CSS_SELECTOR, "input[data-test-id='autocomplete']")
+        field.click()
+        field.send_keys('Debo')
+        field.send_keys(Keys.ENTER)
+        field.send_keys(Keys.TAB)
+        field = driver.switch_to.active_element
+
+        field.send_keys("444")
+        field.send_keys(Keys.TAB)
+        field = driver.switch_to.active_element
         
+        field.send_keys("333")
+        field.send_keys(Keys.ENTER)
+        field.send_keys(Keys.TAB)
+        field = driver.switch_to.active_element
+        
+        field.send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        result = driver.find_element(By.XPATH,"//td[contains(text(), 'Deborah')]")
+        result = result.find_element(By.XPATH,'following-sibling::*[1]')
+
+        self.assertEqual(result.text, '1')
+
+
+    def test_singles_entry(self):
+        """Test data entry by clicking on the edit icon"""
+        add_participants(self.t3, True, 5)
+
+        driver = self.load_tournament('New Year Joust')
         self.assertEqual(Result.objects.count(), 0)
         
         self.pair_round('1')

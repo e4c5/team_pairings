@@ -68,8 +68,8 @@ class BasicTests(APITransactionTestCase, Helper):
         p1.refresh_from_db()
         p2.refresh_from_db()
         
-        self.assertEquals(p1.game_wins, 1)
-        self.assertEquals(p2.game_wins, 4)
+        self.assertEquals(p1.game_wins, 4)
+        self.assertEquals(p2.game_wins, 1)
         
         self.assertEquals(p1.spread, 100)
         self.assertEqual(p1.white, 0)

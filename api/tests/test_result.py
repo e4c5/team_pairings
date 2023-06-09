@@ -1,18 +1,20 @@
 from django.test import TestCase
 from django.db.models import Q
+from django.contrib.auth.models import User
 
-from tournament.models import BoardResult, Participant, TournamentRound, Tournament, Result
+from tournament.models import BoardResult, Participant, Director, Tournament, Result
 from tournament.tools import add_participants
 
 from api import swiss
 from api.tests.helper import Helper
 
+
 class BasicTests(TestCase, Helper):
     """Testing result objects mostly and their signals"""
-    
+
     def setUp(self) -> None:
         """Creates the fixtures.
-        
+
         A couple of tournaments (one named Indian Open and the other Sri 
         Lankan Open) are created and two tournament directors are assigned
 
@@ -20,9 +22,11 @@ class BasicTests(TestCase, Helper):
         user. However neither should be able to edit/delete/create stuff in 
         the other director's event.
         """
-        self.create_tournaments();
+        self.create_tournaments()
         self.t3 = Tournament.objects.create(name='Joust', start_date='2023-02-25',
-            rated=False, num_rounds=5)
+                                            rated=False, num_rounds=5)
+        Director.objects.create(
+            tournament=self.t3, user=User.objects.get(username='sri'))
 
     def test_update_standings_by_team(self):
         self.add_players(self.t1, 3)
@@ -46,7 +50,7 @@ class BasicTests(TestCase, Helper):
         rnd = self.t2.rounds.all()[0]
         self.speed_pair(rnd)
 
-         # get the result that's not a bye
+        # get the result that's not a bye
         r = rnd.results.exclude(p1__name='Bye').exclude(p2__name='Bye')[0]
         p1 = r.p1
         p2 = r.p2
@@ -63,18 +67,17 @@ class BasicTests(TestCase, Helper):
         self.assertNotEqual(p1.played, 0)
         self.assertNotEqual(p1.spread, 0)
 
-
-    def test_update_standings_singles(self):    
+    def test_update_standings_singles(self):
         """Edit a score for a singles tournament"""
         self.add_players(self.t3, 3)
         rnd = self.t3.rounds.all()[0]
         self.speed_pair(rnd)
-        
+
         # get the result that's not a bye
         r = rnd.results.exclude(p1__name='Bye').exclude(p2__name='Bye')[0]
         p1 = r.p1
         p2 = r.p2
-        
+
         self.assertEqual(p1.played, 1)
         self.assertNotEqual(p1.name, 'Bye')
         self.assertNotEqual(p2.name, 'Bye')
@@ -93,7 +96,6 @@ class BasicTests(TestCase, Helper):
         # there should be exactly one player who has gone first
         self.assertEqual(1, Participant.objects.filter(white=1).count())
 
-
     def test_edit_board_result(self):
         """Add results for all the boards and then edit one"""
         self.add_players(self.t2, 2)
@@ -105,12 +107,12 @@ class BasicTests(TestCase, Helper):
 
         r = Result.objects.all()[0]
         self.assertEqual(f"{r.p1.name} vs {r.p2.name}", str(r))
-        
+
         for b in BoardResult.objects.all():
             b.score1 = 200
             b.score2 = 200
             b.save()
-        
+
         p1 = self.t2.participants.all()[0]
         p2 = self.t2.participants.all()[1]
         self.assertEquals(p1.round_wins, 0.5)
@@ -137,15 +139,14 @@ class BasicTests(TestCase, Helper):
             self.assertEquals(p2.game_wins, 2)
             self.assertEquals(p2.spread, -100)
 
-
     def test_edit_bye(self):
         """The TD might need to edit the bye to impose a penalty"""
         self.add_players(self.t3, 3)
         rnd = self.t3.rounds.all()[0]
         self.speed_pair(rnd)
-        
+
         # get the result that's a bye
-        r = rnd.results.filter( Q(p1__name='Bye') | Q(p2__name='Bye'))[0]
+        r = rnd.results.filter(Q(p1__name='Bye') | Q(p2__name='Bye'))[0]
         p1 = r.p1
         p2 = r.p2
 
@@ -162,7 +163,6 @@ class BasicTests(TestCase, Helper):
             p1.refresh_from_db()
             self.assertEqual(p1.spread, 200)
 
-
     def test_edit_by_team(self):
         """Editing a score, set it to be a tie"""
         self.add_players(self.t2, 3)
@@ -178,22 +178,21 @@ class BasicTests(TestCase, Helper):
         r.save()
 
         r.refresh_from_db()
-        
+
         self.assertNotEqual(w1, r.p1.game_wins)
         self.assertNotEqual(w2, r.p2.game_wins)
         self.assertEquals(r.p1.game_wins, r.p2.game_wins)
         self.assertEqual(r.p1.round_wins, 0.5)
 
-        # ensures that there is a 0.5 in there 
-        self.assertEquals( (r.p2.game_wins * 2) % 2, 1)
-        self.assertEquals( (r.p1.game_wins * 2) % 2, 1)
-
+        # ensures that there is a 0.5 in there
+        self.assertEquals((r.p2.game_wins * 2) % 2, 1)
+        self.assertEquals((r.p1.game_wins * 2) % 2, 1)
 
     def test_score_bye_t(self):
         """targeted at the score by method in Tournament"""
         bye = Participant.objects.create(name="Bye", tournament=self.t1)
         p1, = self.add_players(self.t1, 1)
-        
+
         self.assertEquals(p1.game_wins, 0)
         r = Result.objects.create(p1=p1, p2=bye, round=self.t1.rounds.all()[0])
         self.t1.score_bye(r)
@@ -201,7 +200,6 @@ class BasicTests(TestCase, Helper):
         self.assertEquals(0, p1.white)
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
-
 
     def test_score_by_t_order(self):
         """Call score by with the first, second flipped
@@ -219,7 +217,6 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
 
-
     def test_score_bye_s(self):
         """Test direct assign of bye in an individual tournament"""
         bye = Participant.objects.create(name="Bye", tournament=self.t3)
@@ -232,7 +229,6 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
 
-    
     def test_score_bye_s_flipped(self):
         """Test direct assign of bye in an individual tournament p1, p2 flip"""
         bye = Participant.objects.create(name="Bye", tournament=self.t3)
@@ -247,3 +243,27 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(1, p1.round_wins)
         self.assertEquals(str(p1), f'{p1.name} 3.0 300')
 
+    def test_result_view(self):
+        """Add a result by sending a PUT"""
+        add_participants(self.t3, True, 6)
+        self.client.login(username='sri', password='12345')
+        rnd = self.t3.rounds.get(round_no=1)
+
+        resp = self.client.post(
+            f'/api/tournament/{self.t3.id}/pair/', {'id': rnd.id})
+        self.assertEquals(resp.status_code, 200, resp.content)
+        self.assertEqual(Result.objects.count(), 3)
+
+        result = rnd.results.all()[0]
+        resp = self.client.put(
+            f'/api/tournament/{self.t3.id}/result/',
+            {'result': result.id, 'p1': result.p2_id, 'games_won': 1,
+                'p2': result.p1.id, 'score1': 200, 'score2': 100},
+            content_type='application/json'
+        )
+        self.assertEquals(resp.status_code, 200, resp.content)
+
+        result.refresh_from_db()
+        self.assertEqual(result.score1, 100)
+        self.assertEqual(result.score2, 200)
+        self.assertEqual(result.games_won, 0)

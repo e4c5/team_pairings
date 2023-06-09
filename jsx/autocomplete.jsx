@@ -104,6 +104,7 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
     return (
             <React.Fragment>
                 <input 	type="text"	className='form-control'
+                    data-test-id='autocomplete'
                     placeholder={placeHolder}
                     onChange={onTyped}	onKeyDown={onKeyDown} value={value} />
                 {suggestionsListComponent}

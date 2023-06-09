@@ -20,7 +20,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = ['score1','score2','games_won']
+        fields = ['score1','score2','games_won', 'p1', 'p2']
 
 class TournamentSerializer(serializers.ModelSerializer):
     is_editable = serializers.SerializerMethodField()

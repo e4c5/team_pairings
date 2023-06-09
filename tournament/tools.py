@@ -6,7 +6,7 @@ from django.db.models import Q
 from tournament.models import Participant, TeamMember, Tournament, BoardResult
 from tournament.models import update_standing, update_team_standing
 
-def add_participants(tournament, use_faker=False, count=0, filename=""):
+def add_participants(tournament, use_faker=False, count=0, filename="", seed=None):
     """Adds a list of participants (teams) to a tournament
     Args: tournament: the tournament we are filling up
         use_faker: use faker library to come up with the names. If false
@@ -21,6 +21,8 @@ def add_participants(tournament, use_faker=False, count=0, filename=""):
     participants = []
     if use_faker:
         fake = Faker()
+        if seed:
+            Faker.seed(seed)
         for i in range(count):
             if tournament.team_size:
                 p = Participant.objects.create(tournament=tournament, 
