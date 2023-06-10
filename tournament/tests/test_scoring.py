@@ -102,14 +102,14 @@ class TestResults(SeleniumTest):
         # come back to us through web push. If this doesn't get updated something
         # has gone wrong.
         WebDriverWait(driver, 5, 0.2).until(
-            EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(2)"), "4")
+            EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(3)"), "4")
         )
         
         self.assertEquals(
-            '2000', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(3)").text
+            '2000', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(4)").text
         )
         self.assertEquals(
-            '1500', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(6)").text
+            '1500', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(7)").text
         )
 
         # add another score
@@ -150,14 +150,14 @@ class TestResults(SeleniumTest):
         # has gone wrong.
         table = driver.find_element(By.ID, "results")
         WebDriverWait(table, 5, 0.2).until(
-            EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(2)"), "0")
+            EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(3)"), "0")
         )
         
         self.assertEquals(
-            '400', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(3)").text
+            '400', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(4)").text
         )
         self.assertEquals(
-            '500', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(6)").text
+            '500', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(7)").text
         )
 
         # add another score
@@ -166,7 +166,7 @@ class TestResults(SeleniumTest):
         self.type_score(430, 500, board=4)
         tr = table.find_element(By.CSS_SELECTOR, "tr:nth-of-type(2)")
         self.assertEquals(
-            '430', tr.find_element(By.CSS_SELECTOR, "td:nth-of-type(3)").text
+            '430', tr.find_element(By.CSS_SELECTOR, "td:nth-of-type(4)").text
         )
         self.assertEquals(Result.objects.filter(games_won=0).count(), 2)        
 

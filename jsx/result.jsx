@@ -88,6 +88,7 @@ export function ResultList({editScore, results}) {
                 <thead>
                     { tournament?.team_size ?
                         <tr>
+                            <th align="right">Table</th>
                             <th align="left">Team 1</th>
                             <th align="right">Wins</th>
                             <th align="right">Total Score</th>

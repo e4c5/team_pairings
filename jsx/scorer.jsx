@@ -30,6 +30,7 @@ class Editor extends React.Component {
             },
             body: JSON.stringify({
                 score1: current.score1, result: current.resultId, 
+                p1: current.p1.id, p2: current.p2.id,
                 board: current.board, round: round_id,
                 score2: current.score2, games_won: current.won
             })
