@@ -19,7 +19,12 @@ class Editor extends React.Component {
      * @param {*} e 
      */
     addScore(e) {
-        const { current, dispatch, tournament, round } = this.props;
+        const { current } = this.props;
+        this.postScore(current)
+    }
+
+    postScore(current, callBack) {
+        const { dispatch, tournament, round } = this.props;
         const round_id = tournament.rounds[round - 1].id
         fetch(`/api/tournament/${tournament.id}/result/`, {
             method: 'PUT', 'credentials': 'same-origin',
@@ -36,12 +41,17 @@ class Editor extends React.Component {
             })
         }).then(resp => resp.json()).then(json => {
             dispatch({ type: 'reset' })
-            dispatch({
-                type: 'pending',
-                names: current.pending.filter(
-                    name => name != current.p1.name && name != current.p2.name
-                )
-            })
+            if(current.pending) {
+                dispatch({
+                    type: 'pending',
+                    names: current.pending.filter(
+                        name => name != current.p1.name && name != current.p2.name
+                    )
+                })
+            }
+            if(callBack) {
+                callBack(json)
+            }
         })
     }
 
@@ -317,52 +327,129 @@ class _ScoreByPlayer extends Editor {
 class _IndividualTournamentScorer extends Editor {
     constructor(props) {
         super(props)
+        this.state = {tsh: '', error: ''}
+    }
+
+    tshAction(e) {
+        if(e.key == 'Enter') {
+            const parts = this.state.tsh.toLowerCase().trim().split(' ')
+            if(parts[0] == "pair") {
+
+            }
+            else if(parts[0] == "unpair") {
+
+            }
+            else if(parts.length == 4) {
+                let match = null;
+                let found = false;
+                const results = this.getRoundResults()
+
+                results?.forEach(result => {
+                    if(result.p1.name.toLowerCase().includes(parts[0]) || result.p2.name.toLowerCase().includes(parts[0])) {
+                        if(result.p1.name.toLowerCase().includes(parts[2]) || result.p2.name.toLowerCase().includes(parts[2])) {
+                            if(! found) {
+                                found = true;
+                                if(result.score1 || result.score2) {
+                                    this.setState({error: 'Already has a score'})
+                                }
+                                else {
+                                    match = { ...result, resultId: result.id }
+                                }
+                            }
+                            else {
+                                this.setState({error: 'Multiple matches'})
+                                match = null;
+                            }
+                        }
+                    }
+                })
+                if(match) {
+                    if(match.p1.name.toLowerCase().includes(parts[0])) {
+                        match.score1 = Number(parts[1])
+                        match.score2 = Number(parts[3])
+                    }
+                    else {
+                        match.score2 = Number(parts[1])
+                        match.score1 = Number(parts[3])
+                        
+                    }
+                    if(match.score1 == match.score2) {
+                        match.won = 0.5
+                    }
+                    else if(match.score1 > match.score2) {
+                        match.won = 1
+                    }
+                    else {
+                        match.won = 0
+                    }
+                    this.postScore(match, 
+                        json => {this.setState({tsh: '', error: ''})})
+                }
+            }
+            else {
+                this.setState({error: 'huh?'})
+            }
+        }
     }
 
     render() {
         const { current, dispatch, tournament } = this.props;
         return (
-            <div className='row'>
-                <div className='col'>
-                    <Autocomplete
-                        suggestions={current.pending} placeholder='name'
-                        value={current.name}
-                        onChange={e => this.handleChange(e, 'name')}
-                        onSelect={(e, suggestion) => this.handleChange(e, 'name', suggestion)}
-                        check={autoCompleteCheck}
-                    />
+            <div>
+                <div className='row'>
+                    <div className='col'>
+                        <Autocomplete
+                            suggestions={current.pending} placeholder='name'
+                            value={current.name}
+                            onChange={e => this.handleChange(e, 'name')}
+                            onSelect={(e, suggestion) => this.handleChange(e, 'name', suggestion)}
+                            check={autoCompleteCheck}
+                        />
+                    </div>
+                    <div className='col'>
+                        <input value={current.won} placeholder="Result" 
+                            className='form-control' type='number' data-test-id='games-won'
+                            onChange={e => this.handleChange(e, 'won')} disabled />
+                    </div>
+                    <div className='col'>
+                        <input value={current.score1} placeholder="Score for Player1" 
+                            className='form-control' data-test-id='score1' ref={this.props.forward}
+                            onChange={e => this.handleChange(e, 'score1')} type='number' />
+                    </div>
+                    <div className='col'>
+                        {/* see handlechange 'name' for why how this works */}
+                        <input value={current.p2?.name ? current.p2.name : ""}
+                            placeholder="Opponent" data-test-id='p2' disabled
+                            className='form-control' onChange={e => { }} />
+                    </div>
+                    <div className='col'>
+                        <input value={current.lost} placeholder="Result" disabled type='number'
+                            className='form-control' />
+                    </div>
+                    <div className='col'>
+                        <input value={current.score2} placeholder="Score for Player2"
+                            className='form-control' data-test-id='score2'
+                            type='number' onChange={e => this.handleChange(e, 'score2')} />
+                    </div>
+                    <div className='col'>
+                        <button className='btn btn-primary'
+                            disabled={current.resultId == ''}
+                            onClick={e => this.addScore()}>
+                            <i className='bi-plus' ></i>
+                        </button>
+                    </div>
                 </div>
-                <div className='col'>
-                    <input value={current.won} placeholder="Result" 
-                        className='form-control' type='number' data-test-id='games-won'
-                        onChange={e => this.handleChange(e, 'won')} disabled />
+                <div className='row mt-1'>
+                    <div className='col-12'>
+                        <input type='text' className='form-control' onKeyDown={e => this.tshAction(e)}
+                            placeholder='TSH style data entry'
+                            value={this.state.tsh} onChange={e => this.setState({tsh: e.target.value}) } />
+                    </div>
                 </div>
-                <div className='col'>
-                    <input value={current.score1} placeholder="Score for Player1" 
-                        className='form-control' data-test-id='score1' ref={this.props.forward}
-                        onChange={e => this.handleChange(e, 'score1')} type='number' />
-                </div>
-                <div className='col'>
-                    {/* see handlechange 'name' for why how this works */}
-                    <input value={current.p2?.name ? current.p2.name : ""}
-                        placeholder="Opponent" data-test-id='p2' disabled
-                        className='form-control' onChange={e => { }} />
-                </div>
-                <div className='col'>
-                    <input value={current.lost} placeholder="Result" disabled type='number'
-                        className='form-control' />
-                </div>
-                <div className='col'>
-                    <input value={current.score2} placeholder="Score for Player2"
-                        className='form-control' data-test-id='score2'
-                        type='number' onChange={e => this.handleChange(e, 'score2')} />
-                </div>
-                <div className='col'>
-                    <button className='btn btn-primary'
-                        disabled={current.resultId == ''}
-                        onClick={e => this.addScore()}>
-                        <i className='bi-plus' ></i>
-                    </button>
+                <div className='row mt-1 mb-1'>
+                    <div className='col-12'>
+                        { this.state.error }
+                    </div>
                 </div>
             </div>
         )
