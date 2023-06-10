@@ -34,6 +34,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
+        '''Unauth users see all but private tournaments.'''
         if self.request.user.is_authenticated:
             return models.Tournament.objects.distinct('id').filter(
                 Q(director__user=self.request.user) | Q(private=False)
@@ -43,6 +44,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
         
 
     def perform_create(self, serializer):
+        '''Creates a new tournament'''
         t = serializer.save()
         models.Director.objects.create(tournament=t, user=self.request.user)
 

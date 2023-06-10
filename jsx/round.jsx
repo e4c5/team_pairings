@@ -273,8 +273,8 @@ export function Round(props) {
                     score2: result.score2 || '',
                     board: result.board || '',
                     boards: result.boards || [],
-                    won: result.games_won || '',
-                    lost: tournament.team_size - result.games_won
+                    won: result.games_won === null ? '' : result.games_won,
+                    lost: (tournament.team_size || 1) - result.games_won
                 }
             })
             ref.current?.scrollIntoView({ behavior: 'smooth' });

@@ -337,7 +337,28 @@ class _IndividualTournamentScorer extends Editor {
 
             }
             else if(parts[0] == "unpair") {
-
+                if(parts.length == 3) {
+                    const results = this.getRoundResults()
+                    results?.forEach(result => {
+                        if(result.p1.name.toLowerCase().includes(parts[1]) || result.p2.name.toLowerCase().includes(parts[1])) {
+                            if(result.p1.name.toLowerCase().includes(parts[1]) || result.p2.name.toLowerCase().includes(parts[1])) {
+                                const { dispatch, tournament, round } = this.props;
+                                const round_id = tournament.rounds[round - 1].id
+                                fetch(`/api/tournament/${tournament.id}/result/${round_id}/${result.id}/`, {
+                                    method: 'DELETE', 'credentials': 'same-origin',
+                                    headers:
+                                    {
+                                        'Content-Type': 'application/json',
+                                        "X-CSRFToken": getCookie("csrftoken")
+                                    }
+                                }).then(resp => resp.json()).then(json => {
+                                    dispatch({ type: 'reset' })
+                                    this.setState({tsh: '', error: ''})
+                                })
+                            }
+                        }    
+                    }) 
+                }
             }
             else if(parts.length == 4) {
                 let match = null;
