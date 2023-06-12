@@ -4,15 +4,32 @@ from django.db import transaction
 
 from tournament.models import Result, Participant
 
+
 def tsh_export(tournament, out):
-    """Dumps the given tournament to the file like object
+    """Dumps the given tournament to the file like object.
+
     Args: tournament: the tournament to export
         out: a file like object
     """
+    transaction.set_autocommit(False) 
+
+    # Because TSH relies on line numbers for pairing, once a player is
+    # added, she cannot be deleted but merely switched off. Our program
+    # being database backed can have players being deleted. which raises
+    # problems when exporting. The solution then is to reseed the players
+    players = []
+    i = 0
+
     for participant in tournament.participants.order_by('seed'):
         if (participant.seed == 0 or participant.name == 'Bye' 
                 or participant.name == 'Absent' or participant.name == ''):
             continue
+        participant.seed = i + 1
+        participant.save()
+        players.append(participant)
+        i += 1
+
+    for participant in players:
 
         opponents = []
         scores = []
@@ -33,6 +50,7 @@ def tsh_export(tournament, out):
             " ".join(scores),
             "off 0;" if participant.offed else ""
         ), file=out)
+    transaction.rollback()
 
 
 def tsh_import(f):
