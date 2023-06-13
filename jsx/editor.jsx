@@ -6,7 +6,8 @@ import { Participants } from './participant.jsx';
 
 export function TournamentEditor() {
     const [tournament, setTournament] = useState({
-        name: '', start_date: '', num_rounds: 0
+        name: '', start_date: '', num_rounds: 0,
+        type: 'S'
     })
 
     const ref = useRef(null)
@@ -49,6 +50,13 @@ export function TournamentEditor() {
                             Number of Rounds
                             <input type="number" value={tournament.num_rounds}  className="form-control"
                                 onChange={e => setTournament({...tournament, num_rounds: e.target.value})} />
+                        </div>
+                        <div>
+                            Tournament Type
+                            <select value={tournament.type}  className="form-control"
+                                onChange={e => setTournament({...tournament, type: e.target.value})} >
+                                    <option></option>
+                            </select>
                         </div>
                         <div>
                             <button className="btn btn-primary" 

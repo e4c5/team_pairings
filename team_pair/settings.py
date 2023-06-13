@@ -26,7 +26,7 @@ SECRET_KEY = settings_local.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['live.scrabble.lk', 'localhost']
+ALLOWED_HOSTS = ['live.scrabble.lk', 'localhost', '192.168.1.20']
 
 
 # Application definition

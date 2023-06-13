@@ -157,7 +157,7 @@ class _ScoreByTeam extends Editor {
         const { current, dispatch, tournament } = this.props;
         return (
             <div className='row'>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     <Autocomplete
                         suggestions={current.pending} placeholder='name'
                         value={current.name}
@@ -166,32 +166,32 @@ class _ScoreByTeam extends Editor {
                         check={autoCompleteCheck}
                     />
                 </div>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     <input value={current.won} placeholder="Games won"
                         className='form-control' type='number' data-test-id='games-won'
                         onChange={e => this.handleChange(e, 'won')} />
                 </div>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     <input value={current.score1} placeholder="Score for team1" 
                         className='form-control' data-test-id='score1'
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     {/* see handlechange 'name' for why how this works */}
                     <input value={current.p2?.name ? current.p2.name : ""}
                         placeholder="Opponent" data-test-id='p2' disabled
                         className='form-control' onChange={e => { }} />
                 </div>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     <input value={current.lost} placeholder="Games won" disabled type='number'
                         className='form-control' />
                 </div>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     <input value={current.score2} placeholder="Score for team2"
                         className='form-control' data-test-id='score2'
                         type='number' onChange={e => this.handleChange(e, 'score2')} />
                 </div>
-                <div className='col'>
+                <div className='col col-sm-2'>
                     <button className='btn btn-primary'
                         disabled={current.resultId == ''}
                         onClick={e => this.addScore()}>
@@ -418,41 +418,41 @@ class _IndividualTournamentScorer extends Editor {
         return (
             <div>
                 <div className='row'>
-                    <div className='col'>
+                    <div className='col-md col-sm-2'>
                         <Autocomplete
-                            suggestions={current.pending} placeholder='name'
+                            suggestions={current.pending} placeHolder='Player name'
                             value={current.name}
                             onChange={e => this.handleChange(e, 'name')}
                             onSelect={(e, suggestion) => this.handleChange(e, 'name', suggestion)}
                             check={autoCompleteCheck}
                         />
                     </div>
-                    <div className='col'>
+                    <div className='col-md col-sm-2'>
                         <input value={current.won} placeholder="Result" 
                             className='form-control' type='number' data-test-id='games-won'
                             onChange={e => this.handleChange(e, 'won')} disabled />
                     </div>
-                    <div className='col'>
+                    <div className='col-md col-sm-2'>
                         <input value={current.score1} placeholder="Score for Player1" 
                             className='form-control' data-test-id='score1' ref={this.props.forward}
                             onChange={e => this.handleChange(e, 'score1')} type='number' />
                     </div>
-                    <div className='col'>
+                    <div className='col-md col-sm-2'>
                         {/* see handlechange 'name' for why how this works */}
                         <input value={current.p2?.name ? current.p2.name : ""}
                             placeholder="Opponent" data-test-id='p2' disabled
                             className='form-control' onChange={e => { }} />
                     </div>
-                    <div className='col'>
+                    <div className='col-md col-sm-2'>
                         <input value={current.lost} placeholder="Result" disabled type='number'
                             className='form-control' />
                     </div>
-                    <div className='col'>
+                    <div className='col-md col-sm-2'>
                         <input value={current.score2} placeholder="Score for Player2"
                             className='form-control' data-test-id='score2'
                             type='number' onChange={e => this.handleChange(e, 'score2')} />
                     </div>
-                    <div className='col'>
+                    <div className='col-md col-sm-2 text-end'>
                         <button className='btn btn-primary'
                             disabled={current.resultId == ''}
                             onClick={e => this.addScore()}>
