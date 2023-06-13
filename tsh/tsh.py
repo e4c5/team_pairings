@@ -33,6 +33,7 @@ def tsh_export(tournament, out):
 
         opponents = []
         scores = []
+        p12 = []
         results = Result.objects.filter( 
             Q(p1=participant) | Q(p2=participant)
         ).order_by('round__round_no')
@@ -45,64 +46,76 @@ def tsh_export(tournament, out):
                 opponents.append(str(result.p1.seed))
                 scores.append(str(result.score2))
 
-        print("{0:25s}{1:3d} {2}; {3}; {4}".format(
+            if result.starting == result.p1:
+                p12.append('1')
+            elif result.starting == result.p2:
+                p12.append('2')
+            else:
+                p12.append('3')
+
+        print("{0:25s}{1:3d} {2}; {3}; {4}; p12 {5}".format(
             participant.name, participant.rating, " ".join(opponents),
             " ".join(scores),
-            "off 0;" if participant.offed else ""
+            "off 0" if participant.offed else "",
+            " ".join(p12)
         ), file=out)
     transaction.rollback()
 
 
-def tsh_import(f):
+def tsh_import(fp):
     ''' Used for processing the contents of a.t files.
+    
     Method is invoked by the live_data webview. Doesn't save anything
-    to the database. Returns a python dictionary
+    to the database. 
+
+    Args: fp - a file like object
+    Returns: Tournament results as an array of dictionaries
     '''
     players = [{'name': 'Bye', 'seed': 0}]
     rounds = 0;
 
-    with open(f) as fp:
-        for seed, line in enumerate(fp):
-            if line and len(line) > 30 :
-                # print(line)
-                rating = re.search('[0-9]{1,4} ', line).group(0).strip()
-                name = line[0: line.index(rating)].strip()
-                newr = None
-                data = line[line.index(rating):]
-                data = data.split(';')
-                opponents = data[0].strip().split(' ')[1:]
-                scores = data[1].strip().split(' ')
-                p12 = None
-                rank = None
 
-                offed = False
-                
-                for d in data:
-                    obj = d.strip().split(' ')
-                    obj_name = obj[0].strip()
-                    itms = obj[1:]
-                    
-                    if obj_name == 'p12':
-                        # A value of 1,2 means the obvious, 0 means the play had a bye
-                        # when it's three they tossed for it
+    for seed, line in enumerate(fp):
+        if line and len(line) > 30 :
+            # print(line)
+            rating = re.search('[0-9]{1,4} ', line).group(0).strip()
+            name = line[0: line.index(rating)].strip()
+            newr = None
+            data = line[line.index(rating):]
+            data = data.split(';')
+            opponents = data[0].strip().split(' ')[1:]
+            scores = data[1].strip().split(' ')
+            p12 = None
+            rank = None
 
-                        p12 = itms
+            offed = False
+            
+            for d in data:
+                obj = d.strip().split(' ')
+                obj_name = obj[0].strip()
+                itms = obj[1:]
+                
+                if obj_name == 'p12':
+                    # A value of 1,2 means the obvious, 0 means the play had a bye
+                    # when it's three they tossed for it
 
-                    elif obj_name == 'off':
-                        offed = True
-                    
-                players.append({'name': name, 'opponents' :opponents,'scores':scores,
-                    'p12': p12, 'rank': rank,'newr': newr, 'off': offed, 'seed': seed + 1,
-                    'old_rating': rating})
+                    p12 = itms
+
+                elif obj_name == 'off':
+                    offed = True
                 
-                if len(scores) > rounds :
-                    rounds = len(scores)
-                
-        if len(players) < 2:
-            print('a.t file does not contain any data')
-            return {}
-        
-        return players
+            players.append({'name': name, 'opponents' :opponents,'scores':scores,
+                'p12': p12, 'rank': rank,'newr': newr, 'off': offed, 'seed': seed + 1,
+                'old_rating': rating})
+            
+            if len(scores) > rounds :
+                rounds = len(scores)
+            
+    if len(players) < 2:
+        print('a.t file does not contain any data')
+        return {}
+    
+    return players
 
 @transaction.atomic
 def save_to_db(tournament, results):
@@ -131,6 +144,7 @@ def save_to_db(tournament, results):
                 "tournament": tournament
             }
         )
+        print(p.id)
         participants.append(p)
         
     # pass 2 save the actual results
@@ -183,9 +197,9 @@ def save_to_db(tournament, results):
                 if result['p12'][idx] == '1':
                     defaults['starting'] = p1
 
-                Result.objects.get_or_create(
+                print(Result.objects.get_or_create(
                     p1=p1, p2=p2,round_id=rounds[idx],
                     defaults=defaults
-                )
+                ))
 
     tournament.update_all_standings()

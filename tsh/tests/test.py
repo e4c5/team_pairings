@@ -1,11 +1,11 @@
 from io import StringIO
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.core.management import call_command, CommandError
 from tournament.models import Tournament, Participant
 
 from tsh import tsh
 
-class BasicTests(TestCase):
+class BasicTests(TransactionTestCase):
 
     def setUp(self) -> None:
         self.t1 = Tournament.objects.create(name='Sri Lankan open', start_date='2023-02-25',
