@@ -36,7 +36,7 @@ export function Participants(props) {
     const dispatch = useTournamentDispatch();
 
     const auth = document.getElementById('hh') && document.getElementById('hh').value
-    const columns = props?.tournament?.team_size ? [...team ] : [...individual]
+    const columns = tournament?.team_size ? [...team ] : [...individual]
 
     if (auth) {
         columns.push(["Actions"])
@@ -106,18 +106,18 @@ export function Participants(props) {
         const order = tournament?.order || 'rank'
         if (order == field) {
             return (
-                <th onClick={e => changeOrder(field)} key={field}>
+                <th className=' text-center' onClick={e => changeOrder(field)} key={field}>
                     {name}<i className='bi-sort-down-alt ml-2'></i>
                 </th>)
         }
         if (order == `-${field}`) {
             return (
-                <th onClick={e => changeOrder(field)} key={field}>
+                <th  className='text-center'  onClick={e => changeOrder(field)} key={field}>
                     {name}<i className='bi-sort-up-alt ml-2'></i>
                 </th>)
         }
         return (
-            <th onClick={e => changeOrder(field)} key={field}>
+            <th  className=' text-center' onClick={e => changeOrder(field)} key={field}>
                 {name}
             </th>)
     }
@@ -138,22 +138,22 @@ export function Participants(props) {
             <tbody>
                 {tournament?.participants?.map((row, idx) => (
                     <tr key={row.id}>
-                        <td className="text-left">{row.pos}</td>
+                        <td className="text-end">{row.pos}</td>
                         <td component="th" scope="row">
                             <Link to={`${row.id}`}>
                                 { tournament.team_size ? row.name : `${row.name} (#${row.seed})` }
                             </Link>
                         </td>
-                        <td className="text-right">{row.rating}</td>
+                        <td className="text-end">{row.rating}</td>
                         { tournament.team_size ? 
-                            <><td className="text-right">{row.round_wins}</td>
-                                <td className="text-right">{row.game_wins}</td>
+                            <><td className="text-end">{row.round_wins}</td>
+                                <td className="text-end">{row.game_wins}</td>
                             </>
-                            : <td className="text-right">{row.game_wins}</td>
+                            : <td className="text-end">{row.game_wins}</td>
                         }
-                        <td className="text-right">{row.spread}</td>
+                        <td className="text-end">{row.spread}</td>
                         {auth &&
-                            <td className="text-right">
+                            <td className="text-end">
                                 <div className='d-inline-flex'>
                                     <div className='form-check form-switch'>
                                         <input className="form-check-input" type="checkbox"
@@ -241,4 +241,4 @@ export function Participant() {
     return <div></div>
 }
 
-console.log('Participant 0.01')
+console.log('Participant 0.02')

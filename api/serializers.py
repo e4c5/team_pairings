@@ -30,7 +30,6 @@ class TournamentSerializer(serializers.ModelSerializer):
             return obj.editable
         return True
 
-
     class Meta:
         model = Tournament
         fields = ['id', 'start_date','name','rated','slug',
@@ -40,4 +39,6 @@ class TournamentSerializer(serializers.ModelSerializer):
 class BoardResultSerializer(serializers.Serializer):
     score1 = serializers.IntegerField()
     score2 = serializers.IntegerField()
+    p1 = serializers.IntegerField(required=False)
+    p2 = serializers.IntegerField(required=False)
 

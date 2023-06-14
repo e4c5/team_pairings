@@ -241,6 +241,12 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
             instance.score1 = serializer.validated_data['score1']
             instance.score2 = serializer.validated_data['score2']
+            
+            if serializer.validated_data.get('p1'):
+                if serializer.validated_data['p1'] > serializer.validated_data['p2']:
+                    instance.score2 = serializer.validated_data['score1']
+                    instance.score1 = serializer.validated_data['score2']
+
             instance.save()
             
 

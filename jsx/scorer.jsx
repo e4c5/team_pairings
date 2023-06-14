@@ -41,7 +41,7 @@ class Editor extends React.Component {
             })
         }).then(resp => resp.json()).then(json => {
             dispatch({ type: 'reset' })
-            if(current.pending) {
+            if(current.pending && tournament.entry_mode != 'P') {
                 dispatch({
                     type: 'pending',
                     names: current.pending.filter(
@@ -254,38 +254,38 @@ class _ScoreByPlayer extends Editor {
         return (
             <>
             <div className='row'>
-                <div className='col'>
+                <div className='col-md col-sm-2'>
                     <Autocomplete
-                        suggestions={current.pending} placeholder='name'
+                        suggestions={current.pending} placeHolder='Team name'
                         value={current.name}
                         onChange={e => this.handleChange(e, 'name')}
                         onSelect={(e, suggestion) => this.handleChange(e, 'name', suggestion)}
                         check={autoCompleteCheck}
                     />
                 </div>
-                <div className='col'>
+                <div className='col-md col-sm-2'>
                     <input value={current.board} placeholder="Board Number" className='form-control'
                         data-test-id='board'
                         onChange={e => this.handleChange(e, 'board')} />
                 </div>
-                <div className='col'>
+                <div className='col-md col-sm-2'>
                     <input value={current.score1} placeholder="Score for player1"
                         className='form-control' data-test-id='score1'
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
-                <div className='col'>
-                    {/* see handlechange 'name' for why how this works */}
+                <div className='col-md col-sm-2'>
+                    {/* see handlechange 'name' for how this works */}
                     <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
-                        className='form-control' data-test-id='p2'
+                        className='form-control' data-test-id='p2' disabled
                         size='small' onChange={e => { }} />
                 </div>
-                <div className='col'>
+                <div className='col-md col-sm-2'>
                     <input value={current.score2} placeholder="Score for player2"
                         className='form-control' data-test-id='score2' 
                         type='number'
                         onChange={e => this.handleChange(e, 'score2')} />
                 </div>
-                <div className='col'>
+                <div className='col-md col-sm-2'>
                     <button className='btn btn-primary'
                         disabled={current.resultId == ''}
                         onClick={e => this.addScore()}>
@@ -294,7 +294,7 @@ class _ScoreByPlayer extends Editor {
                 </div>
             </div>
             <div className='row mt-3 mb-3'>
-                <div className='col-md-10 offset-md-1'>
+                <div className='col-10 offset-1'>
                     <table className='table'>
                         { current.resultId ? 
                             (<thead>
