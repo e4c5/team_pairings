@@ -82,9 +82,10 @@ def random_results(tournament):
                     b = BoardResult.objects.get(
                         Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)
                     )
-                    b.score1 = fake.random_int(290, 550)
-                    b.score2 = fake.random_int(290, 550)
-                    b.save()
+                    if b.score1 is None:
+                        b.score1 = fake.random_int(290, 550)
+                        b.score2 = fake.random_int(290, 550)
+                        b.save()
                 # no need to save result here. Post save event for BoardResult
                 # takes care of that
         else:
@@ -106,6 +107,7 @@ def truncate_rounds(tournament, number):
 
     for round in tournament.rounds.filter(round_no__gt=number):
         round.results.all().delete()
+        round.boardresult_set.all().delete()
         round.paired = 0;
         round.save()
 

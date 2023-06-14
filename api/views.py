@@ -265,15 +265,28 @@ def get_participant(pk):
     includes participants overall result, list of team members, the results of
     each round and finally the results of each team member as well.
     """
-    query = """select json_agg(f) from (
-                    select tp.*, 
-                        (select jsonb_agg(to_jsonb(tm)) from tournament_teammember tm
-                        where team_id = tp.id) members,
-                        (select jsonb_agg(to_jsonb(tr)) from tournament_result tr
-                        where p1_id = tp.id or p2_id = tp.id) results
-                    from tournament_participant tp where tp.id = %s
-                ) f	 """
-
+    query = """SELECT json_agg(f) FROM (
+        SELECT tp.*, 
+            (SELECT jsonb_agg(to_jsonb(tm)) 
+            FROM tournament_teammember tm 
+            WHERE tm.team_id = tp.id
+            ) AS members,
+            (SELECT jsonb_agg(to_jsonb(trx))
+            FROM (
+                SELECT tr.*, (
+                    SELECT jsonb_agg(to_jsonb(br))
+                    FROM tournament_boardresult br 
+                    WHERE (br.team1_id = tp.id OR br.team2_id = tp.id)
+                    AND tr.round_id = br.round_id and score1 is not null
+                ) AS boards
+                FROM tournament_result tr
+                WHERE (tr.p1_id = tp.id OR tr.p2_id = tp.id)
+            ) trx
+            ) AS results
+        FROM tournament_participant tp 
+        WHERE tp.id = %s 
+    ) f;"""
+    
     with connection.cursor() as cursor:
         cursor.execute(query, [pk])
         return cursor.fetchone()[0][0]
@@ -292,7 +305,7 @@ def get_participants(tid):
                         where p1_id = tp.id or p2_id = tp.id) results
                     from tournament_participant tp where tp.tournament_id = %s
                 ) f	 """
-
+    
     with connection.cursor() as cursor:
         cursor.execute(query, [tid])
         resp = cursor.fetchone()[0]

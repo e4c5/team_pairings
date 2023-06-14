@@ -77,7 +77,9 @@ class Tournament(models.Model):
                 result.games_won = 1
                 result.score1 = 100
                 result.score2 = 0
-
+            result.save()
+            return
+        
         elif self.entry_mode == Tournament.BY_PLAYER:
             # team tournament where results for each individual player is tracked
             rnd = result.round
@@ -103,19 +105,19 @@ class Tournament(models.Model):
                     if i <= mid:
                         b.score1, b.score2 = 0, 100
                     else:
-                        b.score1, b.score2 = 100, 0
+                        b.score1, b.score2 = 0, 0
                     b.save()
+                
+        
+        if result.p2.name == 'Bye':
+            # team 1 got the bye
+            result.score1 = 300
+            result.score2 = 0
+            result.games_won = 3
         else:
-            # tournament where we don't bother about the results of each individual
-            if result.p2.name == 'Bye':
-                # team 1 got the bye
-                result.score1 = 300
-                result.score2 = 0
-                result.games_won = 3
-            else:
-                result.score2 = 300
-                result.score1 = 0
-                result.games_won = 2
+            result.score2 = 300
+            result.score1 = 0
+            result.games_won = 2
 
         result.save()
     

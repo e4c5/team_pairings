@@ -744,6 +744,7 @@ class KothTests(APITestCase, Helper):
         self.assertTrue((r.p1 == p1 and r.p2 == p2)
                         or (r.p2 == p1 and r.p1 == p2))
 
+
 class TSHTest(APITestCase, Helper):
     """Tests pairing a tournament that has been imported from tsh"""
 
