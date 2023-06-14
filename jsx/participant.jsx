@@ -4,7 +4,7 @@ import {
     useParams,
     Link,
 } from "react-router-dom";
-import { ResultList } from './result.jsx';
+import { ResultTable , ResultList} from './result.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
@@ -210,30 +210,10 @@ export function Participant() {
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
                 <h3>{participant.name}</h3>
-                {tournament?.entry_mode == 'P' && (
-                    <table className='table'>
-                        <thead>
-                            <tr>
-                                <th>Board</th>
-                                <th>Player</th>
-                                <th>Wins</th>
-                                <th>Margin</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {participant?.members?.map(p => (
-                                <tr key={p.id}>
-                                    <td>{p.board}</td>
-                                    <td>{p.name}</td>
-                                    <td>{p.wins}</td>
-                                    <td>{p.spread}</td>
-                                </tr>
-                            )
-                            )}
-                        </tbody>
-                    </table>)
+                {tournament?.entry_mode == 'P' 
+                    ? <ResultList results={participant.results} teamId={participant.id} />  
+                    : <ResultTable results={participant.results} editScore={editScore} />
                 }
-                <ResultList results={participant.results} editScore={editScore} />
 
             </div>
         )

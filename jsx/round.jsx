@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 
 import getCookie from './cookie.js';
 import { useTournament, useTournamentDispatch } from './context.jsx';
-import { ResultList } from './result.jsx';
+import { ResultTable } from './result.jsx';
 import { Confirm } from './dialog.js';
 import { ScoreByTeam, ScoreByPlayer, IndividualTournamentScorer } from './scorer.jsx'
 
@@ -324,7 +324,7 @@ export function Round(props) {
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
                 <h3>Results for round : {round}</h3>
                 {editor()}
-                <ResultList results={getRoundResults()} editScore={editScore} />
+                <ResultTable results={getRoundResults()} editScore={editScore} />
                 <div className='row'>
                     <div className='col'>
                         {editable &&
