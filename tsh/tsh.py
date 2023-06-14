@@ -11,7 +11,7 @@ def tsh_export(tournament, out):
     Args: tournament: the tournament to export
         out: a file like object
     """
-    transaction.set_autocommit(False) 
+    savepoint = transaction.savepoint()
 
     # Because TSH relies on line numbers for pairing, once a player is
     # added, she cannot be deleted but merely switched off. Our program
@@ -46,12 +46,15 @@ def tsh_export(tournament, out):
                 opponents.append(str(result.p1.seed))
                 scores.append(str(result.score2))
 
-            if result.starting == result.p1:
+            if result.starting == participant:
                 p12.append('1')
-            elif result.starting == result.p2:
-                p12.append('2')
             else:
-                p12.append('3')
+                if result.p1 == participant and result.starting == result.p2:
+                    p12.append('2') 
+                elif result.p2 == participant and result.starting == result.p1:
+                    p12.append('2') 
+                else:
+                    p12.append('3')
 
         print("{0:25s}{1:3d} {2}; {3}; {4}; p12 {5}".format(
             participant.name, participant.rating, " ".join(opponents),
@@ -59,7 +62,7 @@ def tsh_export(tournament, out):
             "off 0" if participant.offed else "",
             " ".join(p12)
         ), file=out)
-    transaction.rollback()
+    transaction.savepoint_rollback(savepoint)
 
 
 def tsh_import(fp):

@@ -1,11 +1,11 @@
 from io import StringIO
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, TestCase
 from django.core.management import call_command, CommandError
 from tournament.models import Tournament, Participant
 
 from tsh import tsh
 
-class BasicTests(TransactionTestCase):
+class TransTests(TransactionTestCase):
 
     def setUp(self) -> None:
         self.t1 = Tournament.objects.create(name='Sri Lankan open', start_date='2023-02-25',
@@ -14,8 +14,9 @@ class BasicTests(TransactionTestCase):
         return super().setUp()
     
     def test_import(self):
-        participants = tsh.tsh_import('tsh/data/tournament1/a.t')
-        self.assertEqual(len(participants), 39)
+        with open('tsh/data/tournament1/a.t') as fp:
+            participants = tsh.tsh_import(fp)
+            self.assertEqual(len(participants), 39)
 
 
     def test_impex_command(self):
