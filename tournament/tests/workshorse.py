@@ -117,7 +117,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         #time.sleep(30)
         # wait for the value of the input field to clear. That's when the data
         # would have been posted to the server , the response recieved and state updated
-        WebDriverWait(driver, 1, 0.1).until(lambda x: p2.get_attribute("value") == "")
+        WebDriverWait(driver, 2, 0.1).until(lambda x: p2.get_attribute("value") == "")
         
     def add_participants(self, faker=False, count=0):
         """Helper method to load participants in a file by filling forms

@@ -1,7 +1,11 @@
+from io import StringIO
+
 from faker import Faker
+
 from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.core.management import call_command
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -739,3 +743,28 @@ class KothTests(APITestCase, Helper):
         r = Result.objects.filter(Q(p1=p1) | Q(p2=p1)).get(round=rnd)
         self.assertTrue((r.p1 == p1 and r.p2 == p2)
                         or (r.p2 == p1 and r.p1 == p2))
+
+class TSHTest(APITestCase, Helper):
+    """Tests pairing a tournament that has been imported from tsh"""
+
+    def setUp(self) -> None:
+        self.t3 = Tournament.objects.create(name='Joust', start_date='2023-02-25',
+                                            rated=False, entry_mode='S', num_rounds=9)
+
+    def test_pair(self):
+        out = StringIO()
+        call_command(
+            'importer', 'api/tests/data/anon1.t', 
+            '--tournament_id', self.t3.pk,
+            stdout=out
+        )
+
+        self.assertEquals(self.t3.participants.count(), 43)
+        rnd = self.t3.rounds.get(round_no=7)
+        self.assertEquals(rnd.results.count(), 0)
+
+        sp = swiss.SwissPairing(rnd)
+        sp.make_it()
+        sp.save()
+
+        self.assertEquals(rnd.results.count(), 21)

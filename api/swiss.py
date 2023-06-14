@@ -40,27 +40,49 @@ class SwissPairing(Pairing):
                 required += 1
             if len(self.pairs) < required:
                 # the pairing was not completed. Collapse the first two brackets
-                if self.bye:
-                    b = self.pairs[0]
-                    self.pairs = [b]
-                else:
-                    self.pairs = []
-                self.find_brackets()
-                for player in self.players:
-                    player['pair'] = False
-                    player['downfloater'] = False
-
-                if self.bye:
-                    self.pairs = [self.pairs[0]]
-                else:
-                    self.pairs = []
+                self.reset()
                 sorted_brackets_keys = sorted(self.brackets, reverse=True)
                 self.brackets[sorted_brackets_keys[0]].extend(self.brackets[sorted_brackets_keys[1]])
                 self.brackets[sorted_brackets_keys[1]] = []
                 
                 self.pair_other_round()
 
+                if len(self.pairs) < required:
+                    self.reset()
+                    # still no luck. Try pairing the last person first
+                    last = len(self.players) -1
+                    while last > 0:
+                        lp = self.players[last]
+                        if lp['pair'] or lp['name'] == 'Bye':
+                            last -= 1
+                        else:
+                            break
+                    
+                    prev = last - 1
+                    while prev >= 0:
+                        opponent = self.players[prev]
+                        if lp['name'] not in opponent['opponents']:
+                            lp['pair'] = True
+                            opponent['pair'] = True
+                            self.pair_other_round()
+                            self.pairs.append(self.return_with_color_preferences(lp, opponent))        
+                            break
+                        prev -= 1
+                    
+                    
+
         return self.pairs
+
+    def reset(self):
+        if self.bye:
+            b = self.pairs[0]
+            self.pairs = [b]
+        else:
+            self.pairs = []
+        self.find_brackets()
+        for player in self.players:
+            player['pair'] = False
+            player['downfloater'] = False
 
     def find_brackets(self):
         brackets = {}
