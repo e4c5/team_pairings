@@ -17,5 +17,5 @@ class Command(BaseCommand):
             self.t = Tournament.objects.get(pk=options.get('tournament_id'))
 
         with open(options['tsh_file']) as fp:
-            results = tsh.tsh_import()
+            results = tsh.tsh_import(fp)
             tsh.save_to_db(self.t, results)

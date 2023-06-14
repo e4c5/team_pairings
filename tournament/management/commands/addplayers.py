@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         if options.get('add_participants'):
             if options.get('faker'):
-                add_participants(self.t, use_faker=True, count=options.get('add_teams'))
+                add_participants(self.t, use_faker=True, count=options.get('add_participants'))
             else:
                 add_participants(self.t, False, filename=options["file"])
 

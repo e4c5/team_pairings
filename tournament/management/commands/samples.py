@@ -43,22 +43,23 @@ class Command(BaseCommand):
             )
             Director.objects.create(tournament=soy, user=u)
 
-            results = tsh.tsh_import('tsh/data/tournament1/a.t')
-            tsh.save_to_db(soy, results)
+            with open('tsh/data/tournament1/a.t') as fp:
+                results = tsh.tsh_import(fp)
+                tsh.save_to_db(soy, results)
 
-            five = Tournament.objects.create(
-                name=f"{u.username} Five Rounder",
-                num_rounds=5, start_date=date.today(),
-                private=True
-            )
-            Director.objects.create(tournament=five, user=u)
-            add_participants(five, count=100, use_faker=True)
+                five = Tournament.objects.create(
+                    name=f"{u.username} Five Rounder",
+                    num_rounds=5, start_date=date.today(),
+                    private=True
+                )
+                Director.objects.create(tournament=five, user=u)
+                add_participants(five, count=100, use_faker=True)
 
-            five = Tournament.objects.create(
-                name=f"{u.username} Small",
-                num_rounds=5, start_date=date.today(),
-                private=True
-            )
-            Director.objects.create(tournament=five, user=u)
-            add_participants(five, count=10, use_faker=True)
-            
+                five = Tournament.objects.create(
+                    name=f"{u.username} Small",
+                    num_rounds=5, start_date=date.today(),
+                    private=True
+                )
+                Director.objects.create(tournament=five, user=u)
+                add_participants(five, count=10, use_faker=True)
+                
