@@ -184,7 +184,7 @@ class Pairing:
     
     def get_color_preferences(self, player):
         """Find which 'color' the player should be assigned
-        white means he goes first and black means second.
+        
         
         A color preference that's negative means this player should go first
         in the next game (if possible) a color preference that's positive 
@@ -197,18 +197,15 @@ class Pairing:
     
 
     def return_with_color_preferences(self, playerA, playerB):
-        """Given two players orders them so that the first guy goes first"""
+        """Given two players orders them so that the first guy goes first
+        white means he goes first and black means second.
+        Args: playerA : one half of a pairing
+              playerB : the other half
+        Returns : The two players in an tuple such that the player at index 0
+              starts the game.
+        """
         player1, player2 = self.order_players([playerA, playerB])
-        player1_pref = self.get_color_preferences(player1)
-        player2_pref = self.get_color_preferences(player2)
-
-        if player1_pref <= -2 or player2_pref >= 2:
-            return player1, player2
-        elif player1_pref == -1 or player2_pref == 1:
-            return player1, player2
-        elif player1_pref >= 2 or player2_pref <= -2:
+        
+        if player1['player'].white > player2['player'].white:
             return player2, player1
-        elif player1_pref == 1 or player2_pref == -1:
-            return player2, player1
-
         return player1, player2

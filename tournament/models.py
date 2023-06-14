@@ -345,6 +345,7 @@ def result_presave(sender, instance, **kwargs):
             m = instance.round.tournament.team_size or 1
             instance.games_won = m - instance.games_won
             instance.score1, instance.score2 = instance.score2, instance.score1
+            
 
 
 @receiver(pre_save, sender=BoardResult)

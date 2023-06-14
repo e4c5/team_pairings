@@ -12,6 +12,7 @@ class BoardResultAdmin(admin.ModelAdmin):
 class ResultAdmin(admin.ModelAdmin):
     list_display = ['id', 'round','p1','p2','games_won','score1','score2']
     raw_id_fields = ['round', 'p1', 'p2','starting']
+    search_fields = ['p1__name', 'p2__name']
     
 class TournamentAdmin(admin.ModelAdmin):
     list_display = ['id','name','num_rounds','entry_mode']
