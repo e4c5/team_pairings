@@ -144,7 +144,7 @@ def save_to_db(tournament, results):
                 "tournament": tournament
             }
         )
-        print(p.id)
+        #print(p.id)
         participants.append(p)
         
     # pass 2 save the actual results
@@ -197,9 +197,9 @@ def save_to_db(tournament, results):
                 if result['p12'][idx] == '1':
                     defaults['starting'] = p1
 
-                print(Result.objects.get_or_create(
+                Result.objects.get_or_create(
                     p1=p1, p2=p2,round_id=rounds[idx],
                     defaults=defaults
-                ))
+                )
 
     tournament.update_all_standings()
