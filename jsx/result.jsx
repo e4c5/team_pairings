@@ -37,7 +37,15 @@ export function Result({r, index, editScore}) {
         if(r.games_won === undefined || r.games_won === null) {
             return ""
         }
-        
+        if(tournament.team_size) {
+            if(tournament.entry_mode == 'T') {
+                return tournament.team_size - r.games_won
+            }
+            else {
+                const played = r.boards?.length;
+                return played - r.games_won;
+            }
+        }
         return 1 - r.games_won;
     }
 
