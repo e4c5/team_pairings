@@ -56,7 +56,10 @@ def add_team_members(tournament):
 
 
 def random_results(tournament):
-    """All pending results in will be filled randomly"""
+    """All pending results in will be filled randomly.
+    Args: tournament : the tournament for which results need to be added
+    Returns: the round for which results were added
+    """
     rnd = tournament.rounds.filter(paired=True).order_by('-round_no')[0]
     fake = Faker()
     for result in rnd.results.select_related('p1','p2').all():
@@ -98,7 +101,7 @@ def random_results(tournament):
                         result.score1, result.score2 = result.score2, result.score1
 
                 result.save()
-
+    return rnd
 
 def truncate_rounds(tournament, number):
     """Truncate the tournament

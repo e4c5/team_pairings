@@ -17,10 +17,10 @@ class BasicTests(APITestCase):
 
     def setUp(self) -> None:
         self.t1 = models.Tournament.objects.create(name='Richmond Showdown U20', start_date='2023-02-25',
-            rated=False, team_size=5, entry_mode='T', num_rounds=5)
+            rated=False, team_size=5, entry_mode='T', num_rounds=5, private=False)
 
         self.t2 = models.Tournament.objects.create(name='Richmond Showdown U15', start_date='2023-02-25',
-            rated=False, team_size=5, entry_mode='P', num_rounds=5)
+            rated=False, team_size=5, entry_mode='P', num_rounds=5, private=False)
         user = User.objects.create(username='testuser')
         user.set_password('12345')
         user.save()

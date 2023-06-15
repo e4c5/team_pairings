@@ -7,11 +7,12 @@ from django.db import connection, transaction
 from django.db.models import Q
 from channels.layers import get_channel_layer
 
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
-from tournament import models
+from tournament import models, tools
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
         TournamentRoundSerializer, ResultSerializer, BoardResultSerializer)
 
@@ -116,7 +117,12 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     # unpair helper will broadcast
                     self.unpair_helper(rnd)
                     request.tournament.update_all_standings()
-
+                    broadcast({
+                                        "tournament_id": request.tournament.id,
+                                        "results": get_results(request.tournament, rnd.id),
+                                        "round_no": rnd.round_no
+                                    }
+                            )
 
                     return Response({'status': 'ok'})
                 else:
@@ -177,6 +183,21 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     "tournament_id": rnd.tournament_id
                 }
         )
+
+    @action(detail=True, methods=['post'])
+    def random_fill(self, request, **kwargs):
+        if request.tournament.private:
+            rnd = tools.random_results(request.tournament)
+            broadcast({
+                    "tournament_id": request.tournament.id,
+                    "results": get_results(request.tournament, rnd.id),
+                    "round_no": rnd.round_no
+                }
+            )
+            
+            return Response({'status': 'ok'})
+        raise PermissionDenied("Not allowed for public events")
+    
 
     @action(detail=True, methods=['get'])
     def boards(self, request, **kwargs):

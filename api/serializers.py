@@ -33,7 +33,7 @@ class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
         fields = ['id', 'start_date','name','rated','slug',
-                   'is_editable', 'num_rounds']
+                   'is_editable', 'num_rounds', 'private']
 
     
 class BoardResultSerializer(serializers.Serializer):

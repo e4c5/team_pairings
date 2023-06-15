@@ -316,6 +316,27 @@ export function Round(props) {
         return <IndividualTournamentScorer current={current} dispatch={dispatch} ref={ref} round={round} />
     }
 
+    /**
+     * Fill a tournament with random data.
+     * Available only for private tournaments as a means of carrying out a 
+     * dray run.
+     */
+    function randomFill() {
+
+        fetch(`/api/tournament/${tournament.id}/random_fill/`,
+            {
+                method: 'POST', 'credentials': 'same-origin',
+                headers:
+                {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+            }).then(resp => resp.json()).then(json => {
+                if (json.status !== "ok") {
+                    setError(json.message)
+                }
+            })
+    }
 
     const roundDetails = getRoundDetails()
     if (roundDetails?.paired) {
@@ -339,7 +360,15 @@ export function Round(props) {
                                 Truncate
                             </button>
                         }
+                        
                     </div>
+                    { tournament.private && 
+                        <div className='col'>
+                            <button className='btn btn-light'
+                                 onClick={randomFill}>Random Fill
+                            </button>
+                        </div>
+                    }
                 </div>
                 <div>{error}</div>
                 <Confirm code={code} onCodeChange={e => setCode(e.target.value)} display={modal}
@@ -406,7 +435,7 @@ export function Rounds() {
                                 <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
                     }
                 </div>
-                <div className='col-sm-2'>
+                <div className='col-sm-1'>
                     <Link to={`/${tournament.slug}/boards`}>
                                 <button className='btn btn-primary me-1'>Boards</button></Link>
                 </div>
