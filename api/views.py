@@ -48,7 +48,6 @@ class TournamentViewSet(viewsets.ModelViewSet):
         '''Creates a new tournament'''
         t = serializer.save()
         models.Director.objects.create(tournament=t, user=self.request.user)
-
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -203,7 +202,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
     def boards(self, request, **kwargs):
         query = """
             with boards as (select * from tournament_boardresult 
-                where round_id in (select round_id from tournament_tournamentround tt where tournament_id = %s)
+                where round_id in (select id from tournament_tournamentround tt where tournament_id = %s)
             )
             select json_agg(results) from (
                 select board, team_id, "name", SUM(games_won) games_won, sum(margin) margin from 
@@ -237,10 +236,10 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 order by board, games_won desc, margin desc
             ) results"""
 
-    
+
         with connection.cursor() as cursor:
             cursor.execute(query, [request.tournament.id])
-            return Response(cursor.fetchone()[0])
+            return Response(cursor.fetchone()[0] or [])
         
 
     @action(detail=True, methods=['post'])

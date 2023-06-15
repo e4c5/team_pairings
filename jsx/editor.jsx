@@ -7,7 +7,7 @@ import { Participants } from './participant.jsx';
 export function TournamentEditor() {
     const [tournament, setTournament] = useState({
         name: '', start_date: '', num_rounds: 0,
-        type: 'S'
+        entry_mode: 'S', 'private': true, team_size: 0
     })
 
     const ref = useRef(null)
@@ -54,12 +54,19 @@ export function TournamentEditor() {
                         <div>
                             Tournament Type
                             <select value={tournament.type}  className="form-control"
-                                onChange={e => setTournament({...tournament, type: e.target.value})} >
+                                onChange={e => setTournament({...tournament, entry_mode: e.target.value})} >
                                     <option value='S'>Singles</option>
                                     <option value='T'>Team</option>
                                     <option value='P'>Team with board tracking</option>
                             </select>
                         </div>
+                        { tournament.entry_mode !== 'S' && 
+                            <div>
+                               Team size
+                                <input type="number" value={tournament.team_size}  className="form-control"
+                                    onChange={e => setTournament({...tournament, team_size: e.target.value})} />
+                            </div>
+                        }
                         <div>
                             <button className="btn btn-primary" 
                                 disabled={ tournament.name == '' || tournament.num_rounds == 0 || ref.current.value == '' }

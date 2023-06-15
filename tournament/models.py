@@ -37,7 +37,7 @@ class Tournament(models.Model):
     num_rounds = models.IntegerField()
 
     # this is tournament a private one?
-    private = models.BooleanField(default=True)
+    private = models.BooleanField(default=True, blank=True, null=False)
 
     @classmethod    
     def tournament_slug(self, name):

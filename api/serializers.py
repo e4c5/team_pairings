@@ -24,6 +24,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
 class TournamentSerializer(serializers.ModelSerializer):
     is_editable = serializers.SerializerMethodField()
+    private = serializers.BooleanField(required=False, default=True)
 
     def get_is_editable(self, obj):
         if hasattr(obj, 'editable'):
@@ -32,8 +33,8 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = ['id', 'start_date','name','rated','slug',
-                   'is_editable', 'num_rounds', 'private']
+        fields = ['id', 'start_date','name','rated','slug', 'entry_mode',
+                   'is_editable', 'num_rounds', 'private', 'team_size']
 
     
 class BoardResultSerializer(serializers.Serializer):

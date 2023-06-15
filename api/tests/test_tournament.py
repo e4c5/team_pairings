@@ -45,9 +45,39 @@ class BasicTests(APITestCase):
         resp = self.client.get('/api/tournament/')
 
         resp = self.client.post('/api/tournament/', {
-            'name': 'joust', 'num_rounds': 10, 'start_date': '2023-04-23'
+            'name': 'joust', 'num_rounds': 10, 'start_date': '2023-04-23', 
+            'entry_mode': 'S'
         })
         self.assertEquals(resp.status_code, 201, resp.data)
+
+        t = models.Tournament.objects.order_by('-pk')[0]
+        self.assertEqual(t.name,'joust')
+        self.assertTrue(t.private)
+        self.assertEqual(t.entry_mode, 'S')
+
+        resp = self.client.post('/api/tournament/', {
+            'name': 'Richmond', 'num_rounds': 10, 'start_date': '2023-04-23',
+            'entry_mode': 'P'
+        })
+        self.assertEquals(resp.status_code, 201, resp.data)
+
+        t = models.Tournament.objects.order_by('-pk')[0]
+        self.assertEqual(t.name,'Richmond')
+        self.assertTrue(t.private)
+        # does not work because team size is not set
+        self.assertEqual(t.entry_mode, 'S')
+
+
+        resp = self.client.post('/api/tournament/', {
+            'name': 'Richmond Teams', 'num_rounds': 10, 'start_date': '2023-04-23',
+            'entry_mode': 'P', 'team_size': 5
+        })
+        self.assertEquals(resp.status_code, 201, resp.data)
+
+        t = models.Tournament.objects.order_by('-pk')[0]
+        self.assertEqual(t.name,'Richmond Teams')
+        self.assertTrue(t.private)
+        self.assertEqual(t.entry_mode, 'P')
 
 
     def test_retrieve(self):
