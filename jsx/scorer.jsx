@@ -234,31 +234,32 @@ class _ScoreByPlayer extends Editor {
         const { current, dispatch, tournament } = this.props;
         const scores = []
         for(let i = 0 ; i < tournament.team_size ; i++) {
-            const board = current?.boards?.[i]
+            scores.push(
+                <tr key={ i + 1 }>
+                    <td>{ i + 1 }</td><td></td><td></td>
+                </tr>
+            )
+        }
+        current?.boards?.forEach(board => {
             if(current.resultId && board) {
                 if(current.p1.id == board.team1_id) {
-                    scores.push(
-                        <tr key={i}>
-                            <td>{ i + 1 }</td><td>{board.score1}</td><td>{board.score2}</td>
+                    scores[board.board -1] =(
+                        <tr key={board.board}>
+                            <td>{ board.board }</td><td>{board.score1}</td><td>{board.score2}</td>
                         </tr>
                     )
+                    
                 }
                 else {
-                    scores.push(
-                        <tr key={i}>
-                            <td>{ i + 1 }</td><td>{board.score2}</td><td>{board.score1}</td>
+                    scores[board.board -1] =(
+                        <tr key={board.board}>
+                            <td>{ board.board }</td><td>{board.score2}</td><td>{board.score1}</td>
                         </tr>
                     )
                 }
             }
-            else {
-                scores.push(
-                    <tr key={i}>
-                        <td>{ i + 1 }</td><td></td><td></td>
-                    </tr>
-                )
-            }
-        }
+        })
+            
         return <tbody>{ scores }</tbody>
     }
     render() {    
