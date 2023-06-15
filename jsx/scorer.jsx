@@ -320,11 +320,7 @@ class _ScoreByPlayer extends Editor {
     }
 }
 
-/**
- * Scpromg for none team tournaments
- * @returns 
- */
-class _IndividualTournamentScorer extends Editor {
+class _TSHStyle extends Editor {
     constructor(props) {
         super(props)
         this.state = {tsh: '', error: ''}
@@ -384,7 +380,7 @@ class _IndividualTournamentScorer extends Editor {
                         }
                     }
                 })
-                if(match) {
+                if(match && found) {
                     if(match.p1.name.toLowerCase().includes(parts[0])) {
                         match.score1 = Number(parts[1])
                         match.score2 = Number(parts[3])
@@ -406,6 +402,9 @@ class _IndividualTournamentScorer extends Editor {
                     this.postScore(match, 
                         json => {this.setState({tsh: '', error: ''})})
                 }
+                else if (!found){
+                    this.setState({error: 'No matching entry'})    
+                }
             }
             else {
                 this.setState({error: 'huh?'})
@@ -414,9 +413,33 @@ class _IndividualTournamentScorer extends Editor {
     }
 
     render() {
-        const { current, dispatch, tournament } = this.props;
         return (
             <div>
+                <div className='row mt-1'>
+                        <div className='col-12'>
+                            <input type='text' className='form-control' onKeyDown={e => this.tshAction(e)}
+                                placeholder='TSH style data entry'
+                                value={this.state.tsh} onChange={e => this.setState({tsh: e.target.value}) } />
+                        </div>
+                    </div>
+                    <div className='row mt-1 mb-1'>
+                        <div className='col-12'>
+                            { this.state.error }
+                        </div>
+                </div>
+            </div>
+        )
+    }
+}
+/**
+ * Scorer for individual events
+ * @returns 
+ */
+class _IndividualTournamentScorer extends Editor {
+
+    render() {
+        const { current, dispatch, tournament } = this.props;
+        return (
                 <div className='row'>
                     <div className='col-md col-sm-2'>
                         <Autocomplete
@@ -460,22 +483,10 @@ class _IndividualTournamentScorer extends Editor {
                         </button>
                     </div>
                 </div>
-                <div className='row mt-1'>
-                    <div className='col-12'>
-                        <input type='text' className='form-control' onKeyDown={e => this.tshAction(e)}
-                            placeholder='TSH style data entry'
-                            value={this.state.tsh} onChange={e => this.setState({tsh: e.target.value}) } />
-                    </div>
-                </div>
-                <div className='row mt-1 mb-1'>
-                    <div className='col-12'>
-                        { this.state.error }
-                    </div>
-                </div>
-            </div>
         )
     }
 }
+
 
 export function ScoreByPlayer(props) {
     const tournament = useTournament();
@@ -498,4 +509,12 @@ export const IndividualTournamentScorer = forwardRef((props, ref) => {
     return <_IndividualTournamentScorer tournament={tournament} {...props} forward={ref} />
 });
 
-console.log('scorer 0.02')
+export function TSHStyle(props) {
+    const tournament = useTournament();
+    const tournamentDispatch = useTournamentDispatch()
+
+    return <_TSHStyle tournament={tournament} {...props} />
+}
+
+
+console.log('scorer 0.03')

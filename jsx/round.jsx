@@ -5,7 +5,7 @@ import getCookie from './cookie.js';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import { ResultTable } from './result.jsx';
 import { Confirm } from './dialog.js';
-import { ScoreByTeam, ScoreByPlayer, IndividualTournamentScorer } from './scorer.jsx'
+import { ScoreByTeam, ScoreByPlayer, IndividualTournamentScorer, TSHStyle } from './scorer.jsx'
 
 /**
  * Initial value for the result entry form
@@ -313,7 +313,12 @@ export function Round(props) {
             return <ScoreByPlayer current={current} dispatch={dispatch} round={round} />
         }
         
-        return <IndividualTournamentScorer current={current} dispatch={dispatch} ref={ref} round={round} />
+        return (
+            <>
+                <IndividualTournamentScorer current={current} dispatch={dispatch} ref={ref} round={round} />
+                <TSHStyle current={current} dispatch={dispatch} round={round} />
+            </>
+        )
     }
 
     /**

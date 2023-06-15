@@ -260,6 +260,15 @@ class TournamentViewSet(viewsets.ModelViewSet):
         else:
             return Response({"status": "error", "message": "Not paired"})
        
+
+    @action(detail=True, methods=['post'])
+    def tsh(self, request, pk, *args, **kwargs):
+        """Manual pairing or unpairing in TSH style"""
+        rnd = models.TournamentRound.objects.get(pk=pk)
+        cmd = request.data.get('command')
+        if cmd == 'pair':
+            pass
+
     @action(detail=True, methods=['post','get','put'])
     def result(self, request, pk, *args, **kwargs):
         """Update or retrieve a result.
