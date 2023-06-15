@@ -57,8 +57,12 @@ class BasicTests(APITestCase, Helper):
         self.pair_with_repeats()
 
     def pair_with_repeats(self):
+        """A pairing setup with repeats.
+        First couple of rounds can be paired without repeats but pairing for
+        fourth and fifth rounds will fail wtihout repeats."""
         self.assertIsNone(self.t2.get_last_completed())
-        self.add_players(self.t2, 4)
+        players = self.add_players(self.t2, 4)
+
         rnd1 = TournamentRound.objects.filter(
             tournament=self.t2).get(round_no=1)
         self.speed_pair(rnd1)
@@ -92,10 +96,17 @@ class BasicTests(APITestCase, Helper):
         self.speed_pair(rnd5)
         self.assertEqual(Result.objects.count(), 10)
 
+        # lets see what the participant end point looks like
+        resp = self.client.get(f'/api/tournament/{self.t2.id}/participant/{players[0].id}/')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(len(resp.data['results']), 5)
+
         # lets truncate everything
         truncate_rounds(self.t2, 0)
         self.assertEqual(0, Result.objects.filter(round__tournament=self.t2).count())
-
+        resp = self.client.get(f'/api/tournament/{self.t2.id}/participant/{players[0].id}/')
+        self.assertEquals(resp.status_code, 200)
+        self.assertIsNone(resp.data['results'])
 
     def test_pair_empty(self):
         """Cannot pair a tournament unless you have participants in it!"""
@@ -405,7 +416,8 @@ class ByesTests(APITestCase, Helper):
         self.assertTrue('Bye' == result.p1.name or 'Bye' == result.p2.name)
 
     def test_late_comer(self):
-        add_participants(self.t1, True, 4)
+        """Add a playre to the event after it has started."""
+        teams = add_participants(self.t1, True, 4)
         rnd1 = TournamentRound.objects.filter(
             tournament=self.t1).get(round_no=1)
         rnd2 = TournamentRound.objects.filter(
@@ -420,6 +432,12 @@ class ByesTests(APITestCase, Helper):
         self.assertEquals(Result.objects.count(), 6)
         add_participants(self.t1, True, 1)
         self.assertEquals(Result.objects.count(), 9)
+        
+        resp = self.client.get(f'/api/tournament/{self.t2.id}/participant/{teams[0].id}/')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(len(resp.data['results']), 3)
+        self.assertIsNone(resp.data['results'][0]['boards'])
+
 
     def test_two_player(self):
         add_participants(self.t1, True, 4)
@@ -637,6 +655,12 @@ class DataEntryTests(APITestCase, Helper):
 
         self.assertEquals(BoardResult.objects.count(), 25)
         self.assertEquals(BoardResult.objects.exclude(score1=None).count(), 1)
+
+        resp = self.client.get(f'/api/tournament/{self.t2.id}/participant/{r.p1_id}/')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(len(resp.data['results']), 1)
+        self.assertEquals(len(resp.data['results'][0]['boards']), 1)
+
 
     @patch('api.views.broadcast')
     def test_enter_results_by_team(self, m):

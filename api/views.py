@@ -178,6 +178,50 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 }
         )
 
+    @action(detail=True, methods=['get'])
+    def boards(self, request, **kwargs):
+        query = """
+            with boards as (select * from tournament_boardresult 
+                where round_id in (select round_id from tournament_tournamentround tt where tournament_id = %s)
+            )
+            select json_agg(results) from (
+                select board, team_id, "name", SUM(games_won) games_won, sum(margin) margin from 
+                    (SELECT
+                        board,
+                        team1_id AS team_id,
+                        SUM(CASE WHEN score1 > score2 THEN 1 when score1 = score2 and score1 != 0 then 0.5 ELSE 0 END) AS games_won,
+                        SUM(score1 - score2) AS margin
+                    FROM
+                        boards
+                    GROUP BY
+                        board,
+                        team1_id
+                    UNION
+                    SELECT
+                        board,
+                        team2_id AS team_id,
+                        SUM(CASE WHEN score2 > score1 THEN 1 when score1 = score2 and score1 != 0 then 0.5 ELSE 0 END) AS games_won,
+                        SUM(score2 - score1) AS margin
+                    FROM
+                        boards
+                    GROUP BY
+                        board,
+                        team2_id
+                    ) a 
+                    inner join tournament_participant tp on tp.id = team_id 
+                    where "name" != 'Bye'
+                    GROUP BY
+                        board,
+                        tp.id, team_id
+                order by board, games_won desc, margin desc
+            ) results"""
+
+    
+        with connection.cursor() as cursor:
+            cursor.execute(query, [request.tournament.id])
+            return Response(cursor.fetchone()[0])
+        
+
     @action(detail=True, methods=['post'])
     def unpair(self, request, pk=None, **kwargs):
         """Unpair a round if it does not have any results"""

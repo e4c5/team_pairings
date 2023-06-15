@@ -9,6 +9,7 @@ import {
 import { Participant} from "./participant.jsx"
 import { Tournament, Tournaments } from "./tournament.jsx"
 import { Round } from "./round.jsx"
+import { Boards } from './boards.jsx';
 import { TournamentEditor } from './editor.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 
@@ -147,7 +148,7 @@ export default function App() {
                 <Route path=""
                     element={<Tournament tournaments={tournaments} />}
                 />
-
+                <Route path="boards" element={<Boards />} />
                 <Route path=":id" element={<Participant />} />
                 <Route path="round/:id" element={<Round />} />
             </Route>

@@ -4,7 +4,7 @@ import {
     useParams,
     Link,
 } from "react-router-dom";
-import { ResultTable , ResultList} from './result.jsx';
+import { ResultTable , TeamResultTable} from './result.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
@@ -195,7 +195,7 @@ export function Participant() {
                 // will be in the same order as the round number. Thats because
                 // when a tournament is created all it's rounds are created at
                 // the same time and in order.
-                json.results.sort( (a, b) => a.round_id - b.round_id)
+                json.results?.sort( (a, b) => a.round_id - b.round_id)
                 setParticipant(json)
             })
         }
@@ -211,7 +211,7 @@ export function Participant() {
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
                 <h3>{participant.name}</h3>
                 {tournament?.entry_mode == 'P' 
-                    ? <ResultList results={participant.results} teamId={participant.id} />  
+                    ? <TeamResultTable results={participant.results} teamId={participant.id} />  
                     : <ResultTable results={participant.results} editScore={editScore} />
                 }
 

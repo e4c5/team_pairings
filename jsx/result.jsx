@@ -224,7 +224,7 @@ export function ResultTable({editScore, results}) {
  * @param {*} param0 
  * @returns 
  */
-export function ResultList({results, teamId}) {
+export function TeamResultTable({results, teamId}) {
     const tournament = useTournament()
     if(results && results.length) {
         return (
@@ -247,6 +247,7 @@ export function ResultList({results, teamId}) {
             </table>
         )
     }
+    
     return null
 }
 

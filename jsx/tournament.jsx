@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import getCookie from './cookie.js';
 import { Participants } from './participant.jsx';
 import { Rounds } from './round.jsx';
+import { Boards } from './boards.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 
 export function Tournament(props) {
@@ -62,7 +63,7 @@ export function Tournament(props) {
             return (
                 
                 <div className='row align-middle'>
-                    <div className='col'>
+                    <div className='col-md-5 col-sm-5'>
                         <input className={ `form-control ${name.error ? 'is-invalid' : ''}` } 
                             placeholder='Name' data-test-id='name'
                             value={name.value} onChange={ e => handleChange(e, 'name')} />
@@ -70,7 +71,7 @@ export function Tournament(props) {
                             {name.error}
                         </div>
                     </div>
-                    <div className='col'>
+                    <div className='col-md-5 col-sm-5'>
                         <input className={ `form-control ${rating.error ? 'is-invalid' : ''}` } 
                             placeholder='rating' 
                             type='number' data-test-id='rating'
@@ -79,7 +80,7 @@ export function Tournament(props) {
                             {rating.error}
                         </div>
                     </div>
-                    <div className='col'>
+                    <div className='col-md-1 col-sm-1'>
                         <button className='btn btn-secondary' onClick = { e => add(e)} data-test-id='add'>
                             <i className='bi-plus' ></i>
                         </button>

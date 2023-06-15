@@ -55,7 +55,9 @@ export function TournamentEditor() {
                             Tournament Type
                             <select value={tournament.type}  className="form-control"
                                 onChange={e => setTournament({...tournament, type: e.target.value})} >
-                                    <option></option>
+                                    <option value='S'>Singles</option>
+                                    <option value='T'>Team</option>
+                                    <option value='P'>Team with board tracking</option>
                             </select>
                         </div>
                         <div>

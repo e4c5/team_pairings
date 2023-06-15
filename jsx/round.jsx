@@ -395,18 +395,38 @@ export function Rounds() {
     const tournament = useTournament();
     const dispatch = useTournamentDispatch()
 
-    return (
-        <div className='row mt-3'>
-            <div className='col-sm-2'><h3>Rounds: </h3></div>
-            <div className='col-sm-10 btn-group' aria-label="outlined primary button group">
-                {
-                    tournament?.rounds?.map(r =>
-                        <Link to={`/${tournament.slug}/round/${r.round_no}`} key={r.round_no}>
-                            <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
-                }
+    if (tournament?.entry_mode == 'P') {
+        return (
+            <div className='row mt-3'>
+                <div className='col-sm-2'><h3>Rounds: </h3></div>
+                <div className='col-sm-9 btn-group' aria-label="outlined primary button group">
+                    {
+                        tournament?.rounds?.map(r =>
+                            <Link to={`/${tournament.slug}/round/${r.round_no}`} key={r.round_no}>
+                                <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
+                    }
+                </div>
+                <div className='col-sm-2'>
+                    <Link to={`/${tournament.slug}/boards`}>
+                                <button className='btn btn-primary me-1'>Boards</button></Link>
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
+    else {
+        return (
+            <div className='row mt-3'>
+                <div className='col-sm-2'><h3>Rounds: </h3></div>
+                <div className='col-sm-10 btn-group' aria-label="outlined primary button group">
+                    {
+                        tournament?.rounds?.map(r =>
+                            <Link to={`/${tournament.slug}/round/${r.round_no}`} key={r.round_no}>
+                                <button className='btn btn-primary me-1'>{r.round_no}</button></Link>)
+                    }
+                </div>
+            </div>
+        )
+    }
 }
 
 console.log('Rounds 0.03.1')
