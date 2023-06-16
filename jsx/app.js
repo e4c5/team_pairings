@@ -36,7 +36,7 @@ export default function App() {
     const [tournaments, setTournaments] = useState()
 
     const tournament = useTournament()
-    const dispatch = useTournamentDispatch();
+    const tournamentDispatch = useTournamentDispatch();
     const navigate = useNavigate()
 
     const [ws, setWs] = useState()
@@ -54,33 +54,34 @@ export default function App() {
         ws.onmessage = function (e) {
             const obj = JSON.parse(e.data)
             console.log(obj)
+            
             if (obj.participant) {
                 // add a new participant to the event
-                dispatch(
-                    { type: 'editParticipant', participant: obj.participant }
+                tournamentDispatch(
+                    { type: 'editParticipant', participant: obj.participant, tid: obj.tournament_id }
                 )
             }
             if (obj.participants) {
                 // replace all the participants with new data
-                dispatch(
-                    { type: 'participants', participants: obj.participants }
+                tournamentDispatch(
+                    { type: 'participants', participants: obj.participants, tid: obj.tournament_id }
                 )
             }
             if (obj.results) {
                 // replace the results for the given round
                 if (obj.round_no) {
-                    dispatch(
+                    tournamentDispatch(
                         {
                             type: 'updateResult', result: obj.results,
-                            round: obj.round_no -1
+                            round: obj.round_no -1, tid: obj.tournament_id
                         }
                     )
                 }
             }
             if (obj.round) {
                 // update a reound
-                dispatch(
-                    { type: 'editRound', round: obj.round }
+                tournamentDispatch(
+                    { type: 'editRound', round: obj.round, tid: obj.tournament_id }
                 )
 
             }
@@ -121,7 +122,7 @@ export default function App() {
                         if (t.slug == slug) {
                             fetch(`/api/tournament/${t.id}/`).then(resp => resp.json()
                             ).then(json => {
-                                dispatch({ type: 'replace', value: json })
+                                tournamentDispatch({ type: 'replace', value: json })
                             })
                         }
                     })

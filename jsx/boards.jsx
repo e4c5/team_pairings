@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTournament, useTournamentDispatch } from './context.jsx';
+import { useTournament } from './context.jsx';
 import { Link } from "react-router-dom";
 
 export function Boards() {

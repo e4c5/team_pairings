@@ -83,9 +83,9 @@ class Tournament(models.Model):
         elif self.entry_mode == Tournament.BY_PLAYER:
             # team tournament where results for each individual player is tracked
             rnd = result.round
+            mid = self.team_size // 2
             if result.p2.name == 'Bye':
                 # team1 1 got a bye
-                mid = self.team_size // 2
                 for i in range(self.team_size):
                     b = BoardResult.objects.get(
                         Q(round=rnd) & Q(team1=result.p1) & Q(team2=result.p2) & Q(board=i+1)

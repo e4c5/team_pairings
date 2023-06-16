@@ -11,7 +11,7 @@ export function Tournament(props) {
     const params = useParams()
     const [name, setName] = useState({value: '', error: ''})
     const [rating, setRating] = useState({value: '', error: ''})
-    const dispatch = useTournamentDispatch()
+    const tournamentDispatch = useTournamentDispatch()
     const tournament = useTournament()
 
     useEffect(() => {
@@ -20,7 +20,7 @@ export function Tournament(props) {
                 if(t.slug == params.slug) {
                     fetch(`/api/tournament/${t.id}/`).then(resp=>resp.json()
                     ).then(json=>{
-                        dispatch({type: 'replace', value: json})                
+                        tournamentDispatch({type: 'replace', value: json})                
                     })
                 }
             })    

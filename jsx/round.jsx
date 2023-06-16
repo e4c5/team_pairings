@@ -158,7 +158,8 @@ export function Round(props) {
         ).then(resp => resp.json()
         ).then(json => {
             tournamentDispatch(
-                { type: 'updateResult', round: roundDetails.round_no - 1, result: json }
+                { type: 'updateResult', tid: tournament.id,
+                    round: roundDetails.round_no - 1, result: json }
             )
             //updatePending(json)
         })
@@ -179,7 +180,7 @@ export function Round(props) {
                 names.push(e.p2.name)
             }
         })
-        dispatch({ type: 'pending', names: names })
+        dispatch({ type: 'pending', names: names , tid: tournament.id})
     }
     /**
      * Pair this round.
@@ -427,7 +428,6 @@ export function Round(props) {
 
 export function Rounds() {
     const tournament = useTournament();
-    const dispatch = useTournamentDispatch()
 
     if (tournament?.entry_mode == 'P') {
         return (

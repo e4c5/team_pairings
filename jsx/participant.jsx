@@ -33,7 +33,7 @@ const team = [
  */
 export function Participants(props) {
     const tournament = useTournament();
-    const dispatch = useTournamentDispatch();
+    const tournamentDispatch = useTournamentDispatch();
 
     const auth = document.getElementById('hh') && document.getElementById('hh').value
     const columns = tournament?.team_size ? [...team ] : [...individual]
@@ -61,7 +61,7 @@ export function Participants(props) {
                     "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify(p)
-            }).then(resp => resp.json()).then(json => dispatch({ type: 'editParticipant', participant: json }))
+            }).then(resp => resp.json()).then(json => tournamentDispatch({ type: 'editParticipant', participant: json }))
     }
 
     /**
@@ -82,7 +82,9 @@ export function Participants(props) {
                 body: JSON.stringify(p)
             }).then(resp => {
                 if (resp.ok) {
-                    dispatch({ type: 'deleteParticipant', participant: p })
+                    tournamentDispatch(
+                        { type: 'deleteParticipant', participant: p, tid: tournament.id }
+                    )
                 }
             })
     }
@@ -95,10 +97,10 @@ export function Participants(props) {
         const order = tournament?.order || 'rank'
 
         if (field == order) {
-            dispatch({ type: 'sort', field: `-${field}` })
+            tournamentDispatch({ type: 'sort', field: `-${field}` , tid: tournament.id})
         }
         else {
-            dispatch({ type: 'sort', field: field })
+            tournamentDispatch({ type: 'sort', field: field, tid: tournament.id })
         }
     }
 

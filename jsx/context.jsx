@@ -72,48 +72,58 @@ export function tournamentReducer(state, action) {
     switch (type) {
         case 'participants':
             // replace all the participants with the new once
-            return {...state, 
-                participants: sortTournament(state, action.participants)
+            if(state?.id == action.tid) {
+                return {...state, 
+                    participants: sortTournament(state, action.participants)
+                }
             }
-
+            return state
         case 'addParticipant': {
             // add a single participant
-            if (state.participants === null) {
-                return { ...state, participants: [action.participant] }
+            if(state?.id == action.tid) {
+                if (state.participants === null) {
+                    return { ...state, participants: [action.participant] }
+                }
+                state.participants.push(action.participant)
+                return { ...state, 
+                    participants: sortTournament(state, state.participants) 
+                }
             }
-            state.participants.push(action.participant)
-            return { ...state, 
-                participants: sortTournament(state, state.participants) 
-            }
+            return state
         }
         case 'editParticipant': {
             // replace a single participant
-            let matched = false;
-            
-            if (state.participants === null) {
-                return { ...state, participants: [action.participant] }
-            }
-
-            const p = state.participants.map(p => {
-                if (p.id == action.participant.id) {
-                    matched = true;
-                    return action.participant
+            if(state?.id == action.tid) {
+                let matched = false;
+                
+                if (state.participants === null) {
+                    return { ...state, participants: [action.participant] }
                 }
-                return p
-            })
-            if(matched === false) {
-                return {...state,
-                     participants: [...state.participants, action.participant]}
+
+                const p = state.participants.map(p => {
+                    if (p.id == action.participant.id) {
+                        matched = true;
+                        return action.participant
+                    }
+                    return p
+                })
+                if(matched === false) {
+                    return {...state,
+                        participants: [...state.participants, action.participant]}
+                }
+                return { ...state, participants: sortTournament(state, p) }
             }
-            return { ...state, participants: sortTournament(state, p) }
+            return state
         }
         case 'deleteParticipant': {
             // delete a single participant
-            if (state.participants === null) {
-                return state
+            if(state?.id == action.tid) {
+                if (state.participants === null) {
+                    return state
+                }
+                const p = state.participants.filter(p => p.id != action.participant.id)
+                return { ...state, participants: p }
             }
-            const p = state.participants.filter(p => p.id != action.participant.id)
-            return { ...state, participants: p }
         }
 
         case 'changed': {
@@ -132,54 +142,68 @@ export function tournamentReducer(state, action) {
             // results are maintained as an array referenced by round number 
             // but round numbers start from one. The caller needs to make sure
             // that round numbers are adjusted to zero based.
-
-            const round = action.round
-            if(state.results === undefined) {
-                const results = []
-                for(let i = 0 ; i < state.num_rounds ; i++) {
-                    results.push([])
+            if(state?.id == action.tid) {
+                const round = action.round
+                if(state.results === undefined) {
+                    const results = []
+                    for(let i = 0 ; i < state.num_rounds ; i++) {
+                        results.push([])
+                    }
+                    results[round] = action.result
+                    return {...state, results: results}
                 }
-                results[round] = action.result
-                return {...state, results: results}
+                const res = [...state.results]
+                res[round] = action.result
+                
+                const p = new Set()
+                action.result.forEach(r => {
+                    p.add(r.p1)
+                    p.add(r.p2)
+                })
+                
+                return { ...state, results: res, 
+                    participants: sortTournament(state, Array.from(p))
+                }
             }
-            const res = [...state.results]
-            res[round] = action.result
-            
-            const p = new Set()
-            action.result.forEach(r => {
-                p.add(r.p1)
-                p.add(r.p2)
-            })
-            
-            return { ...state, results: res, 
-                participants: sortTournament(state, Array.from(p))
-            }
+            return state
         }
 
         case 'addRound': {
             // is this used?
-            const rounds = [...state.rounds, action.round]
-            return { ...state, rounds: rounds }
+            if(state?.id == action.tid) {
+                const rounds = [...state.rounds, action.round]
+                return { ...state, rounds: rounds }
+            }
+            return state
         }
 
         case 'editRound':
-            const r = state.rounds.map(p => {
-                if (p.id == action.round.id) {
-                    return action.round
-                }
-                return p
-            })
-            return { ...state, rounds: r }
+            if(state?.id == action.tid) {
+                const r = state.rounds.map(p => {
+                    if (p.id == action.round.id) {
+                        return action.round
+                    }
+                    return p
+                })
+                return { ...state, rounds: r }
+            }
+            return state
 
         case 'sort': 
-            state.order = action.field
-            return {...state, order: action.field, 
-                participants: sortTournament(state, state.participants)
+            if(state?.id == action.tid) {
+                state.order = action.field
+                return {...state, order: action.field, 
+                    participants: sortTournament(state, state.participants)
+                }
             }
+            return state
         case 'reset':
         case 'replace':
-            console.log('Warning replace/reset is deprecated')
-            return { ...action.value }
+            if(state?.id == action.tid || state === null || state.id == null) {
+                console.log('Warning replace/reset is deprecated')
+                return { ...action.value }
+            }
+            return state
 
         default: {
             throw Error('Unknown action: ' + action.type);
