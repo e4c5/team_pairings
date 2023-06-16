@@ -44,16 +44,18 @@ class Helper:
         random_results(tournament)
 
     
-    def speed_pair(self, rnd):
+    def speed_pair(self, rnd, add_results = True):
         """Pair using swiss and add results"""
         if rnd.pairing_system == TournamentRound.KOTH:
             sp = koth.Koth(rnd)
             sp.make_it()
             sp.save()
-            self.add_results(rnd.tournament)
+            if add_results:
+                self.add_results(rnd.tournament)
 
         else:
             sp = swiss.SwissPairing(rnd)
             sp.make_it()
             sp.save()
-            self.add_results(rnd.tournament)
+            if add_results:
+                self.add_results(rnd.tournament)

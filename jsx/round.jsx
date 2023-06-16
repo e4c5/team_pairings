@@ -385,7 +385,7 @@ export function Round(props) {
     else {
         return (
             <div>
-                <h2>{tournament?.name}</h2>
+                <h2><Link to={`/${tournament?.slug}`}>{tournament?.name}</Link></h2>
                 This is a round that has not yet been paired
                 <table className='table'>
                     <tbody>

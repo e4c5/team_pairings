@@ -7,7 +7,7 @@ from django.db import connection, transaction
 from django.db.models import Q
 from channels.layers import get_channel_layer
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
@@ -71,7 +71,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
             select tt.*, 	
                 (select jsonb_agg(to_jsonb(parties)) 
                     FROM (
-                        select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc) as "pos", * 
+                        select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc, name) as "pos", * 
                         from tournament_participant parties 
                             where tournament_id = tt.id and name != 'Bye' and name != 'Absent'
                     ) parties
@@ -139,27 +139,32 @@ class TournamentViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             if models.Result.objects.filter(round_id=request.data['id']).exists():
                 return Response({'status': 'error', 'message': 'already paired'})
+            try:
+                rnd = models.TournamentRound.objects.get(id=request.data['id'])
+                count = rnd.tournament.participants.count()
+                if count < 2:
+                    return Response({'status': 'error',
+                        'message': 'A tournament needs at least two player'})
+                p = SwissPairing(rnd)
+                p.make_it()
+                results = p.save()
+                res_serializer = ResultSerializer(results, many=True)
+                rnd_serializer = TournamentRoundSerializer(rnd)
 
-            rnd = models.TournamentRound.objects.get(id=request.data['id'])
-            count = rnd.tournament.participants.count()
-            if count < 2:
-                return Response({'status': 'error',
-                    'message': 'A tournament needs at least two player'})
-            p = SwissPairing(rnd)
-            p.make_it()
-            results = p.save()
-            res_serializer = ResultSerializer(results, many=True)
-            rnd_serializer = TournamentRoundSerializer(rnd)
+                rnd.paired = True
+                rnd.save()
 
-            rnd.paired = True
-            rnd.save()
+                broadcast({
+                            "round": rnd_serializer.data,
+                            "results": res_serializer.data,
+                            "tournament_id": request.tournament.id
+                        }
+                )
+            except ValueError as e:
+                return Response(
+                    {'status': 'error', 'message': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST)
 
-            broadcast({
-                        "round": rnd_serializer.data,
-                        "results": res_serializer.data,
-                        "tournament_id": request.tournament.id
-                    }
-            )
             
         #for query in connection.queries:
         #    print(query)

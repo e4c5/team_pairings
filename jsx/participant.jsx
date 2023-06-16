@@ -138,7 +138,7 @@ export function Participants(props) {
             <tbody>
                 {tournament?.participants?.map((row, idx) => (
                     <tr key={row.id}>
-                        <td className="text-end">{row.pos}</td>
+                        <td className="text-end">{row.pos === undefined ? row.seed : row.pos }</td>
                         <td component="th" scope="row">
                             <Link to={`${row.id}`}>
                                 { tournament.team_size ? row.name : `${row.name} (#${row.seed})` }
@@ -157,7 +157,7 @@ export function Participants(props) {
                                 <div className='d-inline-flex'>
                                     <div className='form-check form-switch'>
                                         <input className="form-check-input" type="checkbox"
-                                            checked={row.offed != 0} onChange={e => toggleParticipant(e, idx)} />
+                                            checked={! row.offed } onChange={e => toggleParticipant(e, idx)} />
                                     </div>
                                     {!isStarted() &&
                                         <div className='form-col'>

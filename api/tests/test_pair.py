@@ -625,6 +625,40 @@ class DataEntryTests(APITestCase, Helper):
         return super().setUp()
 
     @patch('api.views.broadcast')
+    def test_random_fill(self, m):
+        """For private tournaments can do a random fill"""
+        self.add_players(self.t2, 10)
+        rnd1 = TournamentRound.objects.filter(
+            tournament=self.t2).get(round_no=1)
+        self.speed_pair(rnd1, add_results=False)
+        self.client.login(username='ashok', password='12345')
+        
+        resp = self.client.post(f'/api/tournament/{self.t2.id}/random_fill/')
+        self.assertEquals(200, resp.status_code, resp.data)
+
+        self.t2.private = False
+        self.t2.save()
+        resp = self.client.post(f'/api/tournament/{self.t2.id}/random_fill/')
+        self.assertEquals(403, resp.status_code, resp.data)
+
+    @patch('api.views.broadcast')
+    def test_random_board_standings(self, m):
+        """Test """
+        resp = self.client.get(f'/api/tournament/{self.t2.id}/boards/')
+        self.assertEquals(200, resp.status_code)
+        self.assertEquals([], resp.data)
+        rnd1 = TournamentRound.objects.filter(
+            tournament=self.t2).get(round_no=1)
+        
+        self.add_players(self.t2, 10)
+        self.speed_pair(rnd1)
+
+        resp = self.client.get(f'/api/tournament/{self.t2.id}/boards/')
+        self.assertEquals(200, resp.status_code)
+        self.assertEqual(50, len(resp.data))
+
+
+    @patch('api.views.broadcast')
     def test_enter_results_by_board(self, m):
         """Entering results by board should update standings"""
         self.add_players(self.t2, 10)
@@ -696,11 +730,22 @@ class DataEntryTests(APITestCase, Helper):
 
         rnd1 = TournamentRound.objects.filter(
             tournament=self.t1).get(round_no=1)
+
+        rnd2 = TournamentRound.objects.filter(
+            tournament=self.t1).get(round_no=2)
+        
         resp = self.client.post(
             f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(403, resp.status_code)
 
         self.client.login(username='sri', password='12345')
+
+        # even though you are authenticated you still cannot pair round 2!
+        resp = self.client.post(
+            f'/api/tournament/{self.t1.id}/pair/', {'id': rnd2.id})
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual('error', resp.data['status'])
+
         resp = self.client.post(
             f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
         self.assertEqual(200, resp.status_code)

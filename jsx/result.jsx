@@ -53,10 +53,10 @@ export function Result({r, index, editScore}) {
         return (
             <tr>
                 <td>{ r.table ? r.table : ""}</td>
-                <td >{ get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id ? " (first) " : ""}` }</td>
+                <td >{ get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }</td>
                 <td className="text-end" >{ r.games_won }</td>
                 <td className="text-end" >{ r.score1 }</td>
-                <td>{ get_p2(r) } #{r.p2?.seed} {`${r.p2_id == r.starting_id ? " (first) " : ""}` }</td>
+                <td>{ get_p2(r) } #{r.p2?.seed} {`${r.p2_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }</td>
                 <td className="text-end">
                     { gamesLost(r) }
                 </td>
