@@ -6,6 +6,7 @@ from tournament.models import BoardResult, Participant, Director, Tournament, Re
 from tournament.tools import add_participants
 
 from api import swiss
+from api.pairing import create_boards, delete_boards
 from api.tests.helper import Helper
 
 
@@ -44,6 +45,8 @@ class BasicTests(TestCase, Helper):
         self.assertNotEqual(p1.played, 0)
         self.assertNotEqual(p1.spread, 0)
 
+
+    
     def test_update_standings_by_player(self):
         """Team tournaments results are entered for each player"""
         self.add_players(self.t2, 3)
@@ -267,3 +270,45 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(result.score1, 100)
         self.assertEqual(result.score2, 200)
         self.assertEqual(result.games_won, 0)
+
+
+    def test_post_result_flipped(self):
+        self.add_players(self.t2, 2)
+        self.client.login()
+        self.client.login(username='ashok', password='12345')
+        rnd = self.t2.rounds.get(round_no=1)
+
+        self.client.post(
+            f'/api/tournament/{self.t2.id}/pair/', {'id': rnd.id})
+        
+        result = rnd.results.all()[0]
+
+        resp = self.client.put(
+            f'/api/tournament/{self.t2.id}/result/',
+            {'result': result.id, 'p1': result.p2_id, 'board': 1,
+                'p2': result.p1.id, 'score1': 200, 'score2': 100},
+            content_type='application/json'
+        )
+
+        result.refresh_from_db()
+        self.assertEqual(result.score1, 100)
+        self.assertEqual(result.score2, 200)
+        self.assertEqual(result.games_won, 0)
+
+        b = BoardResult.objects.get(board=1, team1=result.p1_id, round=rnd)
+        self.assertEquals(b.score1, 100)
+        
+
+    def test_create_delete_boards(self):
+        add_participants(self.t2, True, 2)
+        p = self.t2.participants.all()
+        result = Result.objects.create(
+            p1=p[0], p2=p[1], round=self.t2.rounds.get(round_no=1)
+        )
+        self.assertEquals(BoardResult.objects.count(), 0)
+
+        create_boards(self.t2, result)
+        self.assertEquals(BoardResult.objects.count(), 5)
+
+        delete_boards(result)
+        self.assertEquals(BoardResult.objects.count(), 0)

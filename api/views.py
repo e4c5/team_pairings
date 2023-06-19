@@ -310,22 +310,22 @@ class TournamentViewSet(viewsets.ModelViewSet):
             instance.save()
 
         else :
-            instance = models.BoardResult.objects.get(
+            board = models.BoardResult.objects.get(
                 Q(team1=instance.p1) & Q(team2=instance.p2) & 
                 Q(board=request.data['board'])
             )
             serializer = BoardResultSerializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
 
-            instance.score1 = serializer.validated_data['score1']
-            instance.score2 = serializer.validated_data['score2']
+            board.score1 = serializer.validated_data['score1']
+            board.score2 = serializer.validated_data['score2']
             
             if serializer.validated_data.get('p1'):
                 if serializer.validated_data['p1'] > serializer.validated_data['p2']:
-                    instance.score2 = serializer.validated_data['score1']
-                    instance.score1 = serializer.validated_data['score2']
+                    board.score2 = serializer.validated_data['score1']
+                    board.score1 = serializer.validated_data['score2']
 
-            instance.save()
+            board.save()
             
 
         broadcast({

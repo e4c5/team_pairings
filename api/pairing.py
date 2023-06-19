@@ -166,12 +166,8 @@ class Pairing:
                 r.table = table
 
             r.save()
-
-            if self.tournament.entry_mode == Tournament.BY_PLAYER:
-                for i in range(self.tournament.team_size):
-                    BoardResult.objects.create(
-                        board=i + 1, team1=r.p1, team2=r.p2, round=self.rnd
-                    )
+            create_boards(self.tournament, r)
+            
             results.append(r)
             if r.p1.name == 'Bye' or r.p2.name == 'Bye':
                 self.tournament.score_bye(r)
@@ -209,3 +205,21 @@ class Pairing:
         if player1['player'].white > player2['player'].white:
             return player2, player1
         return player1, player2
+
+
+def create_boards(tournament, r):
+    """Create an empty board result for each of the boards
+    (provided that this is a tournament with board tracking)
+    
+    Args: tournament: the tournament being played
+          r: the pairing """
+    if tournament.entry_mode == Tournament.BY_PLAYER:
+        for i in range(tournament.team_size):
+            BoardResult.objects.create(
+                board=i + 1, team1=r.p1, team2=r.p2, round=r.round
+            )
+
+def delete_boards(r):
+    """Delete the board results associated with this pairing"""
+
+    BoardResult.objects.filter( Q(team1=r.p1) & Q(team2=r.p2) & Q(round=r.round)).delete()

@@ -1,7 +1,10 @@
+from typing import Any
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.http.request import HttpRequest
 from tournament.models import Tournament, TournamentRound, Participant, \
         Director, TeamMember, BoardResult, Result
+from api.pairing import create_boards, delete_boards
 
 # Register your models here.
 
@@ -13,6 +16,16 @@ class ResultAdmin(admin.ModelAdmin):
     list_display = ['id', 'round','p1','p2','games_won','score1','score2']
     raw_id_fields = ['round', 'p1', 'p2','starting']
     search_fields = ['p1__name', 'p2__name']
+
+    def delete_model(self, request: HttpRequest, obj: Any) -> None:
+        super().delete_model(request, obj)
+        delete_boards(obj)
+        
+    def save_model(self, request: Any, obj: Any, form: Any, change: Any) -> None:
+        if not change:
+            create_boards(obj.round.tournament, obj)
+
+        return super().save_model(request, obj, form, change)
     
 class TournamentAdmin(admin.ModelAdmin):
     list_display = ['id','name','num_rounds','entry_mode']
