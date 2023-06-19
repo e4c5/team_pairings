@@ -37,6 +37,9 @@ export function Result({r, index, editScore}) {
         if(r.games_won === undefined || r.games_won === null) {
             return ""
         }
+        if(r.p2.name == "Bye" || r.p2.name.startsWith('Absent')) {
+            return "";
+        }
         if(tournament.team_size) {
             if(tournament.entry_mode == 'T') {
                 return tournament.team_size - r.games_won
@@ -60,7 +63,8 @@ export function Result({r, index, editScore}) {
                 <td className="text-end">
                     { gamesLost(r) }
                 </td>
-                <td className="text-end">{ r.score2 }</td>
+                <td className="text-end">
+                    { r.p2.name == "Bye" || r.p2.name.startsWith('Absent') ? "" : r.score2 }</td>
                 <td className="text-end">
                     { editable &&
                         <button className='btn btn-primary' onClick={e => editScore(e, index)}>
@@ -111,6 +115,7 @@ export function TeamResult({r, index, teamId}) {
     }
 
     function gamesLost(r) {
+        console.log(r)
         if(r.games_won === undefined || r.games_won === null) {
             return ""
         }
@@ -160,6 +165,7 @@ export function TeamResult({r, index, teamId}) {
                                 </thead>
                                 <tbody>
                                     { r.boards.map(board => (
+                                        
                                             <tr>
                                                 <td className='text-end'>{board.board}</td>
                                                 <td className='text-end'>{board.score1}</td>
@@ -259,4 +265,4 @@ export function TeamResultTable({results, teamId}) {
     return null
 }
 
-console.log('Results.js 0.01')
+console.log('Results.js 0.02')

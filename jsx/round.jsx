@@ -299,6 +299,9 @@ export function Round(props) {
                 if (json.status !== "ok") {
                     setError(json.message)
                 }
+                else {
+                    window.location.reload()
+                }
             })
         setCode('')
     }
