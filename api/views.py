@@ -352,7 +352,7 @@ def get_participant(pk):
             (SELECT jsonb_agg(to_jsonb(trx))
             FROM (
                 SELECT tr.*, (
-                    SELECT jsonb_agg(to_jsonb(br))
+                    SELECT jsonb_agg(to_jsonb(br) order by br.board)
                     FROM tournament_boardresult br 
                     WHERE (br.team1_id = tp.id OR br.team2_id = tp.id)
                     AND tr.round_id = br.round_id and score1 is not null
