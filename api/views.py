@@ -349,7 +349,7 @@ def get_participant(pk):
             FROM tournament_teammember tm 
             WHERE tm.team_id = tp.id
             ) AS members,
-            (SELECT jsonb_agg(to_jsonb(trx))
+            (SELECT jsonb_agg(to_jsonb(trx) order by round_id)
             FROM (
                 SELECT tr.*, (
                     SELECT jsonb_agg(to_jsonb(br) order by br.board)
