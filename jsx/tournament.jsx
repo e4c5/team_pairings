@@ -4,7 +4,6 @@ import { useParams, Link } from "react-router-dom";
 import getCookie from './cookie.js';
 import { Participants } from './participant.jsx';
 import { Rounds } from './round.jsx';
-import { Boards } from './boards.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 
 export function Tournament(props) {
@@ -107,10 +106,10 @@ export function Tournaments(props) {
 
     return (
         <div>
-            <h1>Sri Lanka Scrabble Tournament Manager</h1>
+            <h1>Herald :: Scrabble Tournament Manager</h1>
 
             <ul className='list-group'>
-            { props.tournaments?.map(t => 
+            { props.tournaments?.map(t =>  
                 <li className='list-group-item' key={t.id}>
                     <Link to={"/" + t.slug} >{ t.name }</Link>
                 </li>) 
@@ -121,4 +120,4 @@ export function Tournaments(props) {
     )
 }
 
-console.log('Tournament 0.03.1')
+console.log('Tournament 0.04')

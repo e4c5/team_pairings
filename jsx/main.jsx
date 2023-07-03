@@ -4,13 +4,17 @@ import * as ReactDOM from 'react-dom';
 import App from './app'
 import { BrowserRouter } from "react-router-dom";
 import { TournamentProvider} from './context.jsx';
+import { ThemeProvider } from './theme.jsx';
 
 const div = document.getElementById('root')
 const root = ReactDOM.createRoot(div) 
 root.render(<BrowserRouter>
-                <TournamentProvider><App/></TournamentProvider>
+                <ThemeProvider>
+                    <TournamentProvider><App/></TournamentProvider>
+                </ThemeProvider>
             </BrowserRouter>)
-console.log('main.js 0.02.1')
+
+console.log('main.js 0.03')
 
 
 

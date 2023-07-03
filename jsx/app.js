@@ -12,6 +12,7 @@ import { Round } from "./round.jsx"
 import { Boards } from './boards.jsx';
 import { TournamentEditor } from './editor.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
+import { Theme } from './theme.jsx';
 
 /**
  * The main entry point.
@@ -99,7 +100,7 @@ export default function App() {
     }
 
     useEffect(() => {
-        document.title = 'Sri Lanka Scrabble Pairing App'
+        document.title = 'Herald :: Scrabble Tournament Management'
         if (tournaments == null) {
             fetchTournaments()
         }
@@ -138,22 +139,25 @@ export default function App() {
     }
 
     return (
-        <Routes>
-            <Route path="/" element={<Tournaments tournaments={tournaments} />}></Route>
-            <Route path="/new" 
-                element={
-                    <TournamentEditor />
-                }>
-            </Route>
-            <Route path="/:slug" >
-                <Route path=""
-                    element={<Tournament tournaments={tournaments} />}
-                />
-                <Route path="boards" element={<Boards />} />
-                <Route path=":id" element={<Participant />} />
-                <Route path="round/:id" element={<Round />} />
-            </Route>
-        </Routes>
+        <>
+        <div className='float-end mt-3'><Theme/></div>
+            <Routes>
+                <Route path="/" element={<Tournaments tournaments={tournaments} />}></Route>
+                <Route path="/new" 
+                    element={
+                        <TournamentEditor />
+                    }>
+                </Route>
+                <Route path="/:slug" >
+                    <Route path=""
+                        element={<Tournament tournaments={tournaments} />}
+                    />
+                    <Route path="boards" element={<Boards />} />
+                    <Route path=":id" element={<Participant />} />
+                    <Route path="round/:id" element={<Round />} />
+                </Route>
+            </Routes>
+        </>
     )
 }
 
