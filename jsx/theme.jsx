@@ -7,7 +7,7 @@
  */
 
 import React, {
-    createContext, useContext, useReducer
+    createContext, useContext, useEffect, useReducer
 } from 'react';
 
 const ThemeContext = createContext(null)
@@ -29,11 +29,17 @@ const getPreferredTheme = () => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+const initialTheme = getPreferredTheme()
+
 export function ThemeProvider({ children }) {
     const [theme, dispatch] = useReducer(
         themeReducer,
-        {theme : 'dark', icon: 'bi-moon-stars-fill'}
+        {
+            theme : initialTheme, 
+            icon: initialTheme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'
+        }
     );
+
   
     return (
         <ThemeContext.Provider value={theme}>
@@ -60,10 +66,8 @@ export function themeReducer(state, action) {
         case 'switch':
             if (state.theme === 'dark') 
             {
-                setTheme('light')
                 return { theme: 'light', icon: 'bi-moon-stars-fill'}
             }
-            setTheme('dark')
             return { theme: 'dark', icon: 'bi-sun-fill'}
         
         default: {
@@ -75,6 +79,10 @@ export function themeReducer(state, action) {
 export function Theme () {
     const theme = useTheme()
     const themeDispatch = useThemeDispatch()
+
+    useEffect(() => {
+        setTheme(theme.theme)
+    }, [theme])
 
     function clicked(e) {
         themeDispatch({action: 'switch'})    

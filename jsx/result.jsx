@@ -37,7 +37,7 @@ export function Result({r, index, editScore}) {
         if(r.games_won === undefined || r.games_won === null) {
             return ""
         }
-        if(r.p2.name == "Bye" || r.p2.name.startsWith('Absent')) {
+        if(r.p2?.name == "Bye" || r.p2?.name.startsWith('Absent')) {
             return "";
         }
         if(tournament.team_size) {
@@ -55,23 +55,29 @@ export function Result({r, index, editScore}) {
     function resultIn() {
         return (
             <tr>
-                <td>{ r.table ? r.table : ""}</td>
-                <td >{ get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }</td>
+                <td>{ r.table ? r.table : ""} </td>
+                <td className={ r.games_won ? 'bg-success-subtle' : ''}>
+                    { get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }
+                </td>
                 <td className="text-end" >{ r.games_won }</td>
                 <td className="text-end" >{ r.score1 }</td>
-                <td>{ get_p2(r) } #{r.p2?.seed} {`${r.p2_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }</td>
+                <td className={ r.games_won ? '' : 'bg-success-subtle'}>
+                    { get_p2(r) } #{r.p2?.seed} {`${r.p2_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }
+                </td>
                 <td className="text-end">
                     { gamesLost(r) }
                 </td>
                 <td className="text-end">
-                    { r.p2.name == "Bye" || r.p2.name.startsWith('Absent') ? "" : r.score2 }</td>
-                <td className="text-end">
-                    { editable &&
+                    { r.p2?.name == "Bye" || r.p2?.name.startsWith('Absent') ? "" : r.score2 }
+                </td>
+                { editable &&
+                    <td className="text-end">
                         <button className='btn btn-primary' onClick={e => editScore(e, index)}>
                             <i className='bi-pencil' ></i>
                         </button>
-                    }
-                </td>
+                    </td>
+                }
+                
             </tr>
         )
     }
@@ -193,9 +199,11 @@ export function TeamResult({r, index, teamId}) {
  */
 export function ResultTable({editScore, results}) {
     const tournament = useTournament()
+    const editable = document.getElementById('hh') && document.getElementById('hh').value;
+
     if(results && results.length) {
         return (
-            <table className='table table-striped table-dark table-bordered' id='results'>
+            <table className='table table-dark-subtle table-bordered' id='results'>
                 <thead>
                     { tournament?.team_size ?
                         <tr>
@@ -206,7 +214,7 @@ export function ResultTable({editScore, results}) {
                             <th align="left">Team 2</th>
                             <th align="right">Wins</th>
                             <th align="right">Total Score</th>
-                            <th align="right"></th>
+                            { editable && <th align="right"></th> }
                         </tr>
                         :
                         <tr>
@@ -217,7 +225,7 @@ export function ResultTable({editScore, results}) {
                             <th align="left">Player 2</th>
                             <th align="left">Result</th>
                             <th align="right">Score</th>
-                            <th align="right"></th>
+                            { editable && <th align="right"></th> }
                         </tr>
                     }
                 </thead>
@@ -242,7 +250,7 @@ export function TeamResultTable({results, teamId}) {
     const tournament = useTournament()
     if(results && results.length) {
         return (
-            <table className='table table-striped table-dark table-bordered' id='results'>
+            <table className='table table-striped table-dark-subtle table-bordered' id='results'>
                 <thead>
                     <tr>
                         <th align="right">Table</th>

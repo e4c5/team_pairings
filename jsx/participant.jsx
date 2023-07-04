@@ -125,7 +125,7 @@ export function Participants(props) {
     }
 
     return (
-        <table className='table table-striped align-middle table-bordered table-dark'>
+        <table className='table table-striped align-middle table-bordered table-dark-subtle'>
             <thead>
                 <tr>
                     {columns.map(col => {
