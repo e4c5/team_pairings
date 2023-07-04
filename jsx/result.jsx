@@ -3,7 +3,10 @@ import { useTournament } from './context.jsx';
 
 
 /**
- * Display an individual result
+ * Display a result of a single match up.
+ * The match up might be between two individuals or teams. In the case of teams
+ * a summary result is displayed. 
+ * @see TeamResult
  * @param {*} param0 
  * @returns 
  */
@@ -52,7 +55,7 @@ export function Result({r, index, editScore}) {
         return 1 - r.games_won;
     }
 
-    function resultIn() {
+    function singlesResult() {
         return (
             <tr>
                 <td>{ r.table ? r.table : ""} </td>
@@ -82,7 +85,41 @@ export function Result({r, index, editScore}) {
         )
     }
 
-    return resultIn()
+    function teamResult() {
+        const cls1 = (r.games_won !== null && r.games_won > tournament.team_size / 2) ? 'bg-success-subtle' : ''
+        const cls2 = (r.games_won !== null && r.games_won < tournament.team_size / 2) ? 'bg-success-subtle' : ''
+        return (
+            <tr>
+                <td>{ r.table ? r.table : ""} </td>
+                <td className={ cls1 }>
+                    { get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }
+                </td>
+                <td className="text-end" >{ r.games_won }</td>
+                <td className="text-end" >{ r.score1 }</td>
+                <td className={ cls2 }>
+                    { get_p2(r) } #{r.p2?.seed} {`${r.p2_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }
+                </td>
+                <td className="text-end">
+                    { gamesLost(r) }
+                </td>
+                <td className="text-end">
+                    { r.p2?.name == "Bye" || r.p2?.name.startsWith('Absent') ? "" : r.score2 }
+                </td>
+                { editable &&
+                    <td className="text-end">
+                        <button className='btn btn-primary' onClick={e => editScore(e, index)}>
+                            <i className='bi-pencil' ></i>
+                        </button>
+                    </td>
+                }
+                
+            </tr>
+        )
+    }
+    if(tournament.team_size) {
+        return teamResult()
+    }
+    return singlesResult()
 }
 
 

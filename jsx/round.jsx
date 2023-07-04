@@ -332,7 +332,7 @@ export function Round(props) {
      */
     function randomFill() {
 
-        fetch(`/api/tournament/${tournament.id}/random_fill/`,
+        fetch(`/api/tournament/${tournament.id}/random_results/`,
             {
                 method: 'POST', 'credentials': 'same-origin',
                 headers:

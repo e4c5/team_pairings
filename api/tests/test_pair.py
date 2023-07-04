@@ -625,7 +625,7 @@ class DataEntryTests(APITestCase, Helper):
         return super().setUp()
 
     @patch('api.views.broadcast')
-    def test_random_fill(self, m):
+    def test_random_results(self, m):
         """For private tournaments can do a random fill"""
         self.add_players(self.t2, 10)
         rnd1 = TournamentRound.objects.filter(
@@ -633,12 +633,12 @@ class DataEntryTests(APITestCase, Helper):
         self.speed_pair(rnd1, add_results=False)
         self.client.login(username='ashok', password='12345')
         
-        resp = self.client.post(f'/api/tournament/{self.t2.id}/random_fill/')
+        resp = self.client.post(f'/api/tournament/{self.t2.id}/random_results/')
         self.assertEquals(200, resp.status_code, resp.data)
 
         self.t2.private = False
         self.t2.save()
-        resp = self.client.post(f'/api/tournament/{self.t2.id}/random_fill/')
+        resp = self.client.post(f'/api/tournament/{self.t2.id}/random_results/')
         self.assertEquals(403, resp.status_code, resp.data)
 
     @patch('api.views.broadcast')

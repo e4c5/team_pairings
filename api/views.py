@@ -190,16 +190,42 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def random_fill(self, request, **kwargs):
+        """Fills the tournament with random results.
+        """
         if request.tournament.private:
-            rnd = tools.random_results(request.tournament)
-            broadcast({
-                    "tournament_id": request.tournament.id,
-                    "results": get_results(request.tournament, rnd.id),
-                    "round_no": rnd.round_no
-                }
-            )
-            
+            td = models.Director.objects.filter(
+                Q(tournament_id=request.tournament.id) & Q(user=request.user))
+            if td.exists():
+                tools.add_participants(
+                    request.tournament, True, 
+                    int(request.data.get('fill', 0))
+                )
+                broadcast({
+                        "participants": get_participants(request.tournament.id),
+                        "tournament_id": request.tournament.id
+                    }
+                )
+                
             return Response({'status': 'ok'})
+                
+        raise PermissionDenied("Not allowed for public events")
+
+    @action(detail=True, methods=['post'])
+    def random_results(self, request, **kwargs):
+        if request.tournament.private:
+            td = models.Director.objects.filter(
+                Q(tournament_id=request.tournament.id) & Q(user=request.user))
+            
+            if td.exists():
+                rnd = tools.random_results(request.tournament)
+                broadcast({
+                        "tournament_id": request.tournament.id,
+                        "results": get_results(request.tournament, rnd.id),
+                        "round_no": rnd.round_no
+                    }
+                )
+                
+                return Response({'status': 'ok'})
         raise PermissionDenied("Not allowed for public events")
     
 
