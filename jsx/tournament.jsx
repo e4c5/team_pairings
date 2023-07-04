@@ -19,7 +19,8 @@ export function Tournament(props) {
                 if(t.slug == params.slug) {
                     fetch(`/api/tournament/${t.id}/`).then(resp=>resp.json()
                     ).then(json=>{
-                        tournamentDispatch({type: 'replace', value: json})                
+                        tournamentDispatch({type: 'replace', value: json}) 
+                        console.log('Dispatch', json.id)               
                     })
                 }
             })    
@@ -89,6 +90,7 @@ export function Tournament(props) {
         return null;
     }
 
+    console.log(tournament?.id)
     return (
         <div>
             <h2><a href={tournament?.slug}>{ tournament?.name }</a></h2>

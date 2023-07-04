@@ -199,11 +199,7 @@ export function tournamentReducer(state, action) {
             return state
         case 'reset':
         case 'replace':
-            if(state?.id == action.tid || state === null || state.id == null) {
-                console.log('Warning replace/reset is deprecated')
-                return { ...action.value }
-            }
-            return state
+            return { ...action.value }
 
         default: {
             throw Error('Unknown action: ' + action.type);
