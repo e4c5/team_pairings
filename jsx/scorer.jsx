@@ -19,7 +19,18 @@ class Editor extends React.Component {
      * @param {*} e 
      */
     addScore(e) {
-        const { current } = this.props;
+        const { current, tournament } = this.props;
+        if(! tournament.team_size) {
+            if(current.score1 == current.score2) {
+                current.games_won = 0.5
+            }
+            else if(current.score1 > current.score2) {
+                current.games_won = 1
+            }
+            else {
+                current.games_won = 0
+            }
+        }
         this.postScore(current)
     }
 
@@ -68,6 +79,30 @@ class Editor extends React.Component {
         })
     }
 
+    /**
+     * Detect who has won the game in an individual tournament based on scores.
+     * @param {*} match 
+     */
+    detectWin(match, name) {
+        if(match.p1.name.toLowerCase().includes(name)) {
+            match.score1 = Number(parts[1])
+            match.score2 = Number(parts[3])
+        }
+        else {
+            match.score2 = Number(parts[1])
+            match.score1 = Number(parts[3])
+            
+        }
+        if(match.score1 == match.score2) {
+            match.won = 0.5
+        }
+        else if(match.score1 > match.score2) {
+            match.won = 1
+        }
+        else {
+            match.won = 0
+        }
+    }
     /**
      * Updates the various input boxes 
      */
@@ -374,10 +409,14 @@ class _TSHStyle extends Editor {
                 let match = null;
                 let found = false;
                 const results = this.getRoundResults()
+                const seed1 = Number(parts[0])
+                const seed2 = Number(parts[2])
 
                 results?.forEach(result => {
-                    if(result.p1.name.toLowerCase().includes(parts[0]) || result.p2.name.toLowerCase().includes(parts[0])) {
-                        if(result.p1.name.toLowerCase().includes(parts[2]) || result.p2.name.toLowerCase().includes(parts[2])) {
+                    const p1 = result.p1.name.toLowerCase()
+                    const p2 = result.p2.name.toLowerCase()
+                    if(p1.includes(parts[0]) || p2.includes(parts[0]) || result.p1.seed == seed1 || result.p2.seed == seed1) {
+                        if(p1.includes(parts[2]) || p2.includes(parts[2]) || result.p1.seed == seed2 || result.p2.seed == seed2) {
                             if(! found) {
                                 found = true;
                                 if(result.score1 || result.score2) {
@@ -432,7 +471,7 @@ class _TSHStyle extends Editor {
                 <div className='row mt-1'>
                         <div className='col-12'>
                             <input type='text' className='form-control' onKeyDown={e => this.tshAction(e)}
-                                placeholder='TSH style data entry'
+                                placeholder='TSH style data entry' data-test-id='tsh-style-entry'
                                 value={this.state.tsh} onChange={e => this.setState({tsh: e.target.value}) } />
                         </div>
                     </div>

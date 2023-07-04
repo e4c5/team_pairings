@@ -56,15 +56,18 @@ export function Result({r, index, editScore}) {
     }
 
     function singlesResult() {
+        const cls1 = (r.score1 !== null && r.games_won > 0.5) ? 'bg-success-subtle' : ''
+        const cls2 = (r.score2 !== null && r.games_won < 0.5) ? 'bg-success-subtle' : ''
+
         return (
             <tr>
                 <td>{ r.table ? r.table : ""} </td>
-                <td className={ r.games_won > 0 ? 'bg-success-subtle' : ''}>
+                <td className={ cls1 }>
                     { get_p1(r)} #{r.p1?.seed}  {`${r.p1_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }
                 </td>
                 <td className="text-end" >{ r.games_won }</td>
                 <td className="text-end" >{ r.score1 }</td>
-                <td className={ r.games_won > 0 ? '' : 'bg-success-subtle'}>
+                <td className={ cls2 }>
                     { get_p2(r) } #{r.p2?.seed} {`${r.p2_id == r.starting_id && tournament.team_size ? " (first) " : ""}` }
                 </td>
                 <td className="text-end">

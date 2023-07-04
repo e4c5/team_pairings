@@ -55,6 +55,7 @@ class TestParticipants(SeleniumTest):
 
 
     def test_participant_details(self):
+        """Test that the participant details page shows the correct information"""
         partis = add_participants(count=10, use_faker=True, tournament=self.t1)
         self.assertEqual(10, self.t1.participants.count())
         driver = self.selenium

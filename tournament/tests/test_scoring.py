@@ -16,6 +16,39 @@ class TestResults(SeleniumTest):
         #cls.selenium.quit()
         ""
 
+    def test_tsh_style_entry(self):
+        """Test data entry with TSH style"""
+        add_participants(self.t3, True, 6, seed=10)
+        driver = self.load_tournament('New Year Joust')
+        self.assertEqual(Result.objects.count(), 0)
+        self.pair_round('1')
+        WebDriverWait(driver, 5, 0.1).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
+        )
+        self.assertEqual(3, Result.objects.count())
+
+        field = driver.find_element(By.CSS_SELECTOR, "input[data-test-id='tsh-style-entry']")
+        field.click()
+        field.send_keys('ames 439 mirez 410')
+        field.send_keys(Keys.ENTER)
+
+        time.sleep(0.5)
+
+        result = driver.find_element(By.XPATH,"//td[contains(text(), 'James')]")
+        result = result.find_element(By.XPATH,'following-sibling::*[1]')
+        self.assertEqual(result.text, '1')
+
+        field.click()
+        field.send_keys('4 444 3 333')
+        field.send_keys(Keys.ENTER)
+
+        time.sleep(0.5)
+
+        result = driver.find_element(By.XPATH,"//td[contains(text(), 'Murphy')]")
+        result = result.find_element(By.XPATH,'following-sibling::*[1]')
+        self.assertEqual(result.text, '0')
+        
+
     def test_autocomplete(self):
         """Test data entry with autocomplete"""
         add_participants(self.t3, True, 6, seed=10)
@@ -82,7 +115,7 @@ class TestResults(SeleniumTest):
         add_participants(self.t1, False, 18, 'api/tests/data/teams.csv')
         self.assertEqual(19, TournamentRound.objects.count())
         self.assertEqual(18, Participant.objects.count())
-
+        time.sleep(0.1)
         self.load_tournament("Richmond Showdown U20")
         
         self.pair_round('1')
