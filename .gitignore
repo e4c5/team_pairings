@@ -21,3 +21,4 @@ geckodriver.log
 tournament/static/js/
 sttic
 static
+coverage/

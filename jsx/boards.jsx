@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTournament } from './context.jsx';
 import { Link } from "react-router-dom";
 
+/**
+ * 
+ * @returns HTML for board by board results
+ */
 export function Boards() {
     const tournament = useTournament();
     const [boards, setBoards] = useState()
@@ -42,7 +46,8 @@ export function Boards() {
 
     const results = []
     for(let i = 0 ; i < tournament?.team_size ; i++) {
-        results.push(boardResults(boards?.filter(row => row.board == i + 1)))
+        const filtered = boards?.filter(row => row.board == i + 1)
+        results.push(boardResults(filtered))
     }
     return (<>
         <h2><Link to={`/${tournament?.slug}`}>{tournament?.name}</Link></h2>

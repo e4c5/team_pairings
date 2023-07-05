@@ -369,6 +369,9 @@ class _ScoreByPlayer extends Editor {
     }
 }
 
+/**
+ * Tsh style data entry for individual events.
+ */
 class _TSHStyle extends Editor {
     constructor(props) {
         super(props)

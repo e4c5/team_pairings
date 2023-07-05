@@ -8,7 +8,7 @@
     "start": "webpack-dev-server",
     "watch": "webpack --watch",
     "build": "webpack --mode production",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",

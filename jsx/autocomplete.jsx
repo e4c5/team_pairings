@@ -57,7 +57,7 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
 			
 		} else if (e.keyCode === 38) { // UP
             e.preventDefault();
-            console.log('UP?')
+
 			if (activeSuggestion === 0) {
 				return;
 			}
@@ -65,7 +65,6 @@ export function Autocomplete({suggestions, check, onChange, onSelect, value, pla
 			setState({ ...state, activeSuggestion: activeSuggestion - 1 });
 		} else if (e.keyCode === 40) { // DOWN
             e.preventDefault();
-            console.log('DOWN')
 			if (activeSuggestion === filteredSuggestions.length -1) {
 				return;
 			}
