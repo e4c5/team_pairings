@@ -127,10 +127,11 @@ export function Result({r, index, editScore}) {
 
 
 /**
- * Display an individual result for a team tournament.
+ * Display results for a team with board details.
  * 
  * Intended for use with tournaments where we keep track of each individual
- * board's performance seperately
+ * board's performance seperately. The display would have a headline of the
+ * overall result followed by the board by board results.
  * @param {*} param0 
  * @returns 
  */
@@ -212,7 +213,7 @@ export function TeamResult({r, index, teamId}) {
                                 <tbody>
                                     { r.boards.map(board => (
                                         
-                                            <tr>
+                                            <tr key={board.board}>
                                                 <td className='text-end'>{board.board}</td>
                                                 <td className='text-end'>{board.score1}</td>
                                                 <td className='text-end'>{board.score2}</td>

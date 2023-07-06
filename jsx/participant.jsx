@@ -4,7 +4,7 @@ import {
     useParams,
     Link,
 } from "react-router-dom";
-import { ResultTable , TeamResultTable} from './result.jsx';
+import { ResultTable, TeamResultTable } from './result.jsx';
 import { useTournament, useTournamentDispatch } from './context.jsx';
 import getCookie from './cookie.js';
 
@@ -21,7 +21,7 @@ const team = [
     ["Name", "name"],
     ["Rating", "rating"],
     ["Round Wins", "round_wins"],
-    ["Game Wins", "game_wins"], 
+    ["Game Wins", "game_wins"],
     ["Spread", "spread"],
 ]
 
@@ -34,9 +34,8 @@ const team = [
 export function Participants(props) {
     const tournament = useTournament();
     const tournamentDispatch = useTournamentDispatch();
-
     const auth = document.getElementById('hh') && document.getElementById('hh').value
-    const columns = tournament?.team_size ? [...team ] : [...individual]
+    const columns = tournament?.team_size ? [...team] : [...individual]
 
     if (auth) {
         columns.push(["Actions"])
@@ -61,7 +60,11 @@ export function Participants(props) {
                     "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify(p)
-            }).then(resp => resp.json()).then(json => tournamentDispatch({ type: 'editParticipant', participant: json }))
+            }).then(resp => resp.json()
+            ).then(json => {
+                tournamentDispatch({ type: 'editParticipant', participant: json })
+            }
+        )
     }
 
     /**
@@ -87,6 +90,7 @@ export function Participants(props) {
                     )
                 }
             })
+
     }
 
     function isStarted() {
@@ -97,7 +101,7 @@ export function Participants(props) {
         const order = tournament?.order || 'rank'
 
         if (field == order) {
-            tournamentDispatch({ type: 'sort', field: `-${field}` , tid: tournament.id})
+            tournamentDispatch({ type: 'sort', field: `-${field}`, tid: tournament.id })
         }
         else {
             tournamentDispatch({ type: 'sort', field: field, tid: tournament.id })
@@ -114,12 +118,12 @@ export function Participants(props) {
         }
         if (order == `-${field}`) {
             return (
-                <th  className='text-center'  onClick={e => changeOrder(field)} key={field}>
+                <th className='text-center' onClick={e => changeOrder(field)} key={field}>
                     {name}<i className='bi-sort-up-alt ml-2'></i>
                 </th>)
         }
         return (
-            <th  className=' text-center' onClick={e => changeOrder(field)} key={field}>
+            <th className=' text-center' onClick={e => changeOrder(field)} key={field}>
                 {name}
             </th>)
     }
@@ -140,14 +144,14 @@ export function Participants(props) {
             <tbody>
                 {tournament?.participants?.map((row, idx) => (
                     <tr key={row.id}>
-                        <td className="text-end">{row.pos === undefined ? row.seed : row.pos }</td>
+                        <td className="text-end">{row.pos === undefined ? row.seed : row.pos}</td>
                         <td component="th" scope="row">
                             <Link to={`${row.id}`}>
-                                { tournament.team_size ? row.name : `${row.name} (#${row.seed})` }
+                                {tournament.team_size ? row.name : `${row.name} (#${row.seed})`}
                             </Link>
                         </td>
                         <td className="text-end">{row.rating}</td>
-                        { tournament.team_size ? 
+                        {tournament.team_size ?
                             <><td className="text-end">{row.round_wins}</td>
                                 <td className="text-end">{row.game_wins}</td>
                             </>
@@ -159,7 +163,7 @@ export function Participants(props) {
                                 <div className='d-inline-flex'>
                                     <div className='form-check form-switch'>
                                         <input className="form-check-input" type="checkbox"
-                                            checked={! row.offed } onChange={e => toggleParticipant(e, idx)} />
+                                            checked={!row.offed} onChange={e => toggleParticipant(e, idx)} />
                                     </div>
                                     {!isStarted() &&
                                         <div className='form-col'>
@@ -190,16 +194,16 @@ export function Participant() {
     useEffect(() => {
         if (participant == null && tournament) {
             fetch(`/api/tournament/${tournament.id}/participant/${params.id}/`)
-            .then(resp => resp.json())
-            .then(json => {
-                // when the participants record is retrieved it may not be in 
-                // sorted order. When sorting , we can assume that the round id
-                // will be in the same order as the round number. Thats because
-                // when a tournament is created all it's rounds are created at
-                // the same time and in order.
-                json.results?.sort( (a, b) => a.round_id - b.round_id)
-                setParticipant(json)
-            })
+                .then(resp => resp.json())
+                .then(json => {
+                    // when the participants record is retrieved it may not be in 
+                    // sorted order. When sorting , we can assume that the round id
+                    // will be in the same order as the round number. Thats because
+                    // when a tournament is created all it's rounds are created at
+                    // the same time and in order.
+                    json.results?.sort((a, b) => a.round_id - b.round_id)
+                    setParticipant(json)
+                })
         }
     }, [tournament, participant])
 
@@ -212,8 +216,8 @@ export function Participant() {
             <div>
                 <h2><Link to={`/${tournament.slug}`}>{tournament.name}</Link></h2>
                 <h3>{participant.name}</h3>
-                {tournament?.entry_mode == 'P' 
-                    ? <TeamResultTable results={participant.results} teamId={participant.id} />  
+                {tournament?.entry_mode == 'P'
+                    ? <TeamResultTable results={participant.results} teamId={participant.id} />
                     : <ResultTable results={participant.results} editScore={editScore} />
                 }
 
