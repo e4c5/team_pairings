@@ -162,7 +162,6 @@ export function TeamResult({r, index, teamId}) {
     }
 
     function gamesLost(r) {
-        console.log(r)
         if(r.games_won === undefined || r.games_won === null) {
             return ""
         }

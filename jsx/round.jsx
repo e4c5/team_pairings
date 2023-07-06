@@ -21,7 +21,8 @@ const editorState = {
  * @param {*} action 
  * @returns 
  */
-function reducer(state, action) {
+export function reducer(state, action) {
+
     switch (action.type) {
         case "typed":
             return { ...state, name: action.name }
