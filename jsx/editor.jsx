@@ -1,8 +1,5 @@
 import React, { useState, useRef } from 'react';
 import getCookie from './cookie.js';
-import { Link } from "react-router-dom";
-import { Participants } from './participant.jsx';
-
 
 export function TournamentEditor() {
     const [tournament, setTournament] = useState({
@@ -24,7 +21,6 @@ export function TournamentEditor() {
             },
             body: JSON.stringify(tournament)
         }).then(resp => resp.json()).then(json => {
-            console.log(json)
             window.location.href = `/${json.slug}/`
         })
     }
@@ -37,23 +33,24 @@ export function TournamentEditor() {
                     <div className="card-header">New Tournament</div>
                     <div className="card-body">
                         <div>Name: 
-                            <input type="text" className="form-control"
+                            <input type="text" className="form-control" data-testid='name'
                                 onChange={e => setTournament({ ...tournament, name: e.target.value })} />
                         </div>
                         <div>
                             Start Date
                             <input type="date" initialvalue={tournament.start_date} ref={ref}
-                                className="form-control"
+                                className="form-control"  data-testid='date'
                                 />
                         </div>
                         <div>
                             Number of Rounds
                             <input type="number" value={tournament.num_rounds}  className="form-control"
+                                data-testid='rounds'
                                 onChange={e => setTournament({...tournament, num_rounds: e.target.value})} />
                         </div>
                         <div>
                             Tournament Type
-                            <select value={tournament.type}  className="form-control"
+                            <select value={tournament.type}  className="form-control" data-testid='type'
                                 onChange={e => setTournament({...tournament, entry_mode: e.target.value})} >
                                     <option value='S'>Singles</option>
                                     <option value='T'>Team</option>
@@ -63,7 +60,8 @@ export function TournamentEditor() {
                         { tournament.entry_mode !== 'S' && 
                             <div>
                                Team size
-                                <input type="number" value={tournament.team_size}  className="form-control"
+                                <input type="number" value={tournament.team_size} 
+                                    className="form-control" data-testid='team-size'
                                     onChange={e => setTournament({...tournament, team_size: e.target.value})} />
                             </div>
                         }
