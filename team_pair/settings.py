@@ -43,11 +43,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'channels',
     'tournament','api','tsh',
+    # the next set of apps are for allauth which in turn is required by the 
+    # player registration and login features. If you don't need player 
+    # registration or login, you can remove these.
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.discord',
     'allauth.socialaccount.providers.facebook',
+    'profiles'
 ]
 
 MIDDLEWARE = [
