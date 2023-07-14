@@ -39,9 +39,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
     'channels',
-    'tournament','api','tsh'
+    'tournament','api','tsh',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.discord',
+    'allauth.socialaccount.providers.facebook',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +134,5 @@ LOGOUT_REDIRECT_URL='/'
 CORS_ORIGIN_WHITE_LIST = [ 'https://live.scrabble.lk']
 CSRF_TRUSTED_ORIGINS = [ 'https://live.scrabble.lk']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SITE_ID = 1

@@ -1,6 +1,7 @@
 {% extends "account/base.html" %}
-
+{% load account %}
 {% load i18n %}
+{% load socialaccount %}
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
@@ -17,5 +18,8 @@
   {% endif %}
   <button type="submit">{% trans "Sign Up" %} &raquo;</button>
 </form>
+
+<a href="{% provider_login_url "discord" %}">Discord</a>
+<a href="{% provider_login_url "facebook" %}">Facebook</a>
 
 {% endblock %}

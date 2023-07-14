@@ -15,32 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from django.views.generic import RedirectView
-from django.contrib.auth import views as auth_views
 
 from api import urls
 from tournament import views
 
-
 urlpatterns = [
     path('', views.index),
-    path('login/', 
-         auth_views.LoginView.as_view(template_name='account/login.html'),
-        name='login'
-    ),
-    path('logout/', auth_views.LogoutView.as_view()),
-    path('change-password/', 
-         auth_views.PasswordChangeView.as_view(template_name='account/change-password.html')
-    ),
-    path('change-password/done', auth_views.PasswordChangeDoneView.as_view()),
-    path('accounts/password_reset/', 
-         auth_views.PasswordResetView.as_view(),
-         name='password_reset'
-    ),
-    
+    path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('api/', include(urls.urlpatterns)),
     path('api-auth/', include('rest_framework.urls')),
-    re_path('^', views.redirect_view)
+    #re_path('^', views.redirect_view)
 ]
-13
