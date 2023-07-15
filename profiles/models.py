@@ -4,8 +4,6 @@ import random
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User     
 
-from django.core.cache import cache
-
 from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
@@ -46,8 +44,22 @@ class UserProfile (models.Model):
     wespa_list_name = models.CharField(max_length=128, blank=True, null=True)
                                        
     def save(self, *args, **kwargs):
+        """Fille the player_id field.
+        The player_id is made up of the first letter of the user.first_name and 
+        five letters from the user.last_name if the the player_id"""
+
+        for n in range(1, 6):
+            self.player_id = self.user.first_name[0:n] + self.user.last_name[0:5-n]
+            self.player_id = self.player_id.upper()
+            if not UserProfile.objects.filter(player_id = self.player_id).exists():
+                created = True
+                break
+
+        if not created:
+            # create self.player_id to be 6 random letters
+            self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',5))
+
         super(UserProfile,self).save(*args, **kwargs)
-        
         
     def __str__(self):
         return self.user.username
@@ -55,15 +67,6 @@ class UserProfile (models.Model):
     class Meta:
         app_label = 'profiles'
     
-
-def create_user_profile(sender, user, **kwargs):
-    '''
-    Creates a profile object for registered users via the
-    user_registered signal
-    '''
-    
-    obj = UserProfile.objects.get_or_create(user=user)
-
 
 class PhoneNumber(models.Model):
 
@@ -122,3 +125,13 @@ class Audit(models.Model):
     class Meta:
        app_label = 'profiles'
     
+
+
+@receiver(post_save, sender = User)
+def create_user_profile(sender, instance, created, **kwargs):
+    '''
+    Creates a profile object for registered users via the
+    user_registered signal
+    '''
+    if created:
+        UserProfile.objects.get_or_create(user=instance)    
