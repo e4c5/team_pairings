@@ -24,6 +24,5 @@ class Command(BaseCommand):
                 content = res.read().decode("utf-8").splitlines()
                 import_ratings(content, wespa=True)
             else:
-                self.stdout.write(self.style.ERROR('Error connecting to wespa.org\n'), 
-                                  wespa=True)
-            
+                self.stdout.write(self.style.ERROR('Error connecting to wespa.org\n'))
+

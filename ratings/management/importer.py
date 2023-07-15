@@ -20,7 +20,7 @@ def import_ratings(fp, wespa=False):
                         'rating': line[35:40].strip(),
                         'last': line[40:].strip(),
                     }
-
+                
                 if wespa:
                     WespaRating.objects.update_or_create(
                         name=line[9:30].strip(),
