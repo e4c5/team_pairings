@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.discord',
     'allauth.socialaccount.providers.facebook',
-    'profiles'
+    'profiles', 'ratings'
 ]
 
 MIDDLEWARE = [
