@@ -6,6 +6,7 @@ class WespaRating(models.Model):
     records do not exists. As far are our system is concerned wespa ratings
     came first."""
     name = models.CharField(max_length=20, unique=True)
+    country = models.CharField(max_length=4)
     rating = models.IntegerField()
     games = models.IntegerField()
     last = models.CharField(max_length=20)
