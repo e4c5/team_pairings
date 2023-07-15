@@ -20,4 +20,4 @@ class NationalRating(models.Model):
     rating  = models.IntegerField()
     last = models.CharField(max_length=20)
     country = models.CharField(max_length=3)
-
+    games = models.IntegerField()
