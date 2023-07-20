@@ -84,7 +84,7 @@ class Pairing:
                         'game_wins': pl.game_wins,
                         'score': pl.round_wins,
                         'opponents': []
-                        }
+                }
                 if self.tournament.team_size is None:
                     record['score'] = pl.game_wins
                 d[pl.id] = record

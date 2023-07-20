@@ -36,6 +36,7 @@ class Tournament(models.Model):
 
     num_rounds = models.IntegerField()
 
+    round_robin = models.BooleanField(default=False, blank=True, null=False)
     # this is tournament a private one?
     private = models.BooleanField(default=True, blank=True, null=False)
 
@@ -120,6 +121,7 @@ class Tournament(models.Model):
             result.games_won = 2
 
         result.save()
+
     
     def get_last_completed(self):
         '''
@@ -485,7 +487,7 @@ def setup_tournament(sender, instance, created, **kwargs):
     if created and instance.num_rounds > 0:
         for i in range(1, instance.num_rounds + 1):
             TournamentRound.objects.create(tournament=instance, round_no=i,
-                    pairing_system=TournamentRound.SWISS, repeats=0,
+                    pairing_system=TournamentRound.AUTO, repeats=0,
                     based_on=i - 1)
 
 

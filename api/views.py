@@ -17,6 +17,7 @@ from api.serializers import (ParticipantSerializer, TournamentSerializer,
         TournamentRoundSerializer, ResultSerializer, BoardResultSerializer)
 
 from api.swiss import SwissPairing
+from api.rr import RoundRobinPairing
 from api.permissions import IsAuthenticatedOrReadOnly
 
 """
@@ -145,7 +146,14 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 if count < 2:
                     return Response({'status': 'error',
                         'message': 'A tournament needs at least two player'})
-                p = SwissPairing(rnd)
+                
+                p = None
+
+                if self.request.tournament.round_robin:
+                    p = RoundRobinPairing(rnd)               
+                else:
+                    p = SwissPairing(rnd)
+                    
                 p.make_it()
                 results = p.save()
                 res_serializer = ResultSerializer(results, many=True)
