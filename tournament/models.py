@@ -143,6 +143,32 @@ class Tournament(models.Model):
             
         super().save(*args, **kwargs)
 
+
+    def update_num_rounds(self):
+        """Change num rounds based on num players for RR"""        
+        if self.round_robin:
+            p = self.participants.exclude(offed=True).count()
+            bye = self.participants.filter(name='Bye').exists()
+            if p % 2 == 1 and not bye:
+                Participant.objects.create(
+                        name='Bye', tournament=self, rating=0
+                    )
+                p += 1
+
+            if self.num_rounds < p - 1:
+                for i in range(self.num_rounds + 1, p):
+                    TournamentRound.objects.create(tournament=self, round_no=i,
+                        pairing_system=TournamentRound.AUTO, repeats=0,
+                        based_on=i - 1)
+                
+                self.num_rounds = p - 1
+                self.save()
+
+            if self.num_rounds > p - 1:
+                self.num_rounds = p - 1
+                self.rounds.filter(round_no__gt=p - 1).delete()
+                self.save()
+
         
     def update_all_standings(self):
         """Updates all the standings for the current tournament.
@@ -515,3 +541,4 @@ def participant_absent(sender, instance, created, **kwargs):
     if last:
         for rnd in instance.tournament.rounds.filter(round_no__lte=last.round_no):
             instance.mark_absent(rnd)
+    

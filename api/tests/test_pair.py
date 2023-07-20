@@ -13,7 +13,7 @@ from rest_framework.test import APITestCase
 from tournament.models import BoardResult, Participant, TournamentRound, Tournament, Result
 from tournament.tools import add_participants, truncate_rounds
 
-from api import swiss, koth
+from api import swiss, koth, rr
 from api.tests.helper import Helper
 
 
@@ -125,6 +125,31 @@ class BasicTests(APITestCase, Helper):
         res = Result.objects.all()
         self.assertEqual(res.count(), 0)
 
+    def test_lag(self):
+        """Pairing a round with no results should not work unless lagged"""
+        self.add_players(self.t1, 4)
+        rnd1 = TournamentRound.objects.filter(
+            tournament=self.t1).get(round_no=1)
+        rnd2 = TournamentRound.objects.filter(
+            tournament=self.t1).get(round_no=2)
+        rnd3 = TournamentRound.objects.filter(
+            tournament=self.t1).get(round_no=3)
+        sp = swiss.SwissPairing(rnd1)
+        sp.make_it()
+        sp.save()
+
+        # pairing round 2 should fail since round 1 does not have results.
+        self.assertRaises(ValueError, swiss.SwissPairing, rnd2)
+        # lag it and pair again
+        rnd2.based_on = 0
+        rnd2.save()
+        sp = swiss.SwissPairing(rnd2)
+        sp.make_it()
+        sp.save()
+
+        # attempt to pair round 3 should still fail
+        self.assertRaises(ValueError, swiss.SwissPairing, rnd3)
+
     def test_simple_swiss(self):
         """Round 1 pairing for a tiny swiss tournament"""
         self.assertIsNone(self.t1.get_last_completed())
@@ -151,6 +176,61 @@ class BasicTests(APITestCase, Helper):
         self.assertEqual(res[0].p1.id, p1.id)
         self.assertEqual(res[0].p2.id, bye.id)
         self.assertEqual(rnd, self.t1.get_last_completed())
+
+
+class RoundRobinTests(APITestCase, Helper):
+    """Test round robin.
+    Also see test_result.py"""
+
+    def setUp(self) -> None:
+        self.create_tournaments()
+        return super().setUp()
+
+    def test_update_num_rounds_odd(self):
+        self.add_players(self.t1, 11)
+        self.t1.update_num_rounds()
+        self.assertEqual(5, self.t1.num_rounds)
+
+        self.t1.round_robin = True
+        self.t1.save()
+        self.t1.update_num_rounds()
+        self.assertEqual(11, self.t1.num_rounds)
+        
+        self.assertTrue(Participant.objects.filter(name='Bye').exists())
+        self.assertEquals(self.t1.rounds.count(), 11)
+
+    def test_update_num_rounds_even(self):
+        self.add_players(self.t1, 10)
+        self.t1.update_num_rounds()
+        self.assertEqual(5, self.t1.num_rounds)
+
+        self.t1.round_robin = True
+        self.t1.save()
+        self.t1.update_num_rounds()
+        self.assertEqual(9, self.t1.num_rounds)
+
+        self.assertFalse(Participant.objects.filter(name='Bye').exists())
+        self.assertEquals(self.t1.rounds.count(), 9)
+
+    def test_reduce_rounds(self):
+        self.add_players(self.t1, 4)
+        self.t1.round_robin = True
+        self.t1.save()
+        self.t1.update_num_rounds()
+        self.assertEqual(3, self.t1.num_rounds)
+        self.assertEquals(self.t1.rounds.count(), 3)
+
+
+    def test_round_robin(self):
+        """Round robin pairing"""
+        self.add_players(self.t1, 6)
+        rnd = TournamentRound.objects.filter(
+            tournament=self.t1).get(round_no=1)
+        sp = rr.RoundRobinPairing(rnd)
+        sp.make_it()
+        sp.save()
+        self.assertEqual(Result.objects.count(), 3)
+
 
 
 class ByesTests(APITestCase, Helper):

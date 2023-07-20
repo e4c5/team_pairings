@@ -6,8 +6,9 @@ class RoundRobinPairing(Pairing):
         super().__init__(rnd)
 
     def make_it(self):
-        for _ in range(self.rnd.round_no):
-            self.pairs = [self.pairs[0]] + [self.pairs[-1]] + self.pairs[1:-1]
+        if self.rnd.round_no > 1:
+            n = self.rnd.round_no
+            self.players = self.players[-n:] + self.players[:-n]
 
         for i in range(len(self.players) // 2):
             player1 = self.players[i]
