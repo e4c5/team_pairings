@@ -68,7 +68,8 @@ class UserProfile (models.Model):
         """Fille the player_id field.
         The player_id is made up of the first letter of the user.first_name and 
         five letters from the user.last_name if the the player_id"""
-        if not self.pk:
+        if not self.player_id:
+            created = False
             for n in range(1, 6):
                 self.player_id = self.user.first_name[0:n] + self.user.last_name[0:5-n]
                 self.player_id = self.player_id.upper()
@@ -78,7 +79,7 @@ class UserProfile (models.Model):
 
             if not created:
                 # create self.player_id to be 6 random letters
-                self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',5))
+                self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',k=5))
 
         super(UserProfile,self).save(*args, **kwargs)
         

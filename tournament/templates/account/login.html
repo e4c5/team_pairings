@@ -8,13 +8,14 @@
           <div class="card-header">Login</div>
           <div class="card-body">
             <form method="post"> 
+                {{ form.errors }}
               {% csrf_token %}
               {% if form.non_field_errors %}
               <div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>
               {% endif %}
               <div class="mb-3">
                 <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                <input type="text" name="username" autofocus="" 
+                <input type="text" name="login" autofocus="" 
                         autocapitalize="none" autocomplete="username" maxlength="150" class="form-control"
                         id="id_username"
                 >

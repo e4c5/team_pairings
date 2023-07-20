@@ -66,7 +66,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
     def login(self):
         """Some actions you need to be logged in"""
         self.selenium.refresh()
-        self.get_url('/login/')
+        self.get_url('/accounts/login/')
     
         username_input = self.selenium.find_element(By.ID,"id_username")
         username_input.send_keys('admin')
@@ -148,7 +148,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
                     name.send_keys(line[0])
                     rating.send_keys(line[1])
                     btn.click()
-                    WebDriverWait(driver, 1, 0.1).until(lambda x: rating.get_attribute("value") == "")
+                    WebDriverWait(driver, 1.5, 0.1).until(lambda x: rating.get_attribute("value") == "")
 
         time.sleep(0.1)
 

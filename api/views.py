@@ -10,7 +10,7 @@ from channels.layers import get_channel_layer
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from tournament import models, tools
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
@@ -153,7 +153,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     p = RoundRobinPairing(rnd)               
                 else:
                     p = SwissPairing(rnd)
-                    
+
                 p.make_it()
                 results = p.save()
                 res_serializer = ResultSerializer(results, many=True)
@@ -429,7 +429,19 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ParticipantSerializer
 
+    def check_rr_pairing(self):
+        if self.request.tournament.round_robin:
+            if self.request.tournament.rounds.exists():
+                if self.request.tournaments.rounds.get(round_no=1).paired:
+                    # raise bad request error
+                    raise ValidationError("Round 1 has already been paired")
+                
+    def destroy(self, request, *args, **kwargs):
+        self.check_rr_pairing()
+        return super().destroy(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
+        self.check_rr_pairing()
         instance = serializer.save(tournament_id=self.request.tournament.id)
         p = serializer.data
         p['id'] = instance.pk

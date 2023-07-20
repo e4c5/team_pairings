@@ -62,7 +62,8 @@ class Pairing:
                 raise ValueError(f"round {rnd.based_on} needs to be completed")
 
             if results.filter(score1=None).exists():
-                raise ValueError(f"round {rnd.based_on} needs to be completed")
+                if not self.tournament.round_robin:
+                    raise ValueError(f"round {rnd.based_on} needs to be completed")
 
         # fetch all previous round results so that we know of all the 
         # old pairings

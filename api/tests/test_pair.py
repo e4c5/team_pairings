@@ -187,6 +187,7 @@ class RoundRobinTests(APITestCase, Helper):
         return super().setUp()
 
     def test_update_num_rounds_odd(self):
+        """Before pairing update the number of rounds based on players"""
         self.add_players(self.t1, 11)
         self.t1.update_num_rounds()
         self.assertEqual(5, self.t1.num_rounds)
@@ -200,6 +201,7 @@ class RoundRobinTests(APITestCase, Helper):
         self.assertEquals(self.t1.rounds.count(), 11)
 
     def test_update_num_rounds_even(self):
+        """Before pairing update the number of rounds based on even num of players"""
         self.add_players(self.t1, 10)
         self.t1.update_num_rounds()
         self.assertEqual(5, self.t1.num_rounds)
@@ -213,13 +215,13 @@ class RoundRobinTests(APITestCase, Helper):
         self.assertEquals(self.t1.rounds.count(), 9)
 
     def test_reduce_rounds(self):
+        """If number players < num_rounds rounds shold be deleted."""
         self.add_players(self.t1, 4)
         self.t1.round_robin = True
         self.t1.save()
         self.t1.update_num_rounds()
         self.assertEqual(3, self.t1.num_rounds)
         self.assertEquals(self.t1.rounds.count(), 3)
-
 
     def test_round_robin(self):
         """Round robin pairing"""
@@ -231,7 +233,19 @@ class RoundRobinTests(APITestCase, Helper):
         sp.save()
         self.assertEqual(Result.objects.count(), 3)
 
-
+    def test_pair_all_rounds(self):
+        """Pairing all rounds"""
+        self.add_players(self.t1, 6)
+        self.t1.round_robin = True
+        self.t1.save()
+        self.t1.update_num_rounds()
+        
+        for i in range(1, 6):
+            rnd = self.t1.rounds.get(round_no=i)
+            p = rr.RoundRobinPairing(rnd)
+            p.make_it()
+            p.save()
+            
 
 class ByesTests(APITestCase, Helper):
     """Test byes and absentees.
