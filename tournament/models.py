@@ -166,9 +166,11 @@ class TournamentRound(models.Model):
     KOTH = "KOTH"
     RANDOM = "RANDOM"
     MANUAL = "MANUAL"
+    AUTO = "AUTO" # Try round robin first and then swiss.
     
     PAIRING_CHOICES = ([ROUND_ROBIN, 'Round Robin'], [SWISS, 'Swiss'],
-                       [KOTH, 'KOTH'], [RANDOM, 'Random'], [MANUAL,"Manual"])
+                       [KOTH, 'KOTH'], [RANDOM, 'Random'], [MANUAL,"Manual"],
+                       [AUTO, 'Auto'])
     
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='rounds')
     round_no = models.IntegerField()
