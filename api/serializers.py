@@ -43,3 +43,7 @@ class BoardResultSerializer(serializers.Serializer):
     p1 = serializers.IntegerField(required=False)
     p2 = serializers.IntegerField(required=False)
 
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['full_name','preferred_name']

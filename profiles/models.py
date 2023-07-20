@@ -1,8 +1,9 @@
 import time
 import random
 
-from django.contrib.gis.db import models
+from django.db import models
 from django.contrib.auth.models import User     
+from django.contrib.postgres.search import TrigramSimilarity
 
 from django.db import transaction
 from django.db.models.signals import post_save
@@ -24,7 +25,21 @@ class Avatar(models.Model):
 class UserProfile (models.Model):
     '''
     The profile. Isn't it bleeding obvious?
+
+    Users have several names. First up they have a name that appears on the
+    WESPA rating list. This name can be upto 20 characters only. We also 
+    have a national list name, which in most cases turns out to be twenty 
+    characters long.
+
+    But some players have names that a much longer. Kavindu Malawaraarachchi
+    is a great example. His name appears on the wespa list as Kavindu 
+    Malawaraarac (truncated)
+
+    Some Sri Lankan names are particularly long. Some people have three or
+    four different middle names and for others their surname appears before
+    all other names and can be particularly long as well.
     '''
+
     GENDER_CHOICES = (('M','Male'), ('F','Female'), ('U',''))
     PRIVACY_CHOICES = ((True,'Yes'),(False,'No'));
     player_id = models.CharField(max_length=5)
@@ -32,7 +47,7 @@ class UserProfile (models.Model):
     website_url = models.URLField(blank=True, null=True, max_length=128)
     date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default = 'U')
-    
+    verified = models.BooleanField(default = False)
     user = models.OneToOneField(User, primary_key = True, on_delete=models.PROTECT)
     
     is_public = models.BooleanField(verbose_name=u'Make profile public', 
@@ -40,24 +55,30 @@ class UserProfile (models.Model):
 
     user_preferences = models.JSONField(default = dict)
 
-    national_list_name = models.CharField(max_length=128, blank=True, null=True)
-    wespa_list_name = models.CharField(max_length=128, blank=True, null=True)
-                                       
+    national_list_name = models.CharField(max_length=20, blank=True, null=True)
+    wespa_list_name = models.CharField(max_length=20, blank=True, null=True)
+
+    # the users full name so that we can verify them against passports or
+    # official documents if needed.
+    full_name = models.CharField(max_length=128, blank=True, null=True)
+    # the name as it should appear on a tourament name list.
+    preferred_name = models.CharField(max_length=128, blank=True, null=True)
+
     def save(self, *args, **kwargs):
         """Fille the player_id field.
         The player_id is made up of the first letter of the user.first_name and 
         five letters from the user.last_name if the the player_id"""
+        if not self.pk:
+            for n in range(1, 6):
+                self.player_id = self.user.first_name[0:n] + self.user.last_name[0:5-n]
+                self.player_id = self.player_id.upper()
+                if not UserProfile.objects.filter(player_id = self.player_id).exists():
+                    created = True
+                    break
 
-        for n in range(1, 6):
-            self.player_id = self.user.first_name[0:n] + self.user.last_name[0:5-n]
-            self.player_id = self.player_id.upper()
-            if not UserProfile.objects.filter(player_id = self.player_id).exists():
-                created = True
-                break
-
-        if not created:
-            # create self.player_id to be 6 random letters
-            self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',5))
+            if not created:
+                # create self.player_id to be 6 random letters
+                self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',5))
 
         super(UserProfile,self).save(*args, **kwargs)
         
@@ -135,3 +156,4 @@ def create_user_profile(sender, instance, created, **kwargs):
     '''
     if created:
         UserProfile.objects.get_or_create(user=instance)    
+
