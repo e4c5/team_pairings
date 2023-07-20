@@ -4,6 +4,7 @@ import json
 from unittest.mock import patch
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.forms.models import model_to_dict
 
 from channels.testing import HttpCommunicator
 
@@ -11,6 +12,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from tournament import models
+from api.tests.helper import Helper
 
 class BasicTests(APITestCase):
     """Not going to test creating a tournament since that's one off and done in admin"""
@@ -119,25 +121,6 @@ class BasicTests(APITestCase):
         self.assertEqual('richmond-showdown-u20', response.data[0]['slug'])
 
 
-    @patch('api.views.broadcast')
-    def test_add_teams(self, m):
-        with open('api/tests/data/teams.csv') as fp:
-            resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
-                    {"name": 'aa', "rating":  100})
-            self.assertEqual(403, resp.status_code)
-             
-            self.client.login(username='testuser', password='12345')
-            reader = csv.reader(fp)
-            for line in reader:
-                resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
-                    {"name": line[0], "rating":  line[1]})
-                self.assertEqual(201, resp.status_code)
-            
-            resp = self.client.get(f'/api/tournament/{self.t1.id}/participant/')
-            self.assertEqual(200, resp.status_code)
-            self.assertEqual(18, len(resp.data))
-
-
     def test_unauth(self):
         """Test that our endpoints are read only for anonymous users"""
         resp = self.client.post('/api/tournament/', {})
@@ -165,3 +148,111 @@ class BasicTests(APITestCase):
         models.Tournament.objects.update(private=True)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(1, len(resp.data), resp.data)
+
+
+class TestParticipants(APITestCase, Helper):
+
+    def setUp(self) -> None:
+        self.create_tournaments()
+    
+    @patch('api.views.broadcast')
+    def test_add_teams(self, m):
+        with open('api/tests/data/teams.csv') as fp:
+            resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
+                    {"name": 'aa', "rating":  100})
+            self.assertEqual(403, resp.status_code)
+             
+            self.client.login(username='sri', password='12345')
+            reader = csv.reader(fp)
+            for line in reader:
+                resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
+                    {"name": line[0], "rating":  line[1]})
+                self.assertEqual(201, resp.status_code)
+            
+            resp = self.client.get(f'/api/tournament/{self.t1.id}/participant/')
+            self.assertEqual(200, resp.status_code)
+            self.assertEqual(18, len(resp.data))
+
+
+    def test_rr_add(self):
+        """adding a participant to an already paired RR should fail"""
+        self.t1.round_robin = True
+        self.t1.save()
+        self.add_players(self.t1, count=10)
+        rnd = self.t1.rounds.get(round_no=1)
+
+        self.client.login(username='sri', password='12345')
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd.id})
+        self.assertEquals(resp.status_code, 200)
+
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
+                    {"name": "new player", "rating":  100})
+        self.assertEqual(400, resp.status_code)
+
+    def test_off_and_delete(self):
+        parties = self.add_players(self.t1, count=10)
+        self.client.login(username='sri', password='12345')
+        resp = self.client.delete(
+            f'/api/tournament/{self.t1.id}/participant/{parties[0].id}/'
+        )
+        self.assertEquals(resp.status_code, 204)
+        self.assertEquals(9, self.t1.participants.count())
+
+        p = model_to_dict(parties[1])
+        p['offed'] = 1
+        resp = self.client.put(
+            f'/api/tournament/{self.t1.id}/participant/{parties[1].id}/',p
+        )
+
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(1, self.t1.participants.filter(offed=True).count())
+
+
+    def test_off_and_delete_rr(self):
+        """Delete a participant"""
+        self.t1.round_robin = True
+        self.t1.save()        
+
+        parties = self.add_players(self.t1, count=10)
+        self.client.login(username='sri', password='12345')
+
+        # convert parties[0] which is a django model instance into a dictionary
+        p = model_to_dict(parties[0])
+        p['offed'] = 1
+        resp = self.client.put(
+            f'/api/tournament/{self.t1.id}/participant/{parties[0].id}/',p
+        )
+        self.assertEquals(resp.status_code, 200)
+        resp = self.client.delete(
+            f'/api/tournament/{self.t1.id}/participant/{parties[1].id}/'
+        )
+        self.assertEquals(resp.status_code, 204)
+        self.assertEquals(1, self.t1.participants.filter(offed=True).count())
+
+        # we have switched off one player, we have deleted another that means
+        # only 8 players are eligible to be paired.
+        self.t1.update_num_rounds()
+        self.t1.refresh_from_db()
+
+        self.assertEquals(7, self.t1.num_rounds)
+
+        # no we pair this and try to delete someone again. Should not work.
+        rnd1 = self.t1.rounds.get(round_no=1)
+        resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
+        self.assertEquals(resp.status_code, 200)
+        rnd1.refresh_from_db()
+        self.assertTrue(rnd1.paired)
+        
+        resp = self.client.delete(
+            f'/api/tournament/{self.t1.id}/participant/{parties[2].id}/'
+        )
+        
+        self.assertEquals(resp.status_code, 400)
+
+        # now try to switch someone off.
+        p = model_to_dict(parties[5])
+        p['offed'] = 1
+        resp = self.client.put(
+            f'/api/tournament/{self.t1.id}/participant/{parties[5].id}/',p
+        )
+        self.assertEquals(resp.status_code, 400)

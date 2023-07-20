@@ -432,7 +432,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     def check_rr_pairing(self):
         if self.request.tournament.round_robin:
             if self.request.tournament.rounds.exists():
-                if self.request.tournaments.rounds.get(round_no=1).paired:
+                if self.request.tournament.rounds.get(round_no=1).paired:
                     # raise bad request error
                     raise ValidationError("Round 1 has already been paired")
                 
@@ -451,6 +451,10 @@ class ParticipantViewSet(viewsets.ModelViewSet):
             "tournament_id": self.request.tournament.id
         })
 
+    def update(self, request, *args, **kwargs):
+        self.check_rr_pairing()
+        return super().update(request, *args, **kwargs)
+    
     def retrieve(self, request, pk=None, **kwargs):
         return Response(get_participant(pk))
 
