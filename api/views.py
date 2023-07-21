@@ -214,7 +214,8 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     }
                 )
                 
-            return Response({'status': 'ok'})
+                return Response({'status': 'ok'})
+            raise PermissionDenied("You are not a tournament director")
                 
         raise PermissionDenied("Not allowed for public events")
 

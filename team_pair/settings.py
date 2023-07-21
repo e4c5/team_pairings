@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 from . import settings_local
 import os
+import sys
 import logging.config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -149,6 +150,8 @@ SITE_ID = 1
 
 LOGGING_CONFIG = None
 LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
+if 'test' in sys.argv:
+    LOGLEVEL = 'ERROR'  # Set log level to 'ERROR' to disable all logging output during tests
 
 logging.config.dictConfig({
     'version': 1,

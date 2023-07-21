@@ -14,6 +14,7 @@ from rest_framework.test import APITestCase
 from tournament import models
 from api.tests.helper import Helper
 
+
 class BasicTests(APITestCase):
     """Not going to test creating a tournament since that's one off and done in admin"""
 
@@ -256,3 +257,52 @@ class TestParticipants(APITestCase, Helper):
             f'/api/tournament/{self.t1.id}/participant/{parties[5].id}/',p
         )
         self.assertEquals(resp.status_code, 400)
+
+
+class RandomFillTests(APITestCase):
+    def setUp(self):
+        self.td = User.objects.create_user(username='td', password='testpassword')
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.tournament = models.Tournament.objects.create(
+            name='Test Tournament', private=True, num_rounds=5)
+        self.director = models.Director.objects.create(user=self.td, tournament=self.tournament)
+
+    def test_random_fill_private_tournament_as_director(self):
+        self.client.force_authenticate(user=self.td)
+
+        url = reverse('tournament-random-fill', kwargs={'pk': self.tournament.pk}) 
+        data = {'fill': 5}  # Example data for the 'fill' parameter
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'status': 'ok'})
+
+        # Add more assertions to verify the actual changes made by the 'random_fill' function
+        # For example, check if the tournament has been filled with random results, etc.
+
+    def test_random_fill_private_tournament_as_regular_user(self):
+        # Test random_fill with a regular user who is not a director
+        # This should raise a PermissionDenied exception.
+
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse('tournament-random-fill', kwargs={'pk': self.tournament.pk}) 
+        data = {'fill': 5}  # Example data for the 'fill' parameter
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_random_fill_public_tournament(self):
+        # Test random_fill with a public tournament
+        # This should raise a PermissionDenied exception.
+
+        self.tournament.private = False
+        self.tournament.save()
+
+        self.client.force_authenticate(user=self.td)
+
+        url = reverse('tournament-random-fill', kwargs={'pk': self.tournament.pk}) 
+        data = {'fill': 5}  # Example data for the 'fill' parameter
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
