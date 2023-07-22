@@ -27,7 +27,7 @@ class TestResults(SeleniumTest):
         )
         self.assertEqual(3, Result.objects.count())
 
-        field = driver.find_element(By.CSS_SELECTOR, "input[data-test-id='tsh-style-entry']")
+        field = driver.find_element(By.CSS_SELECTOR, "input[data-testid='tsh-style-entry']")
         field.click()
         field.send_keys('ames 439 mirez 410')
         field.send_keys(Keys.ENTER)
@@ -59,7 +59,7 @@ class TestResults(SeleniumTest):
             EC.presence_of_element_located((By.CLASS_NAME, "bi-pencil"))
         )
         self.assertEqual(3, Result.objects.count())
-        field = driver.find_element(By.CSS_SELECTOR, "input[data-test-id='autocomplete']")
+        field = driver.find_element(By.CSS_SELECTOR, "input[data-testid='autocomplete']")
         field.click()
         field.send_keys('Debo')
         field.send_keys(Keys.ENTER)
@@ -207,8 +207,8 @@ class TestResults(SeleniumTest):
     def flip(self):
         driver = self.selenium
         WebDriverWait(driver, 5, 0.6).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='unpair']"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-testid='unpair']"))
         ).click()
         WebDriverWait(driver, 5, 0.6).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-testid='pair']"))
         ).click()
