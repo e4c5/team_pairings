@@ -359,14 +359,14 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-warning' onClick={unpair} data-test-id='unpair'>
+                            <button className='btn btn-warning' onClick={unpair} data-testid='unpair'>
                                 Unpair
                             </button>
                         }
                     </div>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-danger' onClick={truncate} data-test-id='unpair'>
+                            <button className='btn btn-danger' onClick={truncate} data-testid='unpair'>
                                 Truncate
                             </button>
                         }
@@ -415,7 +415,7 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-warning' onClick={pair} data-test-id='pair'>
+                            <button className='btn btn-warning' onClick={pair} data-testid='pair'>
                                 Pair
                             </button>
                         }
