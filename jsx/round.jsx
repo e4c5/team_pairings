@@ -69,6 +69,7 @@ export function reducer(state, action) {
             throw Error(`unrecognized action ${action.type} in reducer`)
     }
 }
+
 /**
  * A tournament round. 
  * if the round has ben paired will have set of results but no scores

@@ -94,7 +94,9 @@ export function Participants(props) {
     }
 
     function isStarted() {
-        return tournament.rounds[0].paired
+        if(tournament.rounds?.length) 
+            return tournament.rounds[0]?.paired
+        return false
     }
 
     function changeOrder(field) {

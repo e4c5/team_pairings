@@ -85,12 +85,13 @@ describe('Tournament Reducer', () => {
     });
 
     it('should handle updating results', () => {
-        // given
-        const state = {
+        let state = {
             num_rounds: 3,
             participants: [
                 {id: 1, name: 'John Doe'},
-                {id: 2, name: 'Jane Doe'}
+                {id: 2, name: 'Jane Doe'},
+                {id: 3, name: 'John Smith'},
+                {id: 4, name: 'Jane Smith'}
             ]
         };
 
@@ -103,16 +104,25 @@ describe('Tournament Reducer', () => {
         };
         
         // when
-        const result = tournamentReducer(state, action);
+        state = tournamentReducer(state, action);
 
         // then
-        expect(result.results).not.toBeUndefined();
-        expect(result.results).toHaveLength(3);
-        expect(result.results[0]).toContainEqual(action.result[0]);
-        expect(result.participants).toHaveLength(2);
+        expect(state.results).not.toBeUndefined();
+        expect(state.results).toHaveLength(3);
+        expect(state.results[0]).toContainEqual(action.result[0]);
+        expect(state.participants).toHaveLength(4);
+
+        action.result = [
+            {p1: 1, p2: 2, score: 3},
+            {p1: 3, p2: 4, score: 100}
+        ]
+        
+        state = tournamentReducer(state, action);
+        expect(state.results[0]).toContain(action.result[0])
+        expect(state.results[0]).toContain(action.result[1])
     });
 
-    it('should handle adding a round', () => {
+    it('should handle adding rounds', () => {
         // given
         const state = {
             rounds: [ 
@@ -122,16 +132,16 @@ describe('Tournament Reducer', () => {
         };
 
         const action = {
-            type: 'addRound',
-            round: {id: 3, name: 'Round 3'}
+            type: 'updateRounds',
+            rounds: [{id: 3, name: 'Round 3'}]
         };
         
         // when
         const result = tournamentReducer(state, action);
 
         // then
-        expect(result.rounds).toContainEqual(action.round);
-        expect(result.rounds).toHaveLength(3);
+        
+        expect(result.rounds).toHaveLength(1);
     });
 
     it('should handle editing a round', () => {

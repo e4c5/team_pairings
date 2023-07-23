@@ -98,12 +98,13 @@ describe('Participants component', () => {
     // Set up the mock implementations for the hooks
     beforeEach(() => {
         const tournamentDispatchMock = jest.fn();
-        useTournament.mockReturnValue(tournamentMock);
         useTournamentDispatch.mockReturnValue(tournamentDispatchMock);
     });
 
     it('renders the Participants component correctly', async () => {
-        const { getByPlaceholderText, queryByText, getByText, debug } = await act(() => 
+        useTournament.mockReturnValue(tournamentMock);
+
+        const { getByText } = await act(() => 
             render(<MemoryRouter><Participants /></MemoryRouter>)
         );
 
@@ -111,16 +112,36 @@ describe('Participants component', () => {
         expect(getByText(/Participant 2/)).toBeInTheDocument();
         expect(getByText(/Participant 3/)).toBeInTheDocument();
 
-        // Mock the toggleParticipant function and test its functionality
+        // Toggle participants checkbox should not be available
         const toggleCheckbox = screen.queryByRole('checkbox');
         expect(toggleCheckbox).toBeNull()
 
+        const sortDown = document.querySelectorAll('bi-sort-down-alt');
+        const sortUp = document.querySelectorAll('bi-sort-down-alt');
+        const th = document.querySelectorAll('th');
+        expect(sortDown).toHaveLength(0)
+        expect(sortUp).toHaveLength(0)
+        
+        useTournamentDispatch.mockReturnValue(
+            {...tournamentMock, order: 'Rank'});
+            await waitFor(() => {
+                expect(useTournamentDispatch).toHaveBeenCalledTimes(1)
+            });
+        fireEvent.click(th[0])
+        await waitFor(() => {
+            expect(useTournamentDispatch).toHaveBeenCalledTimes(2)
+        });
+
+        await waitFor(() => {
+            expect(document.querySelectorAll('bi-sort-up-alt')).toHaveLength(1)
+        });
     })
 
-    it('tests the deleteParticipant function', async () => {
+    it('test participant switching off', async () => {
         // before rendering the component add a an html hidden input field to the document
-        // that contains the participant id to be deleted
+        // that contains the participant id to be toggled
         document.body.innerHTML = `<input type='hidden' id='hh' value='1'/>`
+        useTournament.mockReturnValue(tournamentMock);
 
         const { debug, queryAllByRole } = await act(() => 
             render(<MemoryRouter><Participants /></MemoryRouter>)
@@ -134,7 +155,40 @@ describe('Participants component', () => {
         });
         fireEvent.click(toggleCheckbox[0]);
         await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({method: 'PUT'})
+        )
         expect(useTournamentDispatch).toHaveBeenCalledTimes(2)
+        
+    })
+
+    it('test participant deleting', async () => {
+        // before rendering the component add a an html hidden input field to the document
+        // that contains the participant id to be deleted
+        document.body.innerHTML = `<input type='hidden' id='hh' value='1'/>`
+        useTournament.mockReturnValue(
+            {...tournamentMock, rounds: [{paired: false}]}
+        );
+
+        const { debug, queryAllByRole } = await act(() => 
+            render(<MemoryRouter><Participants /></MemoryRouter>)
+        )
+        const icons = document.querySelectorAll('i.bi-x-circle');
+        
+        expect(icons.length).toBe(3)
+        //debug()
+        global.fetch = jest.fn().mockResolvedValue({
+            json: jest.fn().mockResolvedValue({'status': 'success'})
+        });
+
+        fireEvent.click(icons[0]);
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({method: 'DELETE'})
+        )
+        expect(useTournamentDispatch).toHaveBeenCalledTimes(3)
         
     })
 });
