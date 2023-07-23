@@ -447,10 +447,25 @@ class ParticipantViewSet(viewsets.ModelViewSet):
         p = serializer.data
         p['id'] = instance.pk
         p['seed'] = instance.seed
-        broadcast({
-            "participant": p,
-            "tournament_id": self.request.tournament.id
-        })
+
+        if self.request.tournament.round_robin:
+            self.request.tournament.update_num_rounds()
+            query = """select jsonb_agg(to_jsonb(r)) FROM (
+                    SELECT * from tournament_tournamentround rounds 
+                        where tournament_id = %s order by round_no
+                ) r"""
+            with connection.cursor() as cursor:
+                cursor.execute(query, [self.request.tournament.id])
+                broadcast({
+                    "rounds": cursor.fetchone()[0][0],
+                    "participant": p,
+                    "tournament_id": self.request.tournament.id
+                })
+        else:
+            broadcast({
+                "participant": p,
+                "tournament_id": self.request.tournament.id
+            })
 
     def update(self, request, *args, **kwargs):
         self.check_rr_pairing()
