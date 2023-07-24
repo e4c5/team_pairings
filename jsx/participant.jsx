@@ -101,7 +101,7 @@ export function Participants(props) {
 
     function changeOrder(field) {
         const order = tournament?.order || 'rank'
-
+        fetch()
         if (field == order) {
             tournamentDispatch({ type: 'sort', field: `-${field}`, tid: tournament.id })
         }

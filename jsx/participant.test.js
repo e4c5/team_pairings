@@ -94,10 +94,10 @@ const tournamentMock = {
 describe('Participants component', () => {
     // Mock the getCookie function
     jest.mock('./cookie', () => jest.fn());
-
+    let tournamentDispatchMock = undefined;
     // Set up the mock implementations for the hooks
     beforeEach(() => {
-        const tournamentDispatchMock = jest.fn();
+        tournamentDispatchMock = jest.fn();
         useTournamentDispatch.mockReturnValue(tournamentDispatchMock);
     });
 
@@ -122,19 +122,19 @@ describe('Participants component', () => {
         expect(sortDown).toHaveLength(0)
         expect(sortUp).toHaveLength(0)
         
-        useTournamentDispatch.mockReturnValue(
-            {...tournamentMock, order: 'Rank'});
-            await waitFor(() => {
-                expect(useTournamentDispatch).toHaveBeenCalledTimes(1)
-            });
+        //useTournamentDispatch.mockReturnValue({...tournamentMock, order: 'Rank'});
+        
+        expect(tournamentDispatchMock).toHaveBeenCalledTimes(0)
+        
         fireEvent.click(th[0])
+        
         await waitFor(() => {
-            expect(useTournamentDispatch).toHaveBeenCalledTimes(2)
-        });
-
-        await waitFor(() => {
-            expect(document.querySelectorAll('bi-sort-up-alt')).toHaveLength(1)
-        });
+                expect(tournamentDispatchMock).toHaveBeenCalledTimes(1)
+            }
+        );
+        expect(tournamentDispatchMock).toHaveBeenCalledWith(
+            {field: "pos", tid: 1, type: "sort"}
+        )
     })
 
     it('test participant switching off', async () => {
