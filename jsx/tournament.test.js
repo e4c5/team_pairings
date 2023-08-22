@@ -84,7 +84,6 @@ describe('Tournament component', () => {
         };
 
         const tournamentDispatchMock = jest.fn();
-        const useParamsMock = jest.fn().mockReturnValue({ slug: 'tournament-1' });
 
         useTournament.mockReturnValue(tournamentMock);
         useTournamentDispatch.mockReturnValue(tournamentDispatchMock);
@@ -110,7 +109,6 @@ describe('Tournament component', () => {
         };
 
         const tournamentDispatchMock = jest.fn();
-        const useParamsMock = jest.fn().mockReturnValue({ slug: 'tournament-1' });
         
         jest.spyOn(document, 'getElementById').mockReturnValue({ value: 'some-auth-token' });
         global.fetch = jest.fn().mockResolvedValue({
@@ -148,7 +146,6 @@ describe('Tournament component', () => {
         jest.spyOn(document, 'getElementById').mockReturnValue({ value: 'some-auth-token' });
 
         const tournamentDispatchMock = jest.fn();
-        const useParamsMock = jest.fn().mockReturnValue({ slug: 'tournament-1' });
 
         useTournament.mockReturnValue(tournamentMock);
         useTournamentDispatch.mockReturnValue(tournamentDispatchMock);
@@ -185,7 +182,6 @@ describe('Tournament component', () => {
         // Mock the authentication check
         jest.spyOn(document, 'getElementById').mockReturnValue({ value: 'some-auth-token' });
         const tournamentDispatchMock = jest.fn();
-        const useParamsMock = jest.fn().mockReturnValue({ slug: 'tournament-1' });
 
         useTournament.mockReturnValue(tournamentMock);
         useTournamentDispatch.mockReturnValue(tournamentDispatchMock);
@@ -219,7 +215,6 @@ describe('Tournament component', () => {
         // Mock the authentication check
         jest.spyOn(document, 'getElementById').mockReturnValue({ value: 'some-auth-token' });
         const tournamentDispatchMock = jest.fn();
-        const useParamsMock = jest.fn().mockReturnValue({ slug: 'tournament-1' });
 
         useTournament.mockReturnValue(tournamentMock);
         useTournamentDispatch.mockReturnValue(tournamentDispatchMock);

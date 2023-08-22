@@ -140,7 +140,7 @@ export default function App() {
 
     return (
         <>
-        <div className='float-end mt-3'><Theme/></div>
+            <div className='float-end mt-3'><Theme/></div>
             <Routes>
                 <Route path="/" element={<Tournaments tournaments={tournaments} />}></Route>
                 <Route path="/new" 

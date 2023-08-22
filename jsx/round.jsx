@@ -350,6 +350,7 @@ export function Round(props) {
     }
 
     const roundDetails = getRoundDetails()
+    
     if (roundDetails?.paired) {
         return (
             <div>
@@ -367,7 +368,7 @@ export function Round(props) {
                     </div>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-danger' onClick={truncate} data-testid='unpair'>
+                            <button className='btn btn-danger' onClick={truncate} data-testid='truncate'>
                                 Truncate
                             </button>
                         }
@@ -433,7 +434,7 @@ export function Round(props) {
 
 export function Rounds() {
     const tournament = useTournament();
-
+    
     if (tournament?.entry_mode == 'P') {
         return (
             <div className='row mt-3'>
