@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-from . import settings_local
+
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,8 +20,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = settings_local.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -88,8 +86,7 @@ ASGI_APPLICATION = 'team_pair.asgi.application'
 
 # Database
 # see settings_local.py
-DATABASES = settings_local.DATABASES
-CHANNEL_LAYERS = settings_local.CHANNEL_LAYERS
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -140,3 +137,7 @@ CSRF_TRUSTED_ORIGINS = [ 'https://live.scrabble.lk']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SITE_ID = 1
+
+from .settings_local import *
+
+print(SOCIALACCOUNT_PROVIDERS)
