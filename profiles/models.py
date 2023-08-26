@@ -53,7 +53,7 @@ class Profile (models.Model):
     is_public = models.BooleanField(verbose_name=u'Make profile public', 
                                     choices = PRIVACY_CHOICES, default = False)
 
-    user_preferences = models.JSONField(default = dict)
+    user_preferences = models.JSONField(default = dict,blank=True)
 
     national_list_name = models.CharField(max_length=20, blank=True, null=True)
     wespa_list_name = models.CharField(max_length=20, blank=True, null=True)
@@ -69,6 +69,7 @@ class Profile (models.Model):
         The player_id is made up of the first letter of the user.first_name and 
         five letters from the user.last_name if the the player_id"""
         if not self.player_id:
+            created = False
             for n in range(1, 6):
                 self.player_id = self.user.first_name[0:n] + self.user.last_name[0:5-n]
                 self.player_id = self.player_id.upper()
@@ -78,7 +79,7 @@ class Profile (models.Model):
 
             if not created:
                 # create self.player_id to be 6 random letters
-                self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',5))
+                self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',k=5))
 
         super(Profile,self).save(*args, **kwargs)
         

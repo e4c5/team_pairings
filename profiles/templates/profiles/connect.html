@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html> 
+<html theme="dark" data-bs-theme="dark">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herald :: Scrable Tournament Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+        rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/default.css">
+</head>
+
+<body>
+  <div class="container-xl">
+    <div class="m5">
+        <p>
+            We are now trying to find your wespa and national rating.
+        </p>
+    </div>
+    <form method="POST">
+        <h3>WESPA Ratings</h3>
+        <p>We have searched for your name in the wespa ratings list, if you see if below please select it. If your name appears multiple times,
+            please contact ratings@scrabble.lk and let us know about it. If you have played WESPA rated tournaments but your name does not appear
+            please tell us about it.
+        </p>
+        {% for w in wespa %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="wespa" value="{{ w.id }}"/>
+                <label class="form-check-label" for="{{ w.id }}">{{ w.name }}</label>
+            </div>
+        {% empty %}
+            No matches found.
+        {% endfor %}
+
+        <h3>National Ratings</h3>
+        <p>We have searched for your name in the national ratings list. If your name is either duplicated or does not appear below even though you have
+            taken part in nationally rated tournaments please email ratings@scrabble.lk . Please note that the national ratings list is the one published
+            on <a href="https://scrabble.lk/ratings/">scrabble.lk</a>
+        </p>
+        {% for w in national %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="national" value="{{ w.id }}"/>
+                <label class="form-check-label" for="{{ w.id }}">{{ w.name }}</label>
+            </div>
+        {% empty %}
+            No matches found.
+        {% endfor %}
+        
+        <h4>Unrated tournaments</h4>
+        <p>If your name does not appear in either national ratings or wespa ratings please see if it appears in the list of players who have taken part 
+            in unrated tournaments.
+        </p>
+        {% for w in unrated %}
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="unrated" value="{{ w.id }}"/>
+            <label class="form-check-label" for="{{ w.id }}">{{ w.name }}</label>
+        </div>
+    {% empty %}
+        No matches found.
+    {% endfor %}
+    </form>
+
+  </div>
+</body>
+
+<script src="/static/js/bundle.js" type="module"></script>
+
+</html>
