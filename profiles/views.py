@@ -48,13 +48,29 @@ def search_names(rtype, name):
 @login_required
 def connect(request):
     profile = request.user.profile
-    if not profile.full_name:
-        redirect('/profile/')
-    wespa = search_names("wespa", profile.preferred_name)
-    national = search_names("national", profile.preferred_name)
-    unrated = search_names("unrated", profile.preferred_name)
-    
-    return render(request, 'profiles/connect.html', 
-            { "wespa": wespa, "national": national, "unrated": unrated }
-    )
 
+    if request.method == "GET":
+        if not profile.full_name:
+            redirect('/profile/')
+
+        wespa = search_names("wespa", profile.preferred_name)
+        national = search_names("national", profile.preferred_name)
+        unrated = search_names("unrated", profile.preferred_name)
+        
+        return render(request, 'profiles/connect.html', 
+                { "wespa": wespa, "national": national, "unrated": unrated }
+        )
+    
+    else:
+        wespa = request.POST.get('wespa')
+        national = request.POST.get('national')
+        unrated = request.POST.get('unrated')
+
+        if not wespa and not national and not unrated:
+            request.user.profile.beginner = True
+        else:
+            request.user.profile.wespa_list_name = wespa
+            request.user.profile.national_list_name = national
+            request.user.profile.beginner = False
+        request.user.profile.save()
+        return render(request, 'profiles/connect.html', )

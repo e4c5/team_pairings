@@ -64,6 +64,8 @@ class Profile (models.Model):
     # the name as it should appear on a tourament name list.
     preferred_name = models.CharField(max_length=128, blank=True, null=True)
 
+    beginner = models.BooleanField(default = False)
+    
     def save(self, *args, **kwargs):
         """Fille the player_id field.
         The player_id is made up of the first letter of the user.first_name and 
