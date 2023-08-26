@@ -94,7 +94,7 @@ export function Tournament(props) {
                 <div className='row align-middle'>
                     <div className='col-md-5 col-sm-5'>
                         <input className={ `form-control ${name.error ? 'is-invalid' : ''}` } 
-                            placeholder='Name' data-test-id='name' ref={ref}
+                            placeholder='Name' data-testid='name' ref={ref}
                             value={name.value} onChange={ e => handleChange(e, 'name')} />
                         <div className='invalid-feedback'>
                             {name.error}
@@ -103,14 +103,14 @@ export function Tournament(props) {
                     <div className={tournament?.private ?  'col-md-2 col-sm-2' : 'col-md-5 col-sm-5'}>
                         <input className={ `form-control ${rating.error ? 'is-invalid' : ''}` } 
                             placeholder='rating' 
-                            type='number' data-test-id='rating'
+                            type='number' data-testid='rating'
                             value={rating.value} onChange={ e => handleChange(e, 'rating')} />
                         <div className='invalid-feedback'>
                             {rating.error}
                         </div>
                     </div>
                     <div className='col-md-1 col-sm-1'>
-                        <button className='btn btn-secondary' onClick = { e => add(e)} data-test-id='add'>
+                        <button className='btn btn-secondary' onClick = { e => add(e)} data-testid='add'>
                             <i className='bi-plus' ></i>
                         </button>
                     </div>
@@ -121,11 +121,11 @@ export function Tournament(props) {
                                 <input className='form-control' placeholder='Random fill #'
                                     value={fill.value}
                                     onChange={ e => handleChange(e, 'fill')}
-                                    type='number' data-test-id='fill-number' />
+                                    type='number' data-testid='fill-number' />
                             </div>
                             
                             <div className='col-md-2 col-sm-2'>
-                                <button className='btn btn-secondary' onClick = { e => filler(e)} data-test-id='fill'>
+                                <button className='btn btn-secondary' onClick = { e => filler(e)} data-testid='fill'>
                                     Random Fill
                                 </button>
                             </div>

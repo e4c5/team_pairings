@@ -10,13 +10,14 @@ from channels.layers import get_channel_layer
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from tournament import models, tools
 from api.serializers import (ParticipantSerializer, TournamentSerializer, 
         TournamentRoundSerializer, ResultSerializer, BoardResultSerializer)
 
 from api.swiss import SwissPairing
+from api.rr import RoundRobinPairing
 from api.permissions import IsAuthenticatedOrReadOnly
 
 """
@@ -145,7 +146,14 @@ class TournamentViewSet(viewsets.ModelViewSet):
                 if count < 2:
                     return Response({'status': 'error',
                         'message': 'A tournament needs at least two player'})
-                p = SwissPairing(rnd)
+                
+                p = None
+
+                if self.request.tournament.round_robin:
+                    p = RoundRobinPairing(rnd)               
+                else:
+                    p = SwissPairing(rnd)
+
                 p.make_it()
                 results = p.save()
                 res_serializer = ResultSerializer(results, many=True)
@@ -206,7 +214,8 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     }
                 )
                 
-            return Response({'status': 'ok'})
+                return Response({'status': 'ok'})
+            raise PermissionDenied("You are not a tournament director")
                 
         raise PermissionDenied("Not allowed for public events")
 
@@ -421,16 +430,47 @@ class ParticipantViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = ParticipantSerializer
 
+    def check_rr_pairing(self):
+        if self.request.tournament.round_robin:
+            if self.request.tournament.rounds.exists():
+                if self.request.tournament.rounds.get(round_no=1).paired:
+                    # raise bad request error
+                    raise ValidationError("Round 1 has already been paired")
+                
+    def destroy(self, request, *args, **kwargs):
+        self.check_rr_pairing()
+        return super().destroy(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
+        self.check_rr_pairing()
         instance = serializer.save(tournament_id=self.request.tournament.id)
         p = serializer.data
         p['id'] = instance.pk
         p['seed'] = instance.seed
-        broadcast({
-            "participant": p,
-            "tournament_id": self.request.tournament.id
-        })
 
+        if self.request.tournament.round_robin:
+            self.request.tournament.update_num_rounds()
+            query = """select jsonb_agg(to_jsonb(r)) FROM (
+                    SELECT * from tournament_tournamentround rounds 
+                        where tournament_id = %s order by round_no
+                ) r"""
+            with connection.cursor() as cursor:
+                cursor.execute(query, [self.request.tournament.id])
+                broadcast({
+                    "rounds": cursor.fetchone()[0][0],
+                    "participant": p,
+                    "tournament_id": self.request.tournament.id
+                })
+        else:
+            broadcast({
+                "participant": p,
+                "tournament_id": self.request.tournament.id
+            })
+
+    def update(self, request, *args, **kwargs):
+        self.check_rr_pairing()
+        return super().update(request, *args, **kwargs)
+    
     def retrieve(self, request, pk=None, **kwargs):
         return Response(get_participant(pk))
 

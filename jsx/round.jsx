@@ -69,6 +69,7 @@ export function reducer(state, action) {
             throw Error(`unrecognized action ${action.type} in reducer`)
     }
 }
+
 /**
  * A tournament round. 
  * if the round has ben paired will have set of results but no scores
@@ -349,6 +350,7 @@ export function Round(props) {
     }
 
     const roundDetails = getRoundDetails()
+    
     if (roundDetails?.paired) {
         return (
             <div>
@@ -359,14 +361,14 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-warning' onClick={unpair} data-test-id='unpair'>
+                            <button className='btn btn-warning' onClick={unpair} data-testid='unpair'>
                                 Unpair
                             </button>
                         }
                     </div>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-danger' onClick={truncate} data-test-id='unpair'>
+                            <button className='btn btn-danger' onClick={truncate} data-testid='truncate'>
                                 Truncate
                             </button>
                         }
@@ -415,7 +417,7 @@ export function Round(props) {
                 <div className='row'>
                     <div className='col'>
                         {editable &&
-                            <button className='btn btn-warning' onClick={pair} data-test-id='pair'>
+                            <button className='btn btn-warning' onClick={pair} data-testid='pair'>
                                 Pair
                             </button>
                         }
@@ -432,7 +434,7 @@ export function Round(props) {
 
 export function Rounds() {
     const tournament = useTournament();
-
+    
     if (tournament?.entry_mode == 'P') {
         return (
             <div className='row mt-3'>

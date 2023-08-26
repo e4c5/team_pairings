@@ -126,17 +126,6 @@ export function tournamentReducer(state, action) {
             }
         }
 
-        case 'changed': {
-            // is this used?
-            return state.map(t => {
-                if (t.id === action.task.id) {
-                    return action.task;
-                } else {
-                    return t;
-                }
-            });
-        }
-
         case 'updateResult': {
             // updates the results section of the tournament.
             // results are maintained as an array referenced by round number 
@@ -168,11 +157,10 @@ export function tournamentReducer(state, action) {
             return state
         }
 
-        case 'addRound': {
+        case 'updateRounds': {
             // is this used?
             if(state?.id == action.tid) {
-                const rounds = [...state.rounds, action.round]
-                return { ...state, rounds: rounds }
+                return { ...state, rounds: action.rounds }
             }
             return state
         }

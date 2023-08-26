@@ -3,7 +3,7 @@ import getCookie from './cookie.js';
 
 export function TournamentEditor() {
     const [tournament, setTournament] = useState({
-        name: '', start_date: '', num_rounds: 0,
+        name: '', start_date: '', num_rounds: 0, round_robin: false,
         entry_mode: 'S', 'private': true, team_size: 0
     })
 
@@ -24,6 +24,12 @@ export function TournamentEditor() {
             window.location.href = `/${json.slug}/`
         })
     }
+
+    function isDisabled() {
+        return tournament.name == '' || 
+               (tournament.num_rounds == 0 && tournament.round_robin == false) || 
+               ref.current.value == ''
+    }
     
     return (
         <div className="container mt-5">
@@ -43,11 +49,27 @@ export function TournamentEditor() {
                                 />
                         </div>
                         <div>
-                            Number of Rounds
-                            <input type="number" value={tournament.num_rounds}  className="form-control"
-                                data-testid='rounds'
-                                onChange={e => setTournament({...tournament, num_rounds: e.target.value})} />
+                            <label>
+                                <input type="radio" value="round-robin" 
+                                    checked={tournament.round_robin} data-testid='rr'
+                                    onChange={() => setTournament({...tournament, round_robin: true})}/>
+                                Round Robin
+                            </label>
+                            <label>
+                                <input type="radio" value="non-round-robin" 
+                                    checked={!tournament.round_robin}  data-testid='non-rr'
+                                    onChange={() => setTournament({...tournament, round_robin: false})}/>
+                                Non Round Robin
+                            </label>
                         </div>
+                        { !tournament.round_robin &&
+                            <div>
+                                Number of Rounds
+                                <input type="number" value={tournament.num_rounds}  className="form-control"
+                                    data-testid='rounds'
+                                    onChange={e => setTournament({...tournament, num_rounds: e.target.value})} />
+                            </div>
+                        }
                         <div>
                             Tournament Type
                             <select value={tournament.type}  className="form-control" data-testid='type'
@@ -67,7 +89,7 @@ export function TournamentEditor() {
                         }
                         <div>
                             <button className="btn btn-primary" 
-                                disabled={ tournament.name == '' || tournament.num_rounds == 0 || ref.current.value == '' }
+                                disabled={ isDisabled() }
                                 onClick={saveTournament}>Create</button>
                         </div>
                     </div>
@@ -78,4 +100,4 @@ export function TournamentEditor() {
     )
 } 
 
-console.log('editor 0.01')
+console.log('editor 0.03')

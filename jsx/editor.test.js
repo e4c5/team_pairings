@@ -6,7 +6,7 @@ import { act } from "react-dom/test-utils";
 import '@testing-library/jest-dom/extend-expect'; 
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor , waitForElementToBeRemoved} from '@testing-library/react';
 import { TournamentEditor } from './editor.jsx';
 
 // Mock the fetch function since we're not testing API calls in this unit test
@@ -100,10 +100,30 @@ describe('TournamentEditor component', () => {
         name: 'Tournament Name',
         start_date: startDate, // Check if the start_date is updated correctly
         num_rounds: '3',
+        round_robin: false,
         entry_mode: 'T',
         private: true,
         team_size: '4',
+        
       }),
     });
   });
+});
+
+describe('TournamentEditor component', () => {
+    it('renders correctly and checks conditional rendering', async () => {
+        const { getByTestId, getByRole } = await act(() => render(<MemoryRouter><TournamentEditor /></MemoryRouter>))
+
+        // Check initial rendering (Round Robin should be selected)
+        expect(getByTestId('non-rr')).toBeChecked();
+        expect(getByTestId('rounds')).toBeVisible();
+
+        // Click on non round robin and check if Number of Rounds input is visible
+        fireEvent.click(getByTestId('rr'));
+        await waitFor(() => expect(screen.getByTestId('rr')).toBeChecked());
+        expect(getByTestId('non-rr')).not.toBeChecked();
+        expect(screen.queryByTestId('rounds')).not.toBeInTheDocument();
+
+
+    });
 });

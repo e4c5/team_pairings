@@ -32,7 +32,7 @@ class TestParticipants(SeleniumTest):
         )
 
         with self.assertRaises(NoSuchElementException) as e:
-            driver.find_element(By.CSS_SELECTOR,'input[data-test-id=name]')
+            driver.find_element(By.CSS_SELECTOR,'input[data-testid=name]')
 
         self.assertIsNotNone(e)
 

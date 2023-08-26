@@ -66,7 +66,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
     def login(self):
         """Some actions you need to be logged in"""
         self.selenium.refresh()
-        self.get_url('/login/')
+        self.get_url('/accounts/login/')
     
         username_input = self.selenium.find_element(By.ID,"id_username")
         username_input.send_keys('admin')
@@ -103,17 +103,17 @@ class SeleniumTest(ChannelsLiveServerTestCase):
 
     def type_score(self, score1, score2, *, games=None, board=None) :
         driver = self.selenium
-        p2 = driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=p2]')         
+        p2 = driver.find_element(By.CSS_SELECTOR, 'input[data-testid=p2]')         
         # wait for the value of the input field to change from blank to non-blank
         # that's when the react state would have finished updating.
         WebDriverWait(driver, 1, 0.1).until_not(lambda x: p2.get_attribute("value") == "")
         if games is not None:
-            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=games-won]').send_keys(games);
+            driver.find_element(By.CSS_SELECTOR, 'input[data-testid=games-won]').send_keys(games);
         elif board is not None:
-            driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=board]').send_keys(board);
+            driver.find_element(By.CSS_SELECTOR, 'input[data-testid=board]').send_keys(board);
 
-        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score1]').send_keys(score1);
-        driver.find_element(By.CSS_SELECTOR, 'input[data-test-id=score2]').send_keys(score2);
+        driver.find_element(By.CSS_SELECTOR, 'input[data-testid=score1]').send_keys(score1);
+        driver.find_element(By.CSS_SELECTOR, 'input[data-testid=score2]').send_keys(score2);
         driver.find_element(By.CSS_SELECTOR, '.bi-plus').click()
 
         #time.sleep(30)
@@ -128,11 +128,11 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         """
         driver = self.selenium
         name = WebDriverWait(driver, 5, 0.2).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-test-id=name]'))
+            EC.presence_of_element_located((By.CSS_SELECTOR,'input[data-testid=name]'))
         )
 
-        rating = driver.find_element(By.CSS_SELECTOR,'input[data-test-id=rating]')
-        btn = driver.find_element(By.CSS_SELECTOR,'button[data-test-id=add]')
+        rating = driver.find_element(By.CSS_SELECTOR,'input[data-testid=rating]')
+        btn = driver.find_element(By.CSS_SELECTOR,'button[data-testid=add]')
     
         if faker:
             fake = Faker()
@@ -148,7 +148,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
                     name.send_keys(line[0])
                     rating.send_keys(line[1])
                     btn.click()
-                    WebDriverWait(driver, 1, 0.1).until(lambda x: rating.get_attribute("value") == "")
+                    WebDriverWait(driver, 1.5, 0.1).until(lambda x: rating.get_attribute("value") == "")
 
         time.sleep(0.1)
 
@@ -169,7 +169,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
             action.move_to_element(driver.find_element(By.LINK_TEXT, rnd)).click().perform()
             
         WebDriverWait(driver, 5, 0.5).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-test-id='pair']"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-testid='pair']"))
         ).click()
 
 

@@ -216,18 +216,18 @@ class _ScoreByTeam extends Editor {
                 </div>
                 <div className='col col-md-2'>
                     <input value={current.won} placeholder="Games won"
-                        className='form-control' type='number' data-test-id='games-won'
+                        className='form-control' type='number' data-testid='games-won'
                         onChange={e => this.handleChange(e, 'won')} />
                 </div>
                 <div className='col col-md-2'>
                     <input value={current.score1} placeholder="Score for team1" 
-                        className='form-control' data-test-id='score1'
+                        className='form-control' data-testid='score1'
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col col-md-2'>
                     {/* see handlechange 'name' for why how this works */}
                     <input value={current.p2?.name ? current.p2.name : ""}
-                        placeholder="Opponent" data-test-id='p2' disabled
+                        placeholder="Opponent" data-testid='p2' disabled
                         className='form-control' onChange={e => { }} />
                 </div>
                 <div className='col col-md-2'>
@@ -236,7 +236,7 @@ class _ScoreByTeam extends Editor {
                 </div>
                 <div className='col col-md-2'>
                     <input value={current.score2} placeholder="Score for team2"
-                        className='form-control' data-test-id='score2'
+                        className='form-control' data-testid='score2'
                         type='number' onChange={e => this.handleChange(e, 'score2')} />
                 </div>
                 <div className='col col-md-2'>
@@ -314,23 +314,23 @@ class _ScoreByPlayer extends Editor {
                 </div>
                 <div className='col-lg col-md-2'>
                     <input value={current.board} placeholder="Board Number" className='form-control'
-                        data-test-id='board'
+                        data-testid='board'
                         onChange={e => this.handleChange(e, 'board')} />
                 </div>
                 <div className='col-lg col-md-2'>
                     <input value={current.score1} placeholder="Score for player1"
-                        className='form-control' data-test-id='score1'
+                        className='form-control' data-testid='score1'
                         onChange={e => this.handleChange(e, 'score1')} type='number' />
                 </div>
                 <div className='col-lg col-md-2'>
                     {/* see handlechange 'name' for how this works */}
                     <input value={current.p2?.name ? current.p2.name : ""} placeholder="Opponent"
-                        className='form-control' data-test-id='p2' disabled
+                        className='form-control' data-testid='p2' disabled
                         size='small' onChange={e => { }} />
                 </div>
                 <div className='col-lg col-md-2'>
                     <input value={current.score2} placeholder="Score for player2"
-                        className='form-control' data-test-id='score2' 
+                        className='form-control' data-testid='score2' 
                         type='number'
                         onChange={e => this.handleChange(e, 'score2')} />
                 </div>
@@ -474,7 +474,7 @@ class _TSHStyle extends Editor {
                 <div className='row mt-1'>
                         <div className='col-12'>
                             <input type='text' className='form-control' onKeyDown={e => this.tshAction(e)}
-                                placeholder='TSH style data entry' data-test-id='tsh-style-entry'
+                                placeholder='TSH style data entry' data-testid='tsh-style-entry'
                                 value={this.state.tsh} onChange={e => this.setState({tsh: e.target.value}) } />
                         </div>
                     </div>
@@ -508,18 +508,18 @@ class _IndividualTournamentScorer extends Editor {
                     </div>
                     <div className='col-lg col-md-2'>
                         <input value={current.won} placeholder="Result" 
-                            className='form-control' type='number' data-test-id='games-won'
+                            className='form-control' type='number' data-testid='games-won'
                             onChange={e => this.handleChange(e, 'won')} disabled />
                     </div>
                     <div className='col-lg col-md-2'>
                         <input value={current.score1} placeholder="Score for Player1" 
-                            className='form-control' data-test-id='score1' ref={this.props.forward}
+                            className='form-control' data-testid='score1' ref={this.props.forward}
                             onChange={e => this.handleChange(e, 'score1')} type='number' />
                     </div>
                     <div className='col-lg col-md-2'>
                         {/* see handlechange 'name' for why how this works */}
                         <input value={current.p2?.name ? current.p2.name : ""}
-                            placeholder="Opponent" data-test-id='p2' disabled
+                            placeholder="Opponent" data-testid='p2' disabled
                             className='form-control' onChange={e => { }} />
                     </div>
                     <div className='col-lg col-md-2'>
@@ -528,7 +528,7 @@ class _IndividualTournamentScorer extends Editor {
                     </div>
                     <div className='col-lg col-md-2'>
                         <input value={current.score2} placeholder="Score for Player2"
-                            className='form-control' data-test-id='score2'
+                            className='form-control' data-testid='score2'
                             type='number' onChange={e => this.handleChange(e, 'score2')} />
                     </div>
                     <div className='col-lg col-md-2 text-end'>
