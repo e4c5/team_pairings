@@ -21,3 +21,10 @@ class NationalRating(models.Model):
     last = models.CharField(max_length=20)
     country = models.CharField(max_length=3)
     games = models.IntegerField()
+
+
+class Unrated(models.Model):
+    """Represents a player that has not been rated yet."""
+    name = models.CharField(max_length=128)
+    country = models.CharField(max_length=3)
+    last = models.CharField(max_length=20)
