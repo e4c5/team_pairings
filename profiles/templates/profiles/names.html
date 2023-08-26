@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html> 
+<html theme="dark" data-bs-theme="dark">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herald :: Scrable Tournament Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+        rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/default.css">
+</head>
+
+<body>
+  <div class="container-xl">
+    <div class="m5">
+        <p>Please fill in your full name, date of birth and your display name in the form below</p>
+        <p> Please note that the names as they appear on the WESPA ratings list happen to be limited to 20 characters of length. 
+            Most people would want this to be their first and last name. In some cases such as De Silva or De Almeida the last name itself is made up of 
+            two components so having three names entered into the display name field would be fine.</p>
+
+        <p>So if you have multiple middle names or if your first or last name is particularly lengthy you want to choose a combination that fits with in this limit.</p>
+        
+        <p>If it's not possible to choose such a combination please type in as many characters as possible. This is how your name will unfortunately appear in the
+        wespa ratings list and that's beyond our control. However in tournaments your correct name will be displayed.
+        </p>
+        
+        <p>You only need to fill this form once, there after for all tournaments conducted under the auspices of the Scrabble Federation of Sri Lanka you 
+            will be able to register by just entering your player id or email address
+        </p>
+
+    </div>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Loop through each form field -->
+        {% for field in form %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            <!-- Add Bootstrap styling -->
+            {{ field }}
+            {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+            <div class="alert alert-danger">
+                {{ field.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</body>
+
+<script src="/static/js/bundle.js" type="module"></script>
+
+</html>

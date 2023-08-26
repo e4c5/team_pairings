@@ -22,6 +22,7 @@ from tournament import views
 urlpatterns = [
     path('', views.index),
     path('accounts/', include('allauth.urls')),
+    path('profile/', include('profiles.urls')),
     path('admin/', admin.site.urls),
     path('api/', include(urls.urlpatterns)),
     path('api-auth/', include('rest_framework.urls')),

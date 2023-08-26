@@ -22,7 +22,7 @@ class Avatar(models.Model):
     is_main = models.BooleanField(default = False)
     
     
-class UserProfile (models.Model):
+class Profile (models.Model):
     '''
     The profile. Isn't it bleeding obvious?
 
@@ -68,11 +68,11 @@ class UserProfile (models.Model):
         """Fille the player_id field.
         The player_id is made up of the first letter of the user.first_name and 
         five letters from the user.last_name if the the player_id"""
-        if not self.pk:
+        if not self.player_id:
             for n in range(1, 6):
                 self.player_id = self.user.first_name[0:n] + self.user.last_name[0:5-n]
                 self.player_id = self.player_id.upper()
-                if not UserProfile.objects.filter(player_id = self.player_id).exists():
+                if not Profile.objects.filter(player_id = self.player_id).exists():
                     created = True
                     break
 
@@ -80,7 +80,7 @@ class UserProfile (models.Model):
                 # create self.player_id to be 6 random letters
                 self.player_id = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ',5))
 
-        super(UserProfile,self).save(*args, **kwargs)
+        super(Profile,self).save(*args, **kwargs)
         
     def __str__(self):
         return self.user.username
@@ -90,7 +90,6 @@ class UserProfile (models.Model):
     
 
 class PhoneNumber(models.Model):
-
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     number = models.BigIntegerField(unique = True)
     verified = models.BooleanField(default=False)
@@ -155,5 +154,5 @@ def create_user_profile(sender, instance, created, **kwargs):
     user_registered signal
     '''
     if created:
-        UserProfile.objects.get_or_create(user=instance)    
+        Profile.objects.get_or_create(user=instance)    
 

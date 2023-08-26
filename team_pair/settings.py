@@ -129,7 +129,7 @@ STATIC_ROOT = '/var/www/pairing/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL='/'
+LOGIN_REDIRECT_URL='/profile/'
 LOGOUT_REDIRECT_URL='/'
 
 CORS_ORIGIN_WHITE_LIST = [ 'https://live.scrabble.lk']
@@ -140,4 +140,3 @@ SITE_ID = 1
 
 from .settings_local import *
 
-print(SOCIALACCOUNT_PROVIDERS)
