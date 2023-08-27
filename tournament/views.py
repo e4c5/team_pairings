@@ -30,7 +30,9 @@ def register(request):
                         Q(user=request.user) &  Q(tournament__in=tournaments)
                 ).exists():
                     
-                    tournaments = list(Tournament.objects.filter(start_date__gte=timezone.now()))
+                    tournaments = list(Tournament.objects.filter(
+                        Q(start_date__gte=timezone.now()) & Q(registration_open=True)
+                    ))
                     user_participation = Participant.objects.filter(user=request.user).values_list('tournament', flat=True)
 
                     # Annotate the queryset with a 'registered' field

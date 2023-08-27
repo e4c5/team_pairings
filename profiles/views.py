@@ -4,7 +4,7 @@ Views for creating, editing and viewing user profiles.
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db.models import Case, When, Value, BooleanField
+from django.db.models import Case, When, Value, BooleanField, Q
 from django.utils import timezone
 
 from profiles.forms import UserProfileForm
@@ -33,7 +33,9 @@ def index(request):
         return render(request, 'profiles/names.html', {
             "form": form})    
     else:
-        tournaments = list(Tournament.objects.filter(start_date__gte=timezone.now()))
+        tournaments = list(Tournament.objects.filter(
+            Q(start_date__gte=timezone.now()) & Q(registration_open=True)
+        ))
         user_participation = Participant.objects.filter(user=request.user).values_list('tournament', flat=True)
 
         # Annotate the queryset with a 'registered' field
