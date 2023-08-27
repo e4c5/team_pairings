@@ -66,8 +66,10 @@ class Profile (models.Model):
 
     beginner = models.BooleanField(default = False)
     
+    organization = models.CharField(max_length=128, blank=True, null=True)
+    
     def save(self, *args, **kwargs):
-        """Fille the player_id field.
+        """Fill the player_id field.
         The player_id is made up of the first letter of the user.first_name and 
         five letters from the user.last_name if the the player_id"""
         if not self.player_id:

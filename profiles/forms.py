@@ -3,7 +3,10 @@ from django.core.validators import RegexValidator
 
 class UserProfileForm(forms.Form):
     date_of_birth = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        widget=forms.DateInput(
+            attrs={'type': 'date', 'placeholder': 'yyyy/mm/dd','class': 'form-control'}
+        ),
+        input_formats=['%Y-%m-%d'],
         label='Date of Birth',
     )
 
@@ -26,7 +29,7 @@ class UserProfileForm(forms.Form):
 
     display_name = forms.CharField(
         max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Match your ratings list name. 20 characters max."}),
         label='Display Name',
     )
 
@@ -34,9 +37,20 @@ class UserProfileForm(forms.Form):
         regex=r'^\+?1?\d{9,15}$',
         message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
     )
+
     phone = forms.CharField(
         validators=[phone_regex],
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=17,
         label='Phone Number',
+    )
+
+    organization = forms.CharField(
+        validators=[phone_regex],
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'required': False,
+                   'placeholder': "Leave blank if you are not a student"}
+        ),
+        max_length=128, required=False,
+        label='School / University (if a student)',
     )
