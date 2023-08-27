@@ -46,7 +46,6 @@ class UserProfileForm(forms.Form):
     )
 
     organization = forms.CharField(
-        validators=[phone_regex],
         widget=forms.TextInput(
             attrs={'class': 'form-control', 'required': False,
                    'placeholder': "Leave blank if you are not a student"}
