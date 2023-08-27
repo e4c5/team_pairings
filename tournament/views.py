@@ -30,24 +30,17 @@ def register(request):
                         Q(user=request.user) &  Q(tournament__in=tournaments)
                 ).exists():
                     
-                    tournaments = Tournament.objects.filter(start_date__gte=timezone.now()
-                    ).annotate(
-                        registered=Case(
-                            When(participants__user=request.user, then=Value(True)),
-                            default=Value(False),
-                            output_field=BooleanField()
-                        )
-                    )
-                    return render(request, 'profiles/index.html', {"tournaments": tournaments, "error": "You are already registered"})
+                    tournaments = list(Tournament.objects.filter(start_date__gte=timezone.now()))
+                    user_participation = Participant.objects.filter(user=request.user).values_list('tournament', flat=True)
+
+                    # Annotate the queryset with a 'registered' field
+                    for tournament in tournaments:
+                        tournament.registered = tournament.id in user_participation
+                        return render(request, 'profiles/index.html', {"tournaments": tournaments, "error": "You are already registered"})
                 
             Participant.objects.create(
                 user=request.user, tournament=t,name=request.user.profile.preferred_name,
             )
             return redirect('/profile/')
-        
-        t = Tournament.objects.filter(registration_open=True)
-        return render(request, 'profiles/index.html', {"tournaments": t})
-    
-    else:
-        return render(request, 'register.html')
+    return render(request, 'register.html')
     

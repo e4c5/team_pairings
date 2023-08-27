@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from profiles.forms import UserProfileForm
 from ratings.models import Unrated, WespaRating, NationalRating
-from tournament.models import Tournament
+from tournament.models import Tournament, Participant
 
 @login_required
 def index(request):
@@ -33,14 +33,12 @@ def index(request):
         return render(request, 'profiles/names.html', {
             "form": form})    
     else:
-        tournaments = Tournament.objects.filter(start_date__gte=timezone.now()
-        ).annotate(
-            registered=Case(
-                When(participants__user=request.user, then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField()
-            )
-        )
+        tournaments = list(Tournament.objects.filter(start_date__gte=timezone.now()))
+        user_participation = Participant.objects.filter(user=request.user).values_list('tournament', flat=True)
+
+        # Annotate the queryset with a 'registered' field
+        for tournament in tournaments:
+            tournament.registered = tournament.id in user_participation
         return render(request, 'profiles/index.html', {'tournaments': tournaments})
 
 

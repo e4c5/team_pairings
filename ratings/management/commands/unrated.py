@@ -11,6 +11,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with open(options['file']) as fp:
-            import_ratings(fp, wespa=False)
+            import_unrated(fp)
 
             

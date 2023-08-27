@@ -13,8 +13,7 @@ def import_unrated(fp):
             line = line.strip()
             if line:
                 Unrated.objects.update_or_create(
-                    name=line[9:30].strip(),
-                    defaults={'country': line[5:9].strip()}
+                    name=line.strip()
                 )
 
 def import_ratings(fp, wespa=False):
@@ -42,6 +41,7 @@ def import_ratings(fp, wespa=False):
                         defaults=values
                     )
                 else:
+                    print(line[9:30])
                     NationalRating.objects.update_or_create(
                         name=line[9:30].strip(),
                         defaults=values

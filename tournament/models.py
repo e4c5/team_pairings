@@ -253,7 +253,7 @@ class Participant(models.Model):
     # how many times did this player go first
     white = models.IntegerField(default=0)
 
-    user = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     def mark_absent(self, rnd):
         bye, _ = Participant.objects.get_or_create(
