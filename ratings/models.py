@@ -26,5 +26,3 @@ class NationalRating(models.Model):
 class Unrated(models.Model):
     """Represents a player that has not been rated yet."""
     name = models.CharField(max_length=128)
-    country = models.CharField(max_length=3)
-    last = models.CharField(max_length=20)

@@ -29,7 +29,7 @@ def index(request):
                 profile.date_of_birth = form.cleaned_data['date_of_birth']
                 profile.save()
 
-                return redirect('/profile/connect')
+                return redirect('/profile/connect/')
         return render(request, 'profiles/names.html', {
             "form": form})    
     else:
@@ -54,7 +54,7 @@ def search_names(rtype, name):
 
     return qs.annotate(
             similarity=TrigramSimilarity('name', name)
-    ).filter(similarity__gt=0.8).order_by('-similarity')
+    ).filter(similarity__gt=0.75).order_by('-similarity')
 
 
 @login_required
@@ -84,5 +84,6 @@ def connect(request):
             request.user.profile.wespa_list_name = wespa
             request.user.profile.national_list_name = national
             request.user.profile.beginner = False
+        
         request.user.profile.save()
-        return render(request, 'profiles/connect.html', )
+        return redirect('/profile/')

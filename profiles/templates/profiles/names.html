@@ -13,12 +13,16 @@
 <body>
   <div class="container-xl">
     <div class="m5">
-        <p>Please fill in your full name, date of birth and your display name in the form below</p>
-        <p> Please note that the names as they appear on the WESPA ratings list happen to be limited to 20 characters of length. 
-            Most people would want this to be their first and last name. In some cases such as De Silva or De Almeida the last name itself is made up of 
+        <p>Please fill in your full name, date of birth and your display name in the form below.</p>
+        
+        <p>Please note that the names as they appear on the WESPA ratings list happen to be limited to 20 characters of length. 
+            Most people would want their display to be their <strong>first and last name</strong>. In some cases such as De Silva or De Almeida the last name itself is made up of 
             two components so having three names entered into the display name field would be fine.</p>
 
-        <p>So if you have multiple middle names or if your first or last name is particularly lengthy you want to choose a combination that fits with in this limit.</p>
+        <p>So if you have multiple middle names or if your first or last name is particularly lengthy you want to choose a combination that fits 
+            with in this limit. <b>If you already have an existing <a href="https://wespa.org/ratings.shtml">WESPA</a> or 
+                <a href="https://scrabble.lk/ratings/">national rating</a>, please enter your display name to be an exact match of the name
+        as it appears in the rating list.</b></p>
         
         <p>If it's not possible to choose such a combination please type in as many characters as possible. This is how your name will unfortunately appear in the
         wespa ratings list and that's beyond our control. However in tournaments your correct name will be displayed.
@@ -36,7 +40,7 @@
         {% for field in form %}
         <div class="mb-3">
             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-            <!-- Add Bootstrap styling -->
+
             {{ field }}
             {% if field.help_text %}
             <small class="form-text text-muted">{{ field.help_text }}</small>
