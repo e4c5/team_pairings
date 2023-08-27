@@ -37,8 +37,12 @@ class Tournament(models.Model):
     num_rounds = models.IntegerField()
 
     round_robin = models.BooleanField(default=False, blank=True, null=False)
+
     # this is tournament a private one?
     private = models.BooleanField(default=True, blank=True, null=False)
+    # are we accepting registrations for this event
+    registration_open = models.BooleanField(default=False, blank=True, null=False)
+
 
     @classmethod    
     def tournament_slug(self, name):
@@ -247,6 +251,8 @@ class Participant(models.Model):
 
     # how many times did this player go first
     white = models.IntegerField(default=0)
+
+    user = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
 
     def mark_absent(self, rnd):
         bye, _ = Participant.objects.get_or_create(
