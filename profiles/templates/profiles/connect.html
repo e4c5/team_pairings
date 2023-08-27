@@ -8,52 +8,59 @@
     <form method="POST">
         {% csrf_token %}
         <h3>WESPA Ratings</h3>
-        <p>We have searched for your name in the wespa ratings list, if you see if below please select it. If your name appears multiple times,
-            please contact ratings@scrabble.lk and let us know about it. If you have played WESPA rated tournaments but your name does not appear
-            please tell us about it.
-        </p>
-        {% for w in wespa %}
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="wespa" 
-                    id="w-{{ w.id}}"
-                    value="{{ w.name }}"/>
-                <label class="form-check-label" for="w-{{ w.id }}">{{ w.name }}</label>
-            </div>
-        {% empty %}
-            No matches found.
-        {% endfor %}
+        <div class="m-3">
+            <p>We have searched for your name in the wespa ratings list, if you see if below please select it. If your name appears multiple times,
+                please contact ratings@scrabble.lk and let us know about it. If you have played WESPA rated tournaments but your name does not appear
+                please tell us about it.
+            </p>
+            {% for w in wespa %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="wespa" 
+                        id="w-{{ w.id}}"
+                        value="{{ w.name }}"/>
+                    <label class="form-check-label" for="w-{{ w.id }}">{{ w.name }}</label>
+                </div>
+            {% empty %}
+                No matches found.
+            {% endfor %}
+        </div>
 
         <h3>National Ratings</h3>
-        <p>We have searched for your name in the national ratings list. If your name is either duplicated or does not appear below even though you have
-            taken part in nationally rated tournaments please email ratings@scrabble.lk . Please note that the national ratings list is the one published
-            on <a href="https://scrabble.lk/ratings/">scrabble.lk</a>
-        </p>
-        {% for w in national %}
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="national"
-                    id="n-{{ w.id }}"
-                    value="{{ w.name }}"/>
-                <label class="form-check-label" for="n-{{ w.id }}">{{ w.name }}</label>
-            </div>
-        {% empty %}
-            No matches found.
-        {% endfor %}
-        
-        <h4>Unrated tournaments</h4>
-        <p>If your name does not appear in either national ratings or wespa ratings please see if it appears in the list of players who have taken part 
-            in unrated tournaments.
-        </p>
-        {% for w in unrated %}
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="unrated"
-                id="u-{{w.id}}"
-                value="{{ w.name }}"/>
-            <label class="form-check-label" for="u-{{ w.id }}">{{ w.name }}</label>
+        <div class="m-3">
+            <p>We have searched for your name in the national ratings list. If your name is either duplicated or does not appear below even though you have
+                taken part in nationally rated tournaments please email ratings@scrabble.lk . Please note that the national ratings list is the one published
+                on <a href="https://scrabble.lk/ratings/">scrabble.lk</a>
+            </p>
+            {% for w in national %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="national"
+                        id="n-{{ w.id }}"
+                        value="{{ w.name }}"/>
+                    <label class="form-check-label" for="n-{{ w.id }}">{{ w.name }}</label>
+                </div>
+            {% empty %}
+                No matches found.
+            {% endfor %}
         </div>
-    {% empty %}
-        No matches found.
-    {% endfor %}
+        <h4>Unrated tournaments</h4>
+        <div class="m-3">
+            <p>If your name does not appear in either national ratings or wespa ratings please see if it appears in the list of players who have taken part 
+                in unrated tournaments.
+            </p>
+            {% for w in unrated %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="unrated"
+                    id="u-{{w.id}}"
+                    value="{{ w.name }}"/>
+                <label class="form-check-label" for="u-{{ w.id }}">{{ w.name }}</label>
+            </div>
+            {% empty %}
+                No matches found.
+            {% endfor %}
+        </div>
+    
     <div><input type="submit" class="btn btn-primary" value="submit"/></div>
+    <div class="mt-3">If your name does not appear on any of the three categories above, just hit the submit button above, but contact us if you think this is an error</div>
     </form>
 
 {% endblock %}
