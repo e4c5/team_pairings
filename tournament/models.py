@@ -43,6 +43,7 @@ class Tournament(models.Model):
     # are we accepting registrations for this event
     registration_open = models.BooleanField(default=False, blank=True, null=False)
 
+    venue = models.CharField(max_length=100, blank=True, default="To be notified")
 
     @classmethod    
     def tournament_slug(self, name):

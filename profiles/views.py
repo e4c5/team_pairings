@@ -1,12 +1,16 @@
 """
 Views for creating, editing and viewing user profiles.
 """
-
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from profiles.forms import UserProfileForm
 from django.contrib.postgres.search import TrigramSimilarity
+from django.db.models import Case, When, Value, BooleanField
+from django.utils import timezone
+
+from profiles.forms import UserProfileForm
 from ratings.models import Unrated, WespaRating, NationalRating
+from tournament.models import Tournament
+
 @login_required
 def index(request):
     """Wait till confirmation is recieved"""
@@ -29,7 +33,15 @@ def index(request):
         return render(request, 'profiles/names.html', {
             "form": form})    
     else:
-        return render(request, 'profiles/index.html')
+        tournaments = Tournament.objects.filter(start_date__gte=timezone.now()
+        ).annotate(
+            registered=Case(
+                When(participants__user=request.user, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField()
+            )
+        )
+        return render(request, 'profiles/index.html', {'tournaments': tournaments})
 
 
 def search_names(rtype, name):

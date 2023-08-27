@@ -13,7 +13,28 @@
 <body>
   <div class="container-xl">
     <div class="m5">
-        Thank you for signing up. Please click the email address confirmation link in your email address to validate your account
+        <h3>{{ request.user.profile.preferred_name }}</h3>
+        <h4>Upcoming tournaments</h4>
+        
+        {% for t in tournaments %}
+            <div class="row mb-2">
+                <div class="col-3">{{ t.name }}</div>
+                <div class="col-3">{{ t.venue }}</div>
+                <div class="col-1">{{ t.start_date }}</div>
+                <div class="col-2">
+                    {% if t.registered %}
+                        You are registered
+                    {% else %}
+                        <form method="POST" action="/register/">
+                            {% csrf_token %}
+                            <input type="hidden" name="tournament" value="{{t.id}}" />
+                            <input type="submit" name="register" value="register" />
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        <div>{{ error }}</div>
     </div>
   </div>
 </body>
