@@ -18,31 +18,36 @@ def redirect_view(request):
         request.session['from'] = request.path or ''
     return redirect('/')
 
-@login_required
+
+
 def register(request):
-    if request.method == "POST":
-        t = Tournament.objects.get(pk=request.POST.get('tournament'))
-        if "Junior" in t.name:
-            tournaments = Tournament.objects.filter(name__icontains="Junior")
-            if Participant.objects.filter(
-                    Q(user=request.user) &  Q(tournament__in=tournaments)
-            ).exists():
-                
-                tournaments = Tournament.objects.filter(start_date__gte=timezone.now()
-                ).annotate(
-                    registered=Case(
-                        When(participants__user=request.user, then=Value(True)),
-                        default=Value(False),
-                        output_field=BooleanField()
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            t = Tournament.objects.get(pk=request.POST.get('tournament'))
+            if "Junior" in t.name:
+                tournaments = Tournament.objects.filter(name__icontains="Junior")
+                if Participant.objects.filter(
+                        Q(user=request.user) &  Q(tournament__in=tournaments)
+                ).exists():
+                    
+                    tournaments = Tournament.objects.filter(start_date__gte=timezone.now()
+                    ).annotate(
+                        registered=Case(
+                            When(participants__user=request.user, then=Value(True)),
+                            default=Value(False),
+                            output_field=BooleanField()
+                        )
                     )
-                )
-                return render(request, 'profiles/index.html', {"tournaments": tournaments, "error": "You are already registered"})
-            
-        Participant.objects.create(
-            user=request.user, tournament=t,name=request.user.profile.preferred_name,
-        )
-        return redirect('/profile/')
+                    return render(request, 'profiles/index.html', {"tournaments": tournaments, "error": "You are already registered"})
+                
+            Participant.objects.create(
+                user=request.user, tournament=t,name=request.user.profile.preferred_name,
+            )
+            return redirect('/profile/')
+        
+        t = Tournament.objects.filter(registration_open=True)
+        return render(request, 'profiles/index.html', {"tournaments": t})
     
+    else:
+        return render(request, 'register.html')
     
-    t = Tournament.objects.filter(registration_open=True)
-    return render(request, 'profiles/index.html', {"tournaments": t})

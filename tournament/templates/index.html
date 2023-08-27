@@ -15,14 +15,16 @@
     <div id="root"></div>
     <div id="editable"></div>
     <div id="frm" style="display: none">{{from}}</div>
-    
-    {% if request.user.is_authenticated %}
-    <input type="hidden" name="hh" id="hh" value="true" />
-    {% else %}
-        <div><a href="{% url 'account_login' %}">Login</a></div> 
-        <div><a href="{% url 'account_signup' %}">Sign Up</a></div> 
-    {% endif %}
-
+    <div class="row">
+        {% if request.user.is_authenticated %}
+            <div class="m1">Logged in as <a href="/profile/">{{ request.user.username }}</a>. <a href="/accounts/logout/">Logout</a></div>
+            <input type="hidden" name="hh" id="hh" value="true" />
+            
+        {% else %}
+            <div class="col"><a href="{% url 'account_login' %}">Login</a></div> 
+            <div class="col"><a href="{% url 'account_signup' %}">Sign Up</a></div> 
+        {% endif %}
+    </div>
   </div>
 </body>
 
