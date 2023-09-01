@@ -10,9 +10,9 @@
 <div class="m-5">
         <h2>{% trans "Register as a player with Sri Lanka Scrabble Federation" %}</h2>    
         <p>Each player should register once. If you have already registered but you have forgotten your password, please try the 
-            <a href="password/reset/">password reset form</a> if you are unable to reset your password please contact the federation.
+            <a href="/accounts/password/reset/">password reset form</a> if you are unable to reset your password please contact the federation.
         </p>
-        <p>A player who owns two player ids risks the possibility of being barred from taking part in tournaments.</p>
+        <p><strong>A player who owns two player ids risks the possibility of being barred from taking part in tournaments.</strong></p>
         
         <p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
         
@@ -22,7 +22,8 @@
           {% for field in form %}
           <div class="form-group">
               <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}</label>
-              <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" placeholder="{{ field.help_text }}" {% if field.field.required %} required {% endif %}>
+              <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" 
+                         placeholder="{{ field.help_text }}" {% if field.field.required %} required {% endif %}>
                 {{ field.errors }}
           </div>
           {% endfor %}

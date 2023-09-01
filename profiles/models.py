@@ -40,7 +40,7 @@ class Profile (models.Model):
     all other names and can be particularly long as well.
     '''
 
-    GENDER_CHOICES = (('M','Male'), ('F','Female'), ('U',''))
+    GENDER_CHOICES = (('M','Male'), ('F','Female'), ('U','Unspecified'))
     PRIVACY_CHOICES = ((True,'Yes'),(False,'No'));
     player_id = models.CharField(max_length=5)
     about_me = models.CharField(blank=True, null=True, max_length=512)
@@ -54,7 +54,8 @@ class Profile (models.Model):
                                     choices = PRIVACY_CHOICES, default = False)
 
     user_preferences = models.JSONField(default = dict,blank=True)
-
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    
     national_list_name = models.CharField(max_length=20, blank=True, null=True)
     wespa_list_name = models.CharField(max_length=20, blank=True, null=True)
 

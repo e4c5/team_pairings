@@ -3,7 +3,7 @@
     <div class="m5">
         <div class="row mt-3">
             <div class="col-10">
-                <h3 class="">{{ request.user.profile.preferred_name }}</h3>
+                <a href="/profile/edit/"><h3 class="">{{ request.user.profile.preferred_name }}</h3></a>
             </div>
             <div class="col-2">
                 <a href="/accounts/logout/">Logout</a>
@@ -30,5 +30,7 @@
             </div>
         {% endfor %}
         <div>{{ error }}</div>
+
+        <a href="/profile/edit/">Edit Profile</a>
     </div>
 {% endblock %}

@@ -12,26 +12,41 @@ from ratings.models import Unrated, WespaRating, NationalRating
 from tournament.models import Tournament, Participant
 
 @login_required
+def edit(request):
+    profile = request.user.profile
+    
+    if request.method == "GET":
+        form = UserProfileForm(
+            initial = {'full_name': profile.full_name,
+                      'phone': profile.phone,
+                      'gender': profile.gender,
+                      'display_name': profile.preferred_name,
+                      'date_of_birth': profile.date_of_birth,
+                      'organization' : profile.organization
+            }
+        )
+    else:
+        form = UserProfileForm(request.POST)
+        if form.is_valid():
+            profile.full_name = form.cleaned_data['full_name']
+            profile.phone = form.cleaned_data['phone']
+            profile.gender = form.cleaned_data['gender']
+            profile.preferred_name = form.cleaned_data['display_name']
+            profile.date_of_birth = form.cleaned_data['date_of_birth']
+            profile.organization = form.cleaned_data['organization']
+            profile.save()
+
+            return redirect('/profile/connect/')
+    return render(request, 'profiles/names.html', {
+        "form": form}) 
+
+
+@login_required
 def index(request):
     """Wait till confirmation is recieved"""
     profile = request.user.profile
     if not profile.full_name:
-        if request.method == "GET":
-            form = UserProfileForm()
-            
-        else:
-            form = UserProfileForm(request.POST)
-            if form.is_valid():
-                profile.full_name = form.cleaned_data['full_name']
-                profile.phone_number = form.cleaned_data['phone']
-                profile.gender = form.cleaned_data['gender']
-                profile.preferred_name = form.cleaned_data['display_name']
-                profile.date_of_birth = form.cleaned_data['date_of_birth']
-                profile.save()
-
-                return redirect('/profile/connect/')
-        return render(request, 'profiles/names.html', {
-            "form": form})    
+        return edit(request)   
     else:
         tournaments = list(Tournament.objects.filter(
             Q(start_date__gte=timezone.now()) & Q(registration_open=True)

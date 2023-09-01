@@ -5,5 +5,7 @@ from profiles import views
 
 urlpatterns = [
     path('', views.index),
-    path('connect/', views.connect)
+    path('connect/', views.connect),
+    path('edit/', views.edit)
 ]
+
