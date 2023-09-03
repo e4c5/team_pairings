@@ -48,7 +48,7 @@ class Profile (models.Model):
     date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default = 'U')
     verified = models.BooleanField(default = False)
-    user = models.OneToOneField(User, primary_key = True, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, primary_key = True, on_delete=models.CASCADE)
     
     is_public = models.BooleanField(verbose_name=u'Make profile public', 
                                     choices = PRIVACY_CHOICES, default = False)

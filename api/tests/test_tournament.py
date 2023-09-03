@@ -201,6 +201,7 @@ class TestParticipants(APITestCase, Helper):
 
         p = model_to_dict(parties[1])
         p['offed'] = 1
+        del p['user']
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[1].id}/',p
         )
@@ -220,6 +221,7 @@ class TestParticipants(APITestCase, Helper):
         # convert parties[0] which is a django model instance into a dictionary
         p = model_to_dict(parties[0])
         p['offed'] = 1
+        del p['user']
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[0].id}/',p
         )
@@ -253,6 +255,7 @@ class TestParticipants(APITestCase, Helper):
         # now try to switch someone off.
         p = model_to_dict(parties[5])
         p['offed'] = 1
+        del p['user']
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[5].id}/',p
         )
