@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.http.request import HttpRequest
 from tournament.models import Tournament, TournamentRound, Participant, \
-        Director, TeamMember, BoardResult, Result
+        Director, TeamMember, BoardResult, Result, Payment
 from api.pairing import create_boards, delete_boards
 
 # Register your models here.
@@ -39,6 +39,16 @@ class RoundAdmin(admin.ModelAdmin):
 class TDAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'user']
 
+
+class PaymentAdmin(admin.ModelAdmin):
+    """Payment is a proxy model for Participant.
+    
+    This admin class is here because payment moderation can be delegated to
+    a different staff member who is not familiar with the Participant model.
+    for example an accounting type can take over verification of payments"""
+    list_display = ['tournament', 'payment', 'approval', 'approved_by']
+    search_fields = ['tournament__name', 'name']
+
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ['pk', 'tournament','name','seed','round_wins','game_wins']
     search_fields = ['tournament__name', 'name']
@@ -61,3 +71,4 @@ admin.site.register(Director,TDAdmin)
 admin.site.register(TeamMember, TeamMemberAdmin)
 admin.site.register(BoardResult, BoardResultAdmin)
 admin.site.register(Result, ResultAdmin)
+admin.site.register(Payment, PaymentAdmin,url='bada')

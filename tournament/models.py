@@ -293,6 +293,9 @@ class Participant(models.Model):
             )
         ]
 
+class Payment(Participant):
+    class Meta:
+        proxy = True
    
 class Result(models.Model):
     """A round result.

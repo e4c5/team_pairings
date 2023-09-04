@@ -14,6 +14,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
 from tournament.models import Tournament, Director
+from allauth.account.models import EmailAddress
 
 
 class SeleniumTest(ChannelsLiveServerTestCase):
@@ -27,7 +28,9 @@ class SeleniumTest(ChannelsLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = webdriver.Chrome()
+        #cls.selenium = webdriver.Chrome()
+        cls.selenium = webdriver.Firefox()
+
         cls.selenium.maximize_window()
 
         for handler in logging.getLogger('').handlers:
@@ -83,6 +86,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         u = User(username='admin',is_superuser=True)
         u.set_password('12345')
         u.save()
+        EmailAddress.objects.create(user=u, email='rads@raditha.com', primary=True, verified=True)
 
         self.t1 = Tournament.objects.create(name='Richmond Showdown U20', start_date='2023-02-25',
             rated=False, team_size=5, entry_mode='T', num_rounds=5, private=False)
