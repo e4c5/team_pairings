@@ -105,13 +105,29 @@ def connect(request):
 
 @login_required
 def payment(request):
+    """Display payment information for a tournament.
+    
+    For this release, it's assumed that there's only one tournament for which 
+    payment is being collected, but going forward there needs to be support for
+    multiple tournaments.
+    """
+    
+    participants = Participant.objects.filter(user=request.user)
+
     if request.method == 'POST':
+        instance = participants.exclude(approval='V').first()
+        
         form = PaymentForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('success')  # Redirect to a success page
+            instance.payment = form.cleaned_data['payment']
+            instance.approval = 'P'
+            instance.save()
+            return redirect('/profile/payment/')
     else:
-        participants = Participant.objects.filter(user=request.user)
         form = PaymentForm()
-        return render(request, 'profiles/payment.html', {'participants': participants})
+    
+    return render(request, 'profiles/payment.html', 
+                    {'participants': participants, 'form': form}
+            )
+    
     

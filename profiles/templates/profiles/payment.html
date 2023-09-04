@@ -19,15 +19,20 @@
 
                 <div class="col-sm-2">Payment:</div>
                 <div class="col-10">{{ p.get_approval_display }}</div>
-
             </div>
             {% endfor %}
-            <p class="mt-5">If the above information is correct, please transfer your payament to : and upload the payment slip/transfer confirmation</p>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Upload</button>
-            </form>
+            {% if participants.0.approval == 'P' %}
+                <p class='mt-5'>We will send you an email once your payment is verified.</p>
+            {% elif participants.0.approval == 'V' %}
+                <p class='mt-5'>Your registration is complete.</p>
+            {% else %}
+                <p class="mt-5">If the above information is correct, please transfer your payament to : and upload the payment slip/transfer confirmation</p>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Upload</button>
+                </form>
+            {% endif %}
         {% endif %}
         
     </div>

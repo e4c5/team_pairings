@@ -1,4 +1,5 @@
 from typing import Any
+from django.utils import timezone
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.http.request import HttpRequest
@@ -41,7 +42,14 @@ class TDAdmin(admin.ModelAdmin):
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ['pk', 'tournament','name','seed','round_wins','game_wins']
     search_fields = ['tournament__name', 'name']
+    exclude = ['approved_by']
+    raw_id_fields = ['tournament','user']
 
+    def save_model(self, request, obj, form, change):
+        obj.approved_by = request.user
+        obj.approved_at = timezone.now()
+        super().save_model(request, obj, form, change)
+        
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ['team','board','name','wins','spread']
 
