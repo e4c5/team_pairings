@@ -4,7 +4,7 @@
         {% if participants.exists %}
             <p>Currently you are registered for the following tournaments.</p>
             {% for p in participants %}
-            <div class="row">
+            <div class="row m-5">
                 <div class="col-sm-2">Tournament:</div>
                 <div class="col-sm-10">{{p.tournament.name}}</div>
                 
@@ -26,7 +26,18 @@
             {% elif participants.0.approval == 'V' %}
                 <p class='mt-5'>Your registration is complete.</p>
             {% else %}
-                <p class="mt-5">If the above information is correct, please transfer your payament to : and upload the payment slip/transfer confirmation</p>
+                <p class="mt-5">If the above information is correct, please transfer your payament to the account given below and upload the payment slip/transfer confirmation.
+                    If the above information is not correct (for example if you are registered for the wrong zonal), please <a href="/profile/">click here</a> to change it.
+                </p>
+                <p class="ms-5">
+                    <strong>Bank</strong> : Sampath Bank<br/>
+                    <strong>Branch</strong> : Wellampitiya<br/>
+                    <strong>Name</strong> : M. Raashid Sudin<br/>
+                    <strong>Account Number</strong> : 104553978974<br/>
+                </p>
+
+                <p>You can transfer the funds through online banking facilities or the deposit can be made in person at any branch of Sampath Bank.</p>
+                
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}

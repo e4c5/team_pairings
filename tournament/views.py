@@ -25,20 +25,18 @@ def register(request):
         if request.method == "POST":
             t = Tournament.objects.get(pk=request.POST.get('tournament'))
             if "Junior" in t.name:
-                tournaments = Tournament.objects.filter(name__icontains="Junior")
-                if Participant.objects.filter(
-                        Q(user=request.user) &  Q(tournament__in=tournaments)
-                ).exists():
-                    
-                    tournaments = list(Tournament.objects.filter(
-                        Q(start_date__gte=timezone.now()) & Q(registration_open=True)
-                    ))
-                    user_participation = Participant.objects.filter(user=request.user).values_list('tournament', flat=True)
+                junior = Tournament.objects.filter(name__icontains="Junior")
+                tournaments = Participant.objects.filter(
+                    Q(user=request.user) &  Q(tournament__in=junior) &
+                    Q(tournament__start_date__gte=timezone.now()) &
+                    Q(tournament__registration_open=True)
+                )
 
-                    # Annotate the queryset with a 'registered' field
-                    for tournament in tournaments:
-                        tournament.registered = tournament.id in user_participation
-                        return render(request, 'profiles/index.html', {"tournaments": tournaments, "error": "You are already registered"})
+                if tournaments.exists():
+                    #
+                    # this player has registered for a different zonal event. Let's delete that
+                    #                     
+                    tournaments.delete()
                 
             Participant.objects.create(
                 user=request.user, tournament=t,name=request.user.profile.preferred_name,
