@@ -1,0 +1,35 @@
+{% extends "profiles/base.html" %}
+{% block content %}
+    <div class="m5">
+        {% if participants.exists %}
+            <p>Currently you are registered for the following tournaments.</p>
+            {% for p in participants %}
+            <div class="row">
+                <div class="col-sm-2">Tournament:</div>
+                <div class="col-sm-10">{{p.tournament.name}}</div>
+                
+                <div class="col-sm-2">Venue:</div>
+                <div class="col-sm-10">{{p.tournament.venue}}</div>
+
+                <div class="col-sm-2">Start Date:</div>
+                <div class="col-10">{{p.tournament.start_date}}</div>
+
+                <div class="col-sm-2">Registered as:</div>
+                <div class="col-10">{{ p.name }}</div>
+
+                <div class="col-sm-2">Payment:</div>
+                <div class="col-10">{{ p.get_approval_display }}</div>
+
+            </div>
+            {% endfor %}
+            <p class="mt-5">If the above information is correct, please transfer your payament to : and upload the payment slip/transfer confirmation</p>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Upload</button>
+            </form>
+        {% endif %}
+        
+    </div>
+{% endblock %}
+

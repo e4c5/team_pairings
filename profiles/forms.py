@@ -1,6 +1,13 @@
 from django import forms
 from django.core.validators import RegexValidator
 
+from tournament.models import Participant
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Participant
+        fields = ['payment']
+
 class UserProfileForm(forms.Form):
     date_of_birth = forms.DateField(
         widget=forms.DateInput(

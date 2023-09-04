@@ -7,7 +7,7 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Case, When, Value, BooleanField, Q
 from django.utils import timezone
 
-from profiles.forms import UserProfileForm
+from profiles.forms import UserProfileForm, PaymentForm
 from ratings.models import Unrated, WespaRating, NationalRating
 from tournament.models import Tournament, Participant
 
@@ -102,3 +102,16 @@ def connect(request):
         
         request.user.profile.save()
         return redirect('/profile/')
+
+@login_required
+def payment(request):
+    if request.method == 'POST':
+        form = PaymentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('success')  # Redirect to a success page
+    else:
+        participants = Participant.objects.filter(user=request.user)
+        form = PaymentForm()
+        return render(request, 'profiles/payment.html', {'participants': participants})
+    

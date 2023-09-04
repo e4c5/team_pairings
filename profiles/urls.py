@@ -6,6 +6,7 @@ from profiles import views
 urlpatterns = [
     path('', views.index, name='profile'),
     path('connect/', views.connect, name='connect'),
-    path('edit/', views.edit)
+    path('edit/', views.edit),
+    path('payment/', views.payment)
 ]
 

@@ -238,6 +238,11 @@ class Director(models.Model):
 
 class Participant(models.Model):
     ''' A player or a team in a tournament'''
+    APPROVAL_CHOICES = [
+        ('V', 'Verified'), ('R','Verficiation Failed'), 
+        ('P', 'Pending Verification'), ('U', 'Unpaid')
+    ]
+
     name = models.CharField(max_length=128)
     played = models.IntegerField(default=0, null=True)
     game_wins = models.FloatField(default=0, null=True)
@@ -254,6 +259,11 @@ class Participant(models.Model):
     white = models.IntegerField(default=0)
 
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+    payment = models.ImageField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='approved_by',null=True,blank=True)
+    approved_on = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    approval = models.CharField(max_length=1, choices=APPROVAL_CHOICES, default='U')
+
 
     def mark_absent(self, rnd):
         bye, _ = Participant.objects.get_or_create(
