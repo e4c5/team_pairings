@@ -2,7 +2,7 @@
 {% block content %}
     <div class="m5">
         {% if participants.exists %}
-            <p>Currently you are registered for the following tournaments.</p>
+            <p>Currently you are registered for the following tournaments:</p>
             {% for p in participants %}
             <div class="row m-5">
                 <div class="col-sm-2">Tournament:</div>
@@ -22,12 +22,13 @@
             </div>
             {% endfor %}
             {% if participants.0.approval == 'P' %}
-                <p class='mt-5'>We will send you an email once your payment is verified.</p>
+                <p class='mt-5'>Thank you for the payment. We will send you an email once your payment is verified.</p>
             {% elif participants.0.approval == 'V' %}
                 <p class='mt-5'>Your registration is complete.</p>
             {% else %}
-                <p class="mt-5">If the above information is correct, please transfer your payament to the account given below and upload the payment slip/transfer confirmation.
+                <p class="mt-5">If the above information is correct, please transfer your payment to the account given below and upload the payment slip/transfer confirmation.
                     If the above information is not correct (for example if you are registered for the wrong zonal), please <a href="/profile/">click here</a> to change it.
+                    The entry fee is Rs 1500
                 </p>
                 <p class="ms-5">
                     <strong>Bank</strong> : Sampath Bank<br/>
@@ -40,10 +41,13 @@
                 
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit">Upload</button>
+                    <label for="id_payment">Payment details (deposit slip or transfer confirmatio):</label>
+                    <input type="file" name="payment" accept="image/*, .pdf" id="id_payment" class="form-control">
+                    <button type="submit" class="btn btn-primary">Upload</button>
                 </form>
             {% endif %}
+        {% else %}
+                <p>You are not registered for any tournaments.</p>
         {% endif %}
         
     </div>

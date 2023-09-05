@@ -46,19 +46,21 @@ class PaymentAdmin(admin.ModelAdmin):
     This admin class is here because payment moderation can be delegated to
     a different staff member who is not familiar with the Participant model.
     for example an accounting type can take over verification of payments"""
-    list_display = ['tournament', 'payment', 'approval', 'approved_by']
-    search_fields = ['tournament__name', 'name']
-
-class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'tournament','name','seed','round_wins','game_wins']
+    list_display = ['tournament', 'name', 'payment', 'approval', 'approved_by']
     search_fields = ['tournament__name', 'name']
     exclude = ['approved_by']
-    raw_id_fields = ['tournament','user']
 
     def save_model(self, request, obj, form, change):
         obj.approved_by = request.user
         obj.approved_at = timezone.now()
         super().save_model(request, obj, form, change)
+
+
+class ParticipantAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'tournament','name','seed','round_wins','game_wins']
+    search_fields = ['tournament__name', 'name']
+    raw_id_fields = ['tournament','user']
+
         
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ['team','board','name','wins','spread']
