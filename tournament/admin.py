@@ -39,6 +39,22 @@ class RoundAdmin(admin.ModelAdmin):
 class TDAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'user']
 
+class PaymentFilter(admin.SimpleListFilter):
+    title = 'payment status'
+    parameter_name = 'payment'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('null', 'Payment attached'),
+            ('not_null', 'Not attached'),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'null':
+            return queryset.filter(payment__isnull=True)
+        elif self.value() == 'not_null':
+            return queryset.filter(payment__isnull=False)
+            
 
 class PaymentAdmin(admin.ModelAdmin):
     """Payment is a proxy model for Participant.
@@ -49,12 +65,13 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'name', 'payment', 'approval', 'approved_by']
     search_fields = ['tournament__name', 'name']
     exclude = ['approved_by']
+    list_filter = (PaymentFilter,'approval')
 
     def save_model(self, request, obj, form, change):
         obj.approved_by = request.user
         obj.approved_at = timezone.now()
         super().save_model(request, obj, form, change)
-
+            
 
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ['pk', 'tournament','name','seed','round_wins','game_wins']

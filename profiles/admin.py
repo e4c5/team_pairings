@@ -10,6 +10,5 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ['full_name', 'preferred_name']
 
 
-
 admin.site.register(Profile, ProfileAdmin)
  

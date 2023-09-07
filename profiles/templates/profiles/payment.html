@@ -43,13 +43,33 @@
                     {% csrf_token %}
                     <label for="id_payment">Payment details (deposit slip or transfer confirmatio):</label>
                     <input type="file" name="payment" accept="image/*, .pdf" id="id_payment" class="form-control">
-                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="submit" class="btn btn-primary" id="submitButton">Upload</button>
                 </form>
             {% endif %}
         {% else %}
                 <p>You are not registered for any tournaments.</p>
         {% endif %}
         
+        <script>
+            // Reference to the file input field and submit button
+            const fileInput = document.getElementById('id_payment');
+            const submitButton = document.getElementById('submitButton');
+        
+            // Initial disable of the submit button
+            submitButton.disabled = true;
+        
+            // Event listener for file input
+            fileInput.addEventListener('change', function() {
+              // Check if a file has been selected
+              if (fileInput.files.length > 0) {
+                // Enable the submit button
+                submitButton.disabled = false;
+              } else {
+                // Disable the submit button
+                submitButton.disabled = true;
+              }
+            });
+          </script>
     </div>
 {% endblock %}
 
