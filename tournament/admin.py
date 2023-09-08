@@ -2,6 +2,9 @@ from typing import Any
 from django.utils import timezone
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.db.models import Q
+
+from django.utils.html import format_html
 from django.http.request import HttpRequest
 from tournament.models import Tournament, TournamentRound, Participant, \
         Director, TeamMember, BoardResult, Result, Payment
@@ -45,16 +48,17 @@ class PaymentFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ('null', 'Payment attached'),
-            ('not_null', 'Not attached'),
+            ('empty', 'Empty'),
+            ('not_empty', 'Not Empty'),
         ]
 
     def queryset(self, request, queryset):
-        if self.value() == 'null':
-            return queryset.filter(payment__isnull=True)
-        elif self.value() == 'not_null':
-            return queryset.filter(payment__isnull=False)
-            
+        if self.value() == 'empty':
+            return queryset.filter(Q(payment__exact='') | Q(payment__isnull=True))
+        elif self.value() == 'not_empty':
+
+            return queryset.exclude(Q(payment=None))
+        
 
 class PaymentAdmin(admin.ModelAdmin):
     """Payment is a proxy model for Participant.
@@ -65,7 +69,16 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'name', 'payment', 'approval', 'approved_by']
     search_fields = ['tournament__name', 'name']
     exclude = ['approved_by']
-    list_filter = (PaymentFilter,'approval')
+    list_filter = ('approval',)
+    list_editable = ['approval',]
+    def payment(self, obj):
+        print(obj)
+        if obj and obj.file_field:
+            return format_html('<a href="{}" target="_blank">Download</a>', obj.file_field.url)
+        return "No File"
+
+    payment.allow_tags = True
+    payment.short_description = 'File'
 
     def save_model(self, request, obj, form, change):
         obj.approved_by = request.user
