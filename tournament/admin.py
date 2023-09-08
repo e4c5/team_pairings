@@ -87,7 +87,7 @@ class PaymentAdmin(admin.ModelAdmin):
             
 
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'tournament','name','seed','round_wins','game_wins']
+    list_display = ['pk', 'tournament','name','seed','round_wins','game_wins','approval',]
     search_fields = ['tournament__name', 'name']
     raw_id_fields = ['tournament','user']
 

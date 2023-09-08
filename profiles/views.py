@@ -56,6 +56,9 @@ def index(request):
         # Annotate the queryset with a 'registered' field
         for tournament in tournaments:
             tournament.registered = tournament.id in user_participation
+            if 'Galle' in tournament.name:
+                tournament.closed = True
+                
         return render(request, 'profiles/index.html', {'tournaments': tournaments})
 
 

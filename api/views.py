@@ -75,6 +75,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                         select rank() over(order by round_wins desc, game_wins desc, spread desc, rating desc, name) as "pos", * 
                         from tournament_participant parties 
                             where tournament_id = tt.id and name != 'Bye' and name != 'Absent'
+                                and parties.approval = 'V'
                     ) parties
                 ) participants,
                 (select jsonb_agg(to_jsonb(r)) FROM (
@@ -417,6 +418,7 @@ def get_participants(tid):
                         (select jsonb_agg(to_jsonb(tr)) from tournament_result tr
                         where p1_id = tp.id or p2_id = tp.id) results
                     from tournament_participant tp where tp.tournament_id = %s
+                    and approval = 'V'
                 ) f	 """
     
     with connection.cursor() as cursor:
@@ -492,7 +494,7 @@ def get_results(tournament, round_id):
                     select *, 
                         (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
                         (select to_jsonb(parti) from parti where id = tr.p2_id) p2
-                    from tournament_result tr where round_id = %s
+                    from tournament_result tr where round_id = %s and approval = 'V'
                 ) r
             """
             cursor.execute(query, [round_id])
@@ -504,7 +506,7 @@ def get_results(tournament, round_id):
                     select rank() over(
                         order by round_wins desc, game_wins desc, spread desc, rating desc
                     ) as "pos", * 
-                    from tournament_participant
+                    from tournament_participant where approval = 'V'
                 )
                 select json_agg(r) from (     
                     select *, 

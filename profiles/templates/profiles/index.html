@@ -20,11 +20,15 @@
                     {% if t.registered %}
                         You are registered
                     {% else %}
-                        <form method="POST" action="/register/">
-                            {% csrf_token %}
-                            <input type="hidden" name="tournament" value="{{t.id}}" />
-                            <input type="submit" name="register" value="register" />
-                        </form>
+                        {% if t.closed %} 
+                            <p>Registration closed</p>
+                        {% else %}
+                            <form method="POST" action="/register/">
+                                {% csrf_token %}
+                                <input type="hidden" name="tournament" value="{{t.id}}" />
+                                <input type="submit" name="register" value="register" />
+                            </form>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

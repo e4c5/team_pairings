@@ -18,7 +18,16 @@
                 <div class="col-10">{{ p.name }}</div>
 
                 <div class="col-sm-2">Payment:</div>
-                <div class="col-10">{{ p.get_approval_display }}</div>
+                <div class="col-10">
+                    {% if p.approval == 'V' %}
+                        <strong>{{ p.get_approval_display }}</strong>
+                    {% elif p.approval == 'P' %}
+                        {{ p.get_approval_display }}<br/>
+                        {{ p.payment.name }}
+                    {% else %}
+                        {{ p.get_approval_display }}
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
             {% if participants.0.approval == 'P' %}
@@ -40,6 +49,7 @@
                 <p>You can transfer the funds through online banking facilities or the deposit can be made in person at any branch of Sampath Bank.</p>
                 
                 <form method="post" enctype="multipart/form-data">
+                    {{ form.errors }}
                     {% csrf_token %}
                     <label for="id_payment">Payment details (deposit slip or transfer confirmatio):</label>
                     <input type="file" name="payment" accept="image/*, .pdf" id="id_payment" class="form-control">

@@ -38,9 +38,10 @@ def register(request):
                     #                     
                     tournaments.delete()
                 
-            Participant.objects.create(
-                user=request.user, tournament=t,name=request.user.profile.preferred_name,
-            )
-            return redirect('/profile/')
+                Participant.objects.create(
+                    user=request.user, tournament=t,name=request.user.profile.preferred_name,
+                )
+                return redirect('/profile/')
+            
     return render(request, 'register.html')
     
