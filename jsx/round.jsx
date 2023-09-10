@@ -178,8 +178,13 @@ export function Round(props) {
                 //
             }
             else {
-                names.push(e.p1.name)
-                names.push(e.p2.name)
+                if(e.p1 && e.p2){
+                    names.push(e.p1.name)
+                    names.push(e.p2.name)
+                }
+                else {
+                    console.log(e)
+                }
             }
         })
         dispatch({ type: 'pending', names: names , tid: tournament.id})

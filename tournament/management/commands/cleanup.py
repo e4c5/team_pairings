@@ -7,7 +7,7 @@ from asgiref.sync import async_to_sync
 
 from tournament.models import Tournament, Participant
 from profiles.models import Profile
-
+from ratings.models import NationalRating
 
 
 channel_layer = get_channel_layer()
@@ -34,4 +34,15 @@ class Command(BaseCommand):
                             participant.save()
                         except Tournament.DoesNotExist:
                             print('This has no junior')
-                
+
+            for participant in t.participants.all():
+                try:
+                    nr = NationalRating.objects.get(name=participant.name)
+                    participant.rating = nr.rating
+                    participant.save()
+                    print(participant.name, participant.rating)
+                except NationalRating.DoesNotExist:
+                    participant.rating = 100
+                    participant.save()
+                    print(participant.name)
+                    pass

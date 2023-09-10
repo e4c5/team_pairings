@@ -51,7 +51,8 @@ class Pairing:
 
         players = Participant.objects.select_related(
             ).filter(tournament=self.tournament
-            ).exclude(name='Absent')
+            ).exclude(name='Absent'
+            ).filter(approval='V')
 
         if rnd.based_on > 0:
             # this round has a predecessor that needs to be completed.
