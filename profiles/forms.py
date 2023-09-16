@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator
 from tournament.models import Participant
 
 class PaymentForm(forms.Form):
+    tournament = forms.IntegerField(widget=forms.HiddenInput())
     payment = forms.FileField(required=False)
 
 class UserProfileForm(forms.Form):

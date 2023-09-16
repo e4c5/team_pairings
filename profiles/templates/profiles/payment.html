@@ -4,80 +4,88 @@
         {% if participants.exists %}
             <p>Currently you are registered for the following tournaments:</p>
             {% for p in participants %}
-            <div class="row m-5">
-                <div class="col-sm-2">Tournament:</div>
-                <div class="col-sm-10">{{p.tournament.name}}</div>
-                
-                <div class="col-sm-2">Venue:</div>
-                <div class="col-sm-10">{{p.tournament.venue}}</div>
+                <div class="card m-5">
+                    <div class="card-header"><h4>{{p.tournament.name}}</h4></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">Venue:</div>
+                            <div class="col-sm-10">{{p.tournament.venue}}</div>
 
-                <div class="col-sm-2">Start Date:</div>
-                <div class="col-10">{{p.tournament.start_date}}</div>
+                            <div class="col-sm-2">Start Date:</div>
+                            <div class="col-10">{{p.tournament.start_date}}</div>
 
-                <div class="col-sm-2">Registered as:</div>
-                <div class="col-10">{{ p.name }}</div>
+                            <div class="col-sm-2">Registered as:</div>
+                            <div class="col-10">{{ p.name }}</div>
 
-                <div class="col-sm-2">Payment:</div>
-                <div class="col-10">
-                    {% if p.approval == 'V' %}
-                        <strong>{{ p.get_approval_display }}</strong>
-                    {% elif p.approval == 'P' %}
-                        {{ p.get_approval_display }}<br/>
-                        {{ p.payment.name }}
-                    {% else %}
-                        {{ p.get_approval_display }}
-                    {% endif %}
+                            <div class="col-sm-2">Payment:</div>
+                            <div class="col-10">
+                                {% if p.approval == 'V' %}
+                                    <strong>{{ p.get_approval_display }}</strong>
+                                {% elif p.approval == 'P' %}
+                                    {{ p.get_approval_display }}<br/>
+                                    {{ p.payment.name }}
+                                {% else %}
+                                    {{ p.get_approval_display }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if p.approval == 'P' %}
+                            <p class='mt-5'>Thank you for the payment. Once your payment has been verified the status will change here from 'Pending Verifiction' to 'Verified'
+                        {% elif p.approval == 'V' %}
+                            <p class='mt-5'>Your registration is complete.</p>
+                        {% else %}
+                            <p class="mt-5">If the above information is correct, please transfer your payment to the account given below and upload the payment slip/transfer confirmation.
+                                If the above information is not correct (for example if you are registered for the wrong zonal), please <a href="/profile/">click here</a> to change it.
+                                The entry fee is Rs {{p.tournament.fee}}
+                            </p>
+                            <p class="ms-5">
+                                <strong>Bank</strong> : Sampath Bank<br/>
+                                <strong>Branch</strong> : Wellampitiya<br/>
+                                <strong>Name</strong> : M. Raashid Sudin<br/>
+                                <strong>Account Number</strong> : 104553978974<br/>
+                            </p>
+
+                            <p>You can transfer the funds through online banking facilities or the deposit can be made in person at any branch of Sampath Bank.</p>
+                            
+                            <form method="post" enctype="multipart/form-data" class="file-upload-form">
+                                {{ p.form.errors }}
+                                {% csrf_token %}
+                                <label for="id_payment">Payment details (deposit slip or transfer confirmation):</label>
+                                <input type="file" name="payment" accept="image/*, .pdf" id="id_payment-{{p.tournament.id}}" 
+                                    class="form-control file-input">
+                                <button type="submit" class="btn btn-primary upload-button" disabled
+                                    id="submitButton-{{p.tournament.id}}">Upload</button>
+                                {{ p.form.tournament }}
+                            </form>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
             {% endfor %}
-            {% if participants.0.approval == 'P' %}
-                <p class='mt-5'>Thank you for the payment. We will send you an email once your payment is verified.</p>
-            {% elif participants.0.approval == 'V' %}
-                <p class='mt-5'>Your registration is complete.</p>
-            {% else %}
-                <p class="mt-5">If the above information is correct, please transfer your payment to the account given below and upload the payment slip/transfer confirmation.
-                    If the above information is not correct (for example if you are registered for the wrong zonal), please <a href="/profile/">click here</a> to change it.
-                    The entry fee is Rs 1500
-                </p>
-                <p class="ms-5">
-                    <strong>Bank</strong> : Sampath Bank<br/>
-                    <strong>Branch</strong> : Wellampitiya<br/>
-                    <strong>Name</strong> : M. Raashid Sudin<br/>
-                    <strong>Account Number</strong> : 104553978974<br/>
-                </p>
-
-                <p>You can transfer the funds through online banking facilities or the deposit can be made in person at any branch of Sampath Bank.</p>
-                
-                <form method="post" enctype="multipart/form-data">
-                    {{ form.errors }}
-                    {% csrf_token %}
-                    <label for="id_payment">Payment details (deposit slip or transfer confirmatio):</label>
-                    <input type="file" name="payment" accept="image/*, .pdf" id="id_payment" class="form-control">
-                    <button type="submit" class="btn btn-primary" id="submitButton">Upload</button>
-                </form>
-            {% endif %}
+            
         {% else %}
                 <p>You are not registered for any tournaments.</p>
         {% endif %}
         
         <script>
-            // Reference to the file input field and submit button
-            const fileInput = document.getElementById('id_payment');
-            const submitButton = document.getElementById('submitButton');
-        
-            // Initial disable of the submit button
-            submitButton.disabled = true;
-        
-            // Event listener for file input
-            fileInput.addEventListener('change', function() {
-              // Check if a file has been selected
-              if (fileInput.files.length > 0) {
-                // Enable the submit button
+            const fileInputs = document.querySelectorAll('.file-input');
+
+            // Loop through each file input
+            fileInputs.forEach(function(input) {
+            // Add event listener for each input
+            input.addEventListener('change', function(event) {
+                // Get the parent form of the file input
+                const form = event.target.closest('.file-upload-form');
+                
+                // Find the submit button within the parent form
+                const submitButton = form.querySelector('.upload-button');
+                
+                // Enable the submit button if a file is selected, otherwise disable it
+                if (event.target.files.length > 0) {
                 submitButton.disabled = false;
-              } else {
-                // Disable the submit button
+                } else {
                 submitButton.disabled = true;
-              }
+                }
+            });
             });
           </script>
     </div>
