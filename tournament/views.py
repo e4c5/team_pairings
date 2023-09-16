@@ -42,6 +42,11 @@ def register(request):
                     user=request.user, tournament=t,name=request.user.profile.preferred_name,
                 )
                 return redirect('/profile/')
+            else:
+                Participant.objects.create(
+                    user=request.user, tournament=t,name=request.user.profile.preferred_name,
+                )
+                return redirect('/profile/')
             
     return render(request, 'register.html')
     
