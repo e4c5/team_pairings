@@ -28,8 +28,8 @@ class SeleniumTest(ChannelsLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        #cls.selenium = webdriver.Chrome()
-        cls.selenium = webdriver.Firefox()
+        cls.selenium = webdriver.Chrome()
+        #cls.selenium = webdriver.Firefox()
 
         cls.selenium.maximize_window()
 

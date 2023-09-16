@@ -32,7 +32,8 @@ class ResultAdmin(admin.ModelAdmin):
         return super().save_model(request, obj, form, change)
     
 class TournamentAdmin(admin.ModelAdmin):
-    list_display = ['id','name','num_rounds','entry_mode','registration_open']
+    list_display = ['id','name','num_rounds','entry_mode',
+                    'registration_open','fee']
 
 class RoundAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'round_no','spread_cap','pairing_system',

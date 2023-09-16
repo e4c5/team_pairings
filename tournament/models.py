@@ -45,6 +45,8 @@ class Tournament(models.Model):
 
     venue = models.CharField(max_length=100, blank=True, default="To be notified")
 
+    fee = models.IntegerField(default=0, blank=True, null=False)
+
     @classmethod    
     def tournament_slug(self, name):
         ''' Slugify tournament names so that we can use them in links '''
@@ -279,6 +281,11 @@ class Participant(models.Model):
         else:
             return f'{self.name} {self.game_wins} {self.spread}'
     
+    def save(self, *args, **kwargs):
+        if self.name == 'Bye' or self.name == 'Absent':
+            self.approval = 'V'
+        super().save(*args, **kwargs)
+
     class Meta:
         unique_together = ['name','tournament']
 

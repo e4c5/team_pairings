@@ -27,10 +27,11 @@ def add_participants(tournament, use_faker=False, count=0, filename="", seed=Non
             if tournament.team_size:
                 p = Participant.objects.create(tournament=tournament, 
                     name = fake.city() + " Scrabble Club",
+                    approval='V',
                     rating = i * 10 + 1)
             else:
                 p = Participant.objects.create(tournament=tournament, 
-                    name = fake.name(),
+                    name = fake.name(), approval='V',
                     rating = fake.random_int(500, 1400))
                 
             participants.append(p)
