@@ -162,12 +162,12 @@ class BasicTests(APITestCase, Helper):
         # odd number with no bye
         sp = swiss.SwissPairing(rnd)
         p1 = Participant.objects.create(
-            tournament=self.t1, name='bada', rating=1)
+            tournament=self.t1, name='bada', rating=1, approval='V')
         self.assertRaises(ValueError, sp.make_it)
 
         # one player with a bye should work
         bye = Participant.objects.create(
-            tournament=self.t1, name='Bye', rating=2)
+            tournament=self.t1, name='Bye', rating=2, approval='V')
         sp = swiss.SwissPairing(rnd)
         sp.make_it()
         sp.save()

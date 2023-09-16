@@ -144,7 +144,7 @@ def save_to_db(tournament, results):
             name=result['name'],  tournament=tournament,
             defaults={
                 "name": result['name'], "offed": result.get('off', False),
-                "tournament": tournament
+                "tournament": tournament, 'approval': 'V'
             }
         )
         #print(p.id)

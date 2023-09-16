@@ -494,7 +494,7 @@ def get_results(tournament, round_id):
                     select *, 
                         (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
                         (select to_jsonb(parti) from parti where id = tr.p2_id) p2
-                    from tournament_result tr where round_id = %s and approval = 'V'
+                    from tournament_result tr where round_id = '%s'
                 ) r
             """
             cursor.execute(query, [round_id])
