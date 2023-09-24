@@ -1,10 +1,10 @@
 {% extends "profiles/base.html" %}
 {% block content %}
-    <div class="m5">
+    <div>
         {% if participants.exists %}
             <p>Currently you are registered for the following tournaments:</p>
             {% for p in participants %}
-                <div class="card m-5">
+                <div class="card mt-5">
                     <div class="card-header"><h4>{{p.tournament.name}}</h4></div>
                     <div class="card-body">
                         <div class="row">
