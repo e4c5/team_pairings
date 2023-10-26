@@ -107,7 +107,8 @@ class Pairing:
                 # create one.
                 bye, _ = Participant.objects.get_or_create(
                     name='Bye', tournament=self.tournament,
-                    defaults = {'name': 'Bye', 'rating': 0,  'tournament': self.tournament}
+                    defaults = {'name': 'Bye', 'rating': 0, 'approval': 'V',
+                                'tournament': self.tournament}
                 )
                 self.bye = {'name': 'Bye', 'pair': False,
                     'rating': 0, 'opponents': [], 'player': bye,

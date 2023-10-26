@@ -202,6 +202,9 @@ class TestParticipants(APITestCase, Helper):
         p = model_to_dict(parties[1])
         p['offed'] = 1
         del p['user']
+        del p['payment']
+        del p['approved_by']
+        
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[1].id}/',p
         )
@@ -222,6 +225,9 @@ class TestParticipants(APITestCase, Helper):
         p = model_to_dict(parties[0])
         p['offed'] = 1
         del p['user']
+        del p['payment']
+        del p['approved_by']
+
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[0].id}/',p
         )
@@ -256,6 +262,9 @@ class TestParticipants(APITestCase, Helper):
         p = model_to_dict(parties[5])
         p['offed'] = 1
         del p['user']
+        del p['payment']
+        del p['approved_by']
+
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[5].id}/',p
         )

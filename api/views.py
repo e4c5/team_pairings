@@ -36,7 +36,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        '''Unauth users see all but private tournaments.'''
+        '''Anonymous users see all but private tournaments.'''
         if self.request.user.is_authenticated:
             return models.Tournament.objects.distinct('id').filter(
                 Q(director__user=self.request.user) | Q(private=False)
