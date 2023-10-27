@@ -47,6 +47,7 @@ class TestParticipants(SeleniumTest):
         ).click()
 
         self.add_participants()
+        Participant.objects.update(approval='V')
         time.sleep(0.2)
         self.assertEquals(18, Participant.objects.count())
         self.delete_participants()
