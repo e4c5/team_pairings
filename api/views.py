@@ -444,6 +444,7 @@ class ParticipantViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
     
     def perform_create(self, serializer):
+        """Adds a new participant"""
         self.check_rr_pairing()
         instance = serializer.save(tournament_id=self.request.tournament.id)
         p = serializer.data
@@ -494,7 +495,7 @@ def get_results(tournament, round_id):
                     select *, 
                         (select to_jsonb(parti) from parti where id = tr.p1_id) p1,
                         (select to_jsonb(parti) from parti where id = tr.p2_id) p2
-                    from tournament_result tr where round_id = '%s'
+                    from tournament_result tr where round_id = %s
                 ) r
             """
             cursor.execute(query, [round_id])
