@@ -73,7 +73,7 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ('approval',)
     list_editable = ['approval',]
     def payment(self, obj):
-        print(obj)
+        """Display the payment image as a link"""
         if obj and obj.file_field:
             return format_html('<a href="{}" target="_blank">Download</a>', obj.file_field.url)
         return "No File"
