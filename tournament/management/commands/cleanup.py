@@ -25,15 +25,16 @@ class Command(BaseCommand):
             u20 = date(year=2004, month=1, day=1)
             if '20' in t.name:
                 for participant in t.participants.all():
-                    profile = participant.user.profile
-                    if profile.date_of_birth >= u15:
-                        print(profile.full_name, 'gets relocated', profile.date_of_birth)
-                        try:
-                            sub = Tournament.objects.get(name=t.name.replace('20', '15'))
-                            participant.tournament = sub
-                            participant.save()
-                        except Tournament.DoesNotExist:
-                            print('This has no junior')
+                    if participant.user:
+                        profile = participant.user.profile
+                        if profile.date_of_birth >= u15:
+                            print(profile.full_name, 'gets relocated', profile.date_of_birth)
+                            try:
+                                sub = Tournament.objects.get(name=t.name.replace('20', '15'))
+                                participant.tournament = sub
+                                participant.save()
+                            except Tournament.DoesNotExist:
+                                print('This has no junior')
 
             for participant in t.participants.all():
                 try:
