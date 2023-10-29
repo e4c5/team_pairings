@@ -19,6 +19,8 @@ class TestResults(SeleniumTest):
     def test_tsh_style_entry(self):
         """Test data entry with TSH style"""
         add_participants(self.t3, True, 6, seed=10)
+        Participant.objects.update(approval='V')
+
         driver = self.load_tournament('New Year Joust')
         self.assertEqual(Result.objects.count(), 0)
         self.pair_round('1')
@@ -117,7 +119,7 @@ class TestResults(SeleniumTest):
         self.assertEqual(18, Participant.objects.count())
         time.sleep(0.1)
         self.load_tournament("Richmond Showdown U20")
-        
+        Participant.objects.update(approval='V')
         self.pair_round('1')
         driver = self.selenium
         
@@ -156,6 +158,7 @@ class TestResults(SeleniumTest):
     def test_entry_by_player(self):
         """Testing a tournament where data is entered per player"""
         add_participants(self.t2, False, 18, 'api/tests/data/teams.csv')
+        Participant.objects.update(approval='V')
         add_team_members(tournament=self.t2)
 
         driver = self.selenium

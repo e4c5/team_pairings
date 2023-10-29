@@ -20,6 +20,12 @@ def tsh_export(tournament, out):
     players = []
     i = 0
 
+    completed = tournament.get_last_completed()
+    if completed:
+        completed = completed.round_no
+    else:
+        completed = 0
+
     for participant in tournament.participants.order_by('seed'):
         if (participant.seed == 0 or participant.name == 'Bye' 
                 or participant.name == 'Absent' or participant.name == ''):
@@ -30,7 +36,8 @@ def tsh_export(tournament, out):
         i += 1
 
     for participant in players:
-
+        # iterate through all the players and create lists containing their opponents and
+        # their scores.
         opponents = []
         scores = []
         p12 = []
@@ -39,12 +46,28 @@ def tsh_export(tournament, out):
         ).order_by('round__round_no')
         
         for result in results:
+            # when finding their opponent numbers, the bye and absent both get remapped to 0
             if result.p1 == participant:
-                opponents.append(str(result.p2.seed))
-                scores.append(str(result.score1))
+                
+                if result.p2.name == 'Bye':
+                    opponents.append('0')
+                    scores.append('100')
+                elif result.p2.name == 'Absent':
+                    opponents.append('0')
+                    scores.append('-100')
+                else:
+                    opponents.append(str(result.p2.seed))
+                    scores.append(str(result.score1))
             else:
-                opponents.append(str(result.p1.seed))
-                scores.append(str(result.score2))
+                if result.p1.name == 'Bye':
+                    opponents.append('0')
+                    scores.append('100')
+                elif result.p1.name == 'Absent':
+                    opponents.append('0')
+                    scores.append('-100')
+                else:
+                    opponents.append(str(result.p1.seed))
+                    scores.append(str(result.score2))
 
             if result.starting == participant:
                 p12.append('1')
@@ -55,6 +78,11 @@ def tsh_export(tournament, out):
                     p12.append('2') 
                 else:
                     p12.append('3')
+
+        if participant.offed:
+            while len(opponents) < completed:
+                opponents.append('0')
+                scores.append('-100')
 
         print("{0:25s}{1:3d} {2}; {3}; {4}; p12 {5}".format(
             participant.name, participant.rating, " ".join(opponents),

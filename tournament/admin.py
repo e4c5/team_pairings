@@ -17,9 +17,11 @@ class BoardResultAdmin(admin.ModelAdmin):
     raw_id_fields = ['round', 'team1', 'team2']
 
 class ResultAdmin(admin.ModelAdmin):
+    """Tournament results
+    Searchable by player name or tournament name"""
     list_display = ['id', 'round','p1','p2','games_won','score1','score2']
     raw_id_fields = ['round', 'p1', 'p2','starting']
-    search_fields = ['p1__name', 'p2__name']
+    search_fields = ['p1__name', 'p2__name', 'round__tournament__name']
 
     def delete_model(self, request: HttpRequest, obj: Any) -> None:
         super().delete_model(request, obj)
@@ -67,13 +69,15 @@ class PaymentAdmin(admin.ModelAdmin):
     This admin class is here because payment moderation can be delegated to
     a different staff member who is not familiar with the Participant model.
     for example an accounting type can take over verification of payments"""
+    
     list_display = ['tournament', 'name', 'payment', 'approval', 'approved_by']
     search_fields = ['tournament__name', 'name']
     exclude = ['approved_by']
     list_filter = ('approval',)
     list_editable = ['approval',]
+    
     def payment(self, obj):
-        print(obj)
+        """Display the payment image as a link"""
         if obj and obj.file_field:
             return format_html('<a href="{}" target="_blank">Download</a>', obj.file_field.url)
         return "No File"
@@ -88,7 +92,19 @@ class PaymentAdmin(admin.ModelAdmin):
             
 
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'tournament','name','seed','round_wins','game_wins','approval',]
+
+    def gender(self, obj):
+        if obj.user and obj.user.profile:
+            return obj.user.profile.gender
+        return ''
+    
+    def dob(self, obj):
+        if obj.user and obj.user.profile:
+            dob = obj.user.profile.date_of_birth
+            return dob
+        return ''
+
+    list_display = ['pk', 'tournament','name','rating','seed','round_wins','game_wins','approval','gender','dob']
     search_fields = ['tournament__name', 'name']
     raw_id_fields = ['tournament','user']
 

@@ -60,14 +60,17 @@ class TestIntegration(SeleniumTest):
         """Does the whole hog for a tournament where data entry is by player"""
         self.load_tournament("Richmond Showdown U15")
         self.add_participants()
+        Participant.objects.update(approval='V')
 
     def test_integration_by_team(self):
         """Does the whole hog for a tournament where data entry is by team"""
         self.load_tournament("Richmond Showdown U20")
         self.add_participants()
+        Participant.objects.update(approval='V')
+
         self.pair_round('1')
         self.add_scores()
-
+        
         self.pair_round('2')
         self.add_scores()
 
