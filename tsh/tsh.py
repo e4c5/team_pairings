@@ -25,10 +25,13 @@ def tsh_export(tournament, out):
         completed = completed.round_no
     else:
         completed = 0
-
+    
     for participant in tournament.participants.order_by('seed'):
+        print(participant.name)
         if (participant.seed == 0 or participant.name == 'Bye' 
                 or participant.name == 'Absent' or participant.name == ''):
+            continue
+        if participant.approval != 'V':
             continue
         participant.seed = i + 1
         participant.save()
@@ -36,6 +39,7 @@ def tsh_export(tournament, out):
         i += 1
 
     for participant in players:
+        print(participant.name, participant.rating)
         # iterate through all the players and create lists containing their opponents and
         # their scores.
         opponents = []
