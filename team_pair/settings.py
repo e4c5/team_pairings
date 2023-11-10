@@ -173,3 +173,6 @@ logging.config.dictConfig({
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+#ocid1.user.oc1..aaaaaaaam7i3obrcuuo7pluu2nbsv23g26axd7k6x3dmn4ltpgemojqfsn7q@ocid1.tenancy.oc1..aaaaaaaadkv7vbe52c7oxe6fmqwh56u64nsbfsq2uccjze6gwtub4pviisiq.n8.com
+#fiiuFwR1[OJ{.N}Aa&5)
