@@ -1,10 +1,35 @@
 import csv
 from faker import Faker
+import json
+import requests
 
 from django.db.models import Q
 
 from tournament.models import Participant, TeamMember, Tournament, BoardResult
 from tournament.models import update_standing, update_team_standing
+
+
+def add_woogle_participants(tournament, filename):
+    """Add participents for a woogles online tournament. The file is expected to be 
+    a list of woogles usernames. We will fetch the user's ratings from the woogles 
+    profile and then add them to the tournament"""
+
+    with open(filename) as fp:
+        for line in fp:
+            line = line.strip()
+            response = requests.post('https://woogles.io/twirp/user_service.ProfileService/GetProfile',
+                        json={'username': line})    
+            
+            if response.status_code == 200:
+                data = response.json()
+                ratings = json.loads(data['ratings_json'])
+                try:
+                    print(",".join([line, str(int(ratings['Data']['CSW19.classic.regular']['r']))]))
+                except KeyError:
+                    print(",".join([line, "0"]))
+            else:
+                print(line)
+
 
 def add_participants(tournament, use_faker=False, count=0, filename="", seed=None):
     """Adds a list of participants (teams) to a tournament
@@ -39,9 +64,12 @@ def add_participants(tournament, use_faker=False, count=0, filename="", seed=Non
         with open(filename) as fp:
             reader = csv.reader(fp)
             for line in reader:
-                p = Participant.objects.create(tournament=tournament, name=line[0],
-                    rating=line[1])
-                participants.append(p)
+                try:
+                    p = Participant.objects.create(tournament=tournament, name=line[0],
+                        rating=int(line[1]), approval='V')
+                    participants.append(p)
+                except IndexError:
+                    pass
     return participants
 
 

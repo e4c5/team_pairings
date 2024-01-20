@@ -1,7 +1,7 @@
 import faker
 from django.core.management.base import BaseCommand, CommandError
 from tournament.models import Participant, Tournament
-from tournament.tools import add_participants, add_team_members
+from tournament.tools import add_participants, add_team_members, add_woogle_participants
 
 class Command(BaseCommand):
 
@@ -14,6 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('--add-participants', type=int,
                 help='Add this many teams to the tournament')
         parser.add_argument('--add-members', action='store_true')
+        parser.add_argument('--woogles', action='store_true')
         parser.add_argument('--file', help="the path to the csv file with players")
 
 
@@ -29,6 +30,8 @@ class Command(BaseCommand):
                 add_participants(self.t, use_faker=True, count=options.get('add_participants'))
             else:
                 add_participants(self.t, False, filename=options["file"])
+        if options.get('woogles'):
+                add_woogle_participants(self.t, filename=options["file"])
 
         if options.get('add_members'):
             add_team_members(self.t)

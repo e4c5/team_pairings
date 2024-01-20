@@ -40,9 +40,9 @@ class TournamentViewSet(viewsets.ModelViewSet):
         if self.request.user.is_authenticated:
             return models.Tournament.objects.distinct('id').filter(
                 Q(director__user=self.request.user) | Q(private=False)
-            )
+            ).order_by('-id')
         else:
-            return models.Tournament.objects.filter(private=False)
+            return models.Tournament.objects.filter(private=False).order_by('-id')
         
 
     def perform_create(self, serializer):
