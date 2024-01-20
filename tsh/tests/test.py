@@ -55,8 +55,10 @@ class CommandTestCase(TestCase):
         self.tournament = Tournament.objects.create(name='Test Tournament', 
                                                     slug='test-tournament',
                                                     num_rounds=5)
-        self.participant1 = Participant.objects.create(name='Player 1', tournament=self.tournament)
-        self.participant2 = Participant.objects.create(name='Player 2', tournament=self.tournament)
+        self.participant1 = Participant.objects.create(name='Player 1', approval='V',
+                                                        tournament=self.tournament)
+        self.participant2 = Participant.objects.create(name='Player 2',  approval='V',
+                                                       tournament=self.tournament)
         
         self.tsh_file = '/tmp/test_tsh_file.t'
 

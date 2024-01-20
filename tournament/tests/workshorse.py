@@ -100,7 +100,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         Director.objects.create(tournament=self.t2, user=u)
         Director.objects.create(tournament=self.t3, user=u)
 
-        self.assertEquals(Tournament.objects.count(), 3)
+        self.assertEqual(Tournament.objects.count(), 3)
 
     def get_url(self, relative_path):
         self.selenium.get('%s%s' % (self.live_server_url, relative_path))
