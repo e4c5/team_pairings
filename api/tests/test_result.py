@@ -118,8 +118,8 @@ class BasicTests(TestCase, Helper):
 
         p1 = self.t2.participants.all()[0]
         p2 = self.t2.participants.all()[1]
-        self.assertEquals(p1.round_wins, 0.5)
-        self.assertEquals(p1.game_wins, 2.5)
+        self.assertEqual(p1.round_wins, 0.5)
+        self.assertEqual(p1.game_wins, 2.5)
 
         b.score2 = 300
         b.save()
@@ -127,20 +127,20 @@ class BasicTests(TestCase, Helper):
         p2.refresh_from_db()
         p1.refresh_from_db()
         if b.team1 == p1:
-            self.assertEquals(p2.round_wins, 1)
-            self.assertEquals(p2.game_wins, 3)
-            self.assertEquals(p2.spread, 100)
-            self.assertEquals(p1.round_wins, 0)
-            self.assertEquals(p1.game_wins, 2)
-            self.assertEquals(p1.spread, -100)
+            self.assertEqual(p2.round_wins, 1)
+            self.assertEqual(p2.game_wins, 3)
+            self.assertEqual(p2.spread, 100)
+            self.assertEqual(p1.round_wins, 0)
+            self.assertEqual(p1.game_wins, 2)
+            self.assertEqual(p1.spread, -100)
         else:
-            self.assertEquals(p1.round_wins, 1)
-            self.assertEquals(p1.game_wins, 3)
-            self.assertEquals(p1.spread, 100)
+            self.assertEqual(p1.round_wins, 1)
+            self.assertEqual(p1.game_wins, 3)
+            self.assertEqual(p1.spread, 100)
 
-            self.assertEquals(p2.round_wins, 0)
-            self.assertEquals(p2.game_wins, 2)
-            self.assertEquals(p2.spread, -100)
+            self.assertEqual(p2.round_wins, 0)
+            self.assertEqual(p2.game_wins, 2)
+            self.assertEqual(p2.spread, -100)
 
     def test_edit_bye(self):
         """The TD might need to edit the bye to impose a penalty"""
@@ -184,23 +184,23 @@ class BasicTests(TestCase, Helper):
 
         self.assertNotEqual(w1, r.p1.game_wins)
         self.assertNotEqual(w2, r.p2.game_wins)
-        self.assertEquals(r.p1.game_wins, r.p2.game_wins)
+        self.assertEqual(r.p1.game_wins, r.p2.game_wins)
         self.assertEqual(r.p1.round_wins, 0.5)
 
         # ensures that there is a 0.5 in there
-        self.assertEquals((r.p2.game_wins * 2) % 2, 1)
-        self.assertEquals((r.p1.game_wins * 2) % 2, 1)
+        self.assertEqual((r.p2.game_wins * 2) % 2, 1)
+        self.assertEqual((r.p1.game_wins * 2) % 2, 1)
 
     def test_score_bye_t(self):
         """targeted at the score by method in Tournament"""
         bye = Participant.objects.create(name="Bye", tournament=self.t1)
         p1, = self.add_players(self.t1, 1)
 
-        self.assertEquals(p1.game_wins, 0)
+        self.assertEqual(p1.game_wins, 0)
         r = Result.objects.create(p1=p1, p2=bye, round=self.t1.rounds.all()[0])
         self.t1.score_bye(r)
         p1.refresh_from_db()
-        self.assertEquals(0, p1.white)
+        self.assertEqual(0, p1.white)
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
 
@@ -210,13 +210,13 @@ class BasicTests(TestCase, Helper):
 
         bye = Participant.objects.create(name="Bye", tournament=self.t1)
         p1, = self.add_players(self.t1, 1)
-        self.assertEquals(str(p1), f'{p1.name} 0 0')
+        self.assertEqual(str(p1), f'{p1.name} 0 0')
 
-        self.assertEquals(p1.game_wins, 0)
+        self.assertEqual(p1.game_wins, 0)
         r = Result.objects.create(p2=p1, p1=bye, round=self.t1.rounds.all()[0])
         self.t1.score_bye(r)
         p1.refresh_from_db()
-        self.assertEquals(0, p1.white)
+        self.assertEqual(0, p1.white)
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
 
@@ -224,11 +224,11 @@ class BasicTests(TestCase, Helper):
         """Test direct assign of bye in an individual tournament"""
         bye = Participant.objects.create(name="Bye", tournament=self.t3)
         p1, = self.add_players(self.t3, 1)
-        self.assertEquals(p1.game_wins, 0)
+        self.assertEqual(p1.game_wins, 0)
         r = Result.objects.create(p1=p1, p2=bye, round=self.t1.rounds.all()[0])
         self.t1.score_bye(r)
         p1.refresh_from_db()
-        self.assertEquals(0, p1.white)
+        self.assertEqual(0, p1.white)
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
 
@@ -236,15 +236,15 @@ class BasicTests(TestCase, Helper):
         """Test direct assign of bye in an individual tournament p1, p2 flip"""
         bye = Participant.objects.create(name="Bye", tournament=self.t3)
         p1, = self.add_players(self.t3, 1)
-        self.assertEquals(str(p1), f'{p1.name} 0 0')
-        self.assertEquals(p1.game_wins, 0)
+        self.assertEqual(str(p1), f'{p1.name} 0 0')
+        self.assertEqual(p1.game_wins, 0)
         r = Result.objects.create(p2=p1, p1=bye, round=self.t1.rounds.all()[0])
         self.t1.score_bye(r)
         p1.refresh_from_db()
-        self.assertEquals(0, p1.white)
+        self.assertEqual(0, p1.white)
         self.assertEqual(3, p1.game_wins)
         self.assertEqual(1, p1.round_wins)
-        self.assertEquals(str(p1), f'{p1.name} 3.0 300')
+        self.assertEqual(str(p1), f'{p1.name} 3.0 300')
 
     def test_result_view(self):
         """Add a result by sending a PUT"""
@@ -254,7 +254,7 @@ class BasicTests(TestCase, Helper):
 
         resp = self.client.post(
             f'/api/tournament/{self.t3.id}/pair/', {'id': rnd.id})
-        self.assertEquals(resp.status_code, 200, resp.content)
+        self.assertEqual(resp.status_code, 200, resp.content)
         self.assertEqual(Result.objects.count(), 3)
 
         result = rnd.results.all()[0]
@@ -264,7 +264,7 @@ class BasicTests(TestCase, Helper):
                 'p2': result.p1.id, 'score1': 200, 'score2': 100},
             content_type='application/json'
         )
-        self.assertEquals(resp.status_code, 200, resp.content)
+        self.assertEqual(resp.status_code, 200, resp.content)
 
         result.refresh_from_db()
         self.assertEqual(result.score1, 100)
@@ -296,7 +296,7 @@ class BasicTests(TestCase, Helper):
         self.assertEqual(result.games_won, 0)
 
         b = BoardResult.objects.get(board=1, team1=result.p1_id, round=rnd)
-        self.assertEquals(b.score1, 100)
+        self.assertEqual(b.score1, 100)
         
 
     def test_create_delete_boards(self):
@@ -305,10 +305,10 @@ class BasicTests(TestCase, Helper):
         result = Result.objects.create(
             p1=p[0], p2=p[1], round=self.t2.rounds.get(round_no=1)
         )
-        self.assertEquals(BoardResult.objects.count(), 0)
+        self.assertEqual(BoardResult.objects.count(), 0)
 
         create_boards(self.t2, result)
-        self.assertEquals(BoardResult.objects.count(), 5)
+        self.assertEqual(BoardResult.objects.count(), 5)
 
         delete_boards(result)
-        self.assertEquals(BoardResult.objects.count(), 0)
+        self.assertEqual(BoardResult.objects.count(), 0)

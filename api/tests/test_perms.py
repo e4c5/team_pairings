@@ -38,13 +38,13 @@ class BasicTests(APITestCase):
     def test_unauth(self):
         """Test that our endpoints are read only for anonymous users"""
         resp = self.client.post('/api/tournament/', {})
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         resp = self.client.get(f'/api/tournament/{self.t1.id}/participant/')
         self.assertEqual(200, resp.status_code)
         resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', {})
         
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
         
 
     @patch('api.views.broadcast')
@@ -53,7 +53,7 @@ class BasicTests(APITestCase):
 
         self.assertEqual(self.t1.start_date,'2023-02-25')        
         sri = User.objects.get(username='sri')
-        self.assertEquals(1, models.Tournament.objects.filter(director__user=sri).count())
+        self.assertEqual(1, models.Tournament.objects.filter(director__user=sri).count())
 
         # edit this tournaments name and start date
         self.client.login(username='sri', password='12345')

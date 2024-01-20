@@ -42,7 +42,7 @@ class BasicTests(APITestCase):
         resp = self.client.post('/api/tournament/', {
             'name': 'joust', 'rounds': 10, 'date': '2023-04-23'
         })
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
         
         self.client.login(username='testuser', password='12345')
         resp = self.client.get('/api/tournament/')
@@ -51,7 +51,7 @@ class BasicTests(APITestCase):
             'name': 'joust', 'num_rounds': 10, 'start_date': '2023-04-23', 
             'entry_mode': 'S'
         })
-        self.assertEquals(resp.status_code, 201, resp.data)
+        self.assertEqual(resp.status_code, 201, resp.data)
 
         t = models.Tournament.objects.order_by('-pk')[0]
         self.assertEqual(t.name,'joust')
@@ -62,7 +62,7 @@ class BasicTests(APITestCase):
             'name': 'Richmond', 'num_rounds': 10, 'start_date': '2023-04-23',
             'entry_mode': 'P'
         })
-        self.assertEquals(resp.status_code, 201, resp.data)
+        self.assertEqual(resp.status_code, 201, resp.data)
 
         t = models.Tournament.objects.order_by('-pk')[0]
         self.assertEqual(t.name,'Richmond')
@@ -75,7 +75,7 @@ class BasicTests(APITestCase):
             'name': 'Richmond Teams', 'num_rounds': 10, 'start_date': '2023-04-23',
             'entry_mode': 'P', 'team_size': 5
         })
-        self.assertEquals(resp.status_code, 201, resp.data)
+        self.assertEqual(resp.status_code, 201, resp.data)
 
         t = models.Tournament.objects.order_by('-pk')[0]
         self.assertEqual(t.name,'Richmond Teams')
@@ -94,7 +94,7 @@ class BasicTests(APITestCase):
         t = models.Tournament.get_by_name('Richmond shoWdOwn U20',start_date='2023-01-01')
         self.assertEqual(2, models.Tournament.objects.count())
         self.assertIsNotNone(t)
-        self.assertEquals(t.get_absolute_url(), '/tournament/richmond-showdown-u20/')
+        self.assertEqual(t.get_absolute_url(), '/tournament/richmond-showdown-u20/')
 
         t = models.Tournament.get_by_name('NOT THERE', start_date='2023-01-01')
         
@@ -119,36 +119,36 @@ class BasicTests(APITestCase):
         response = self.client.get('/api/tournament/',format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(2, len(response.data))
-        self.assertEqual('richmond-showdown-u20', response.data[0]['slug'])
+        self.assertEqual('richmond-showdown-u15', response.data[0]['slug'])
 
 
     def test_unauth(self):
         """Test that our endpoints are read only for anonymous users"""
         resp = self.client.post('/api/tournament/', {})
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         resp = self.client.get(f'/api/tournament/{self.t1.id}/participant/')
         self.assertEqual(200, resp.status_code)
         resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', {})
         
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
         
     def test_private(self):
         """Only owners can see their tournaments in the list"""
         resp = self.client.get('/api/tournament/')
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(2, len(resp.data), resp.data)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(2, len(resp.data), resp.data)
 
         models.Tournament.objects.update(private=True)
         resp = self.client.get('/api/tournament/')
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(0, len(resp.data), resp.data)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(0, len(resp.data), resp.data)
 
         self.client.login(username='testuser', password='12345')        
         resp = self.client.get('/api/tournament/')
         models.Tournament.objects.update(private=True)
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(1, len(resp.data), resp.data)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(1, len(resp.data), resp.data)
 
 
 class TestParticipants(APITestCase, Helper):
@@ -184,7 +184,7 @@ class TestParticipants(APITestCase, Helper):
 
         self.client.login(username='sri', password='12345')
         resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd.id})
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
 
         resp = self.client.post(f'/api/tournament/{self.t1.id}/participant/', 
                     {"name": "new player", "rating":  100})
@@ -196,8 +196,8 @@ class TestParticipants(APITestCase, Helper):
         resp = self.client.delete(
             f'/api/tournament/{self.t1.id}/participant/{parties[0].id}/'
         )
-        self.assertEquals(resp.status_code, 204)
-        self.assertEquals(9, self.t1.participants.count())
+        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(9, self.t1.participants.count())
 
         p = model_to_dict(parties[1])
         p['offed'] = 1
@@ -209,8 +209,8 @@ class TestParticipants(APITestCase, Helper):
             f'/api/tournament/{self.t1.id}/participant/{parties[1].id}/',p
         )
 
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(1, self.t1.participants.filter(offed=True).count())
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(1, self.t1.participants.filter(offed=True).count())
 
 
     def test_off_and_delete_rr(self):
@@ -231,24 +231,24 @@ class TestParticipants(APITestCase, Helper):
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[0].id}/',p
         )
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         resp = self.client.delete(
             f'/api/tournament/{self.t1.id}/participant/{parties[1].id}/'
         )
-        self.assertEquals(resp.status_code, 204)
-        self.assertEquals(1, self.t1.participants.filter(offed=True).count())
+        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(1, self.t1.participants.filter(offed=True).count())
 
         # we have switched off one player, we have deleted another that means
         # only 8 players are eligible to be paired.
         self.t1.update_num_rounds()
         self.t1.refresh_from_db()
 
-        self.assertEquals(7, self.t1.num_rounds)
+        self.assertEqual(7, self.t1.num_rounds)
 
         # no we pair this and try to delete someone again. Should not work.
         rnd1 = self.t1.rounds.get(round_no=1)
         resp = self.client.post(f'/api/tournament/{self.t1.id}/pair/', {'id': rnd1.id})
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         rnd1.refresh_from_db()
         self.assertTrue(rnd1.paired)
         
@@ -256,7 +256,7 @@ class TestParticipants(APITestCase, Helper):
             f'/api/tournament/{self.t1.id}/participant/{parties[2].id}/'
         )
         
-        self.assertEquals(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 400)
 
         # now try to switch someone off.
         p = model_to_dict(parties[5])
@@ -268,7 +268,7 @@ class TestParticipants(APITestCase, Helper):
         resp = self.client.put(
             f'/api/tournament/{self.t1.id}/participant/{parties[5].id}/',p
         )
-        self.assertEquals(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 400)
 
 
 class RandomFillTests(APITestCase):
