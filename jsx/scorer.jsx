@@ -19,7 +19,8 @@ class Editor extends React.Component {
      * @param {*} e 
      */
     addScore(e) {
-        const { current, tournament } = this.props;
+        const current = this.props.current;
+        const tournament = this.props.tournament;
         if(! tournament.team_size) {
             if(current.score1 == current.score2) {
                 current.games_won = 0.5
@@ -50,7 +51,8 @@ class Editor extends React.Component {
                 score1: current.score1, result: current.resultId, 
                 p1: current.p1.id, p2: current.p2.id,
                 board: current.board, round: round_id,
-                score2: current.score2, games_won: current.won
+                score2: current.score2, 
+                games_won: current.games_won == undefined ? current.won : current.games_won,
             })
         }).then(resp => resp.json()).then(json => {
             
@@ -130,10 +132,10 @@ class Editor extends React.Component {
         }
 
         if (fieldName == 'score1') {
-            dispatch({ type: 'score1', score1: e.target.value })
+            dispatch({ type: 'score1', score1: Number(e.target.value )})
         }
         else if (fieldName == 'score2') {
-            dispatch({ type: 'score2', score2: e.target.value })
+            dispatch({ type: 'score2', score2: Number(e.target.value )})
         }
         else if (fieldName == 'board') {
             dispatch({ type: 'board', board: e.target.value })
@@ -573,4 +575,4 @@ export function TSHStyle(props) {
 }
 
 
-console.log('scorer 0.04')
+console.log('scorer 0.04.1')
