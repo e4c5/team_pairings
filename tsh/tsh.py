@@ -27,7 +27,6 @@ def tsh_export(tournament, out):
         completed = 0
     
     for participant in tournament.participants.order_by('seed'):
-        print(participant.name)
         if (participant.seed == 0 or participant.name == 'Bye' 
                 or participant.name == 'Absent' or participant.name == ''):
             continue
@@ -39,7 +38,6 @@ def tsh_export(tournament, out):
         i += 1
 
     for participant in players:
-        print(participant.name, participant.rating)
         # iterate through all the players and create lists containing their opponents and
         # their scores.
         opponents = []
@@ -111,12 +109,12 @@ def tsh_import(fp):
 
 
     for seed, line in enumerate(fp):
+        line = line.strip()
         if line and len(line) > 30 :
-            # print(line)
-            rating = re.search('[0-9]{1,4} ', line).group(0).strip()
-            name = line[0: line.index(rating)].strip()
+            rating = re.search('[0-9]{1,4} ', line[26:]).group(0).strip()
+            name = line[0: 26].strip()
             newr = None
-            data = line[line.index(rating):]
+            data = line[26:]
             data = data.split(';')
             opponents = data[0].strip().split(' ')[1:]
             scores = data[1].strip().split(' ')

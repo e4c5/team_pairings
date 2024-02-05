@@ -39,9 +39,9 @@ class TransTests(TransactionTestCase):
         self.assertEqual(bye.seed, 0)
 
         p1 = Participant.objects.get(seed=1)
-        self.assertEquals(p1.white, 9)
-        self.assertEquals(p1.game_wins, 15)
-        self.assertEquals(p1.spread, 1474)
+        self.assertEqual(p1.white, 9)
+        self.assertEqual(p1.game_wins, 15)
+        self.assertEqual(p1.spread, 1474)
 
         out = StringIO()
         tsh.tsh_export(self.t1, out)
