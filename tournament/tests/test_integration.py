@@ -33,7 +33,7 @@ class TestIntegration(SeleniumTest):
     @classmethod
     def tearDownClass(cls):
         "Sometimes you don't want to quit though "
-        cls.selenium.quit()
+        #cls.selenium.quit()
         #cls.firefox.quit()
 
 

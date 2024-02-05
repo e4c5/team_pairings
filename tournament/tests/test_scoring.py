@@ -132,7 +132,7 @@ class TestResults(SeleniumTest):
         # now let's add some results shall we?
         pencil.click()
         self.type_score(2000, 1500, games=4)
-
+        time.sleep(0.1)
         # now we wait for the result to be posted and for updated standings to
         # come back to us through web push. If this doesn't get updated something
         # has gone wrong.
@@ -140,10 +140,10 @@ class TestResults(SeleniumTest):
             EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(3)"), "4")
         )
         
-        self.assertEquals(
+        self.assertEqual(
             '2000', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(4)").text
         )
-        self.assertEquals(
+        self.assertEqual(
             '1500', driver.find_element(By.CSS_SELECTOR, "td:nth-of-type(7)").text
         )
 
@@ -152,7 +152,7 @@ class TestResults(SeleniumTest):
         pencil.click()
         self.type_score(1430, 2000, games=0)
         time.sleep(1)
-        self.assertEquals(Result.objects.filter(games_won=0).count(), 1)
+        self.assertEqual(Result.objects.filter(games_won=0).count(), 1)
         
 
     def test_entry_by_player(self):
@@ -189,10 +189,10 @@ class TestResults(SeleniumTest):
             EC.text_to_be_present_in_element((By.CSS_SELECTOR, "td:nth-of-type(3)"), "0")
         )
         
-        self.assertEquals(
+        self.assertEqual(
             '400', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(4)").text
         )
-        self.assertEquals(
+        self.assertEqual(
             '500', table.find_element(By.CSS_SELECTOR, "td:nth-of-type(7)").text
         )
 
@@ -201,10 +201,10 @@ class TestResults(SeleniumTest):
         pencil.click()
         self.type_score(430, 500, board=4)
         tr = table.find_element(By.CSS_SELECTOR, "tr:nth-of-type(2)")
-        self.assertEquals(
+        self.assertEqual(
             '430', tr.find_element(By.CSS_SELECTOR, "td:nth-of-type(4)").text
         )
-        self.assertEquals(Result.objects.filter(games_won=0).count(), 2)        
+        self.assertEqual(Result.objects.filter(games_won=0).count(), 2)        
 
 
     def flip(self):

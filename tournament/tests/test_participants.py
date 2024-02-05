@@ -49,10 +49,10 @@ class TestParticipants(SeleniumTest):
         self.add_participants()
         Participant.objects.update(approval='V')
         time.sleep(0.2)
-        self.assertEquals(18, Participant.objects.count())
+        self.assertEqual(18, Participant.objects.count())
         self.delete_participants()
         time.sleep(0.2)
-        self.assertEquals(0, Participant.objects.count())
+        self.assertEqual(0, Participant.objects.count())
 
 
     def test_participant_details(self):
