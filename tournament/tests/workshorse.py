@@ -54,7 +54,7 @@ class SeleniumTest(ChannelsLiveServerTestCase):
     
         self.login()
         self.get_url('/')
-        time.sleep(5)
+        time.sleep(1)
 
         WebDriverWait(driver, 5, 0.1).until(
             EC.presence_of_element_located((By.LINK_TEXT, name))
@@ -163,30 +163,12 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         driver = self.selenium
         driver.find_element(By.TAG_NAME,'body').send_keys(Keys.END);
 
-        element = driver.find_element(By.LINK_TEXT, rnd)
-        driver.execute_script("arguments[0].scrollIntoView();", element)
-        time.sleep(1)  # wait for 1 second
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(0.25)
 
         WebDriverWait(driver, 5, 0.2).until(
             EC.visibility_of_element_located((By.LINK_TEXT, rnd))
-        )
-
-        WebDriverWait(driver, 5, 0.2).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, rnd))
-        )
-
-        # Check if the element is covered
-        covering_element = driver.execute_script("""
-            var elem = arguments[0],                 // your target element
-                x    = elem.getBoundingClientRect().left + (elem.clientWidth / 2),
-                y    = elem.getBoundingClientRect().top + (elem.clientHeight / 2);
-            return document.elementFromPoint(x, y);  // element at centre of your element
-        """, element)
-
-        if covering_element != element and covering_element is not None:
-            print("Another element is covering the target element")
-            print(covering_element.text)
-            element.click()
+        ).click()
 
         WebDriverWait(driver, 5, 0.5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "button[data-testid='pair']"))
