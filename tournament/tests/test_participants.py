@@ -41,7 +41,8 @@ class TestParticipants(SeleniumTest):
         driver = self.selenium
         self.login()
         self.get_url('/')
-
+        time.sleep(0.2)
+        
         WebDriverWait(driver, 5, 0.2).until(
             EC.presence_of_element_located((By.LINK_TEXT, "Richmond Showdown U20"))
         ).click()

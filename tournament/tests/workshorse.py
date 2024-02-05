@@ -164,10 +164,10 @@ class SeleniumTest(ChannelsLiveServerTestCase):
         driver.find_element(By.TAG_NAME,'body').send_keys(Keys.END);
 
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(0.25)
+        time.sleep(0.5)
 
         WebDriverWait(driver, 5, 0.2).until(
-            EC.visibility_of_element_located((By.LINK_TEXT, rnd))
+            EC.element_to_be_clickable((By.XPATH, f'//button[text()="{rnd}"]/..'))
         ).click()
 
         WebDriverWait(driver, 5, 0.5).until(
