@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'api.middleware.TournamentMiddleware'
+    
 ]
 
 ROOT_URLCONF = 'team_pair.urls'

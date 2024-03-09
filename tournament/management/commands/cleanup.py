@@ -18,11 +18,12 @@ class Command(BaseCommand):
     '''
     
     def handle(self, *args, **kwargs):
-        tourneys = Tournament.objects.filter(name__icontains='Junior')
+        tourneys = [Tournament.objects.get(id=66)]
+        #Tournament.objects.filter(name__icontains='Junior').filter(name__contains='2024').filter(name__icontains='Central')
 
         for t in tourneys:
-            u15 = date(year=2009, month=1, day=1)
-            u20 = date(year=2004, month=1, day=1)
+            u15 = date(year=2010, month=1, day=1)
+            u20 = date(year=2005, month=1, day=1)
             if '20' in t.name:
                 for participant in t.participants.all():
                     if participant.user:
@@ -30,7 +31,7 @@ class Command(BaseCommand):
                         if profile.date_of_birth >= u15:
                             print(profile.full_name, 'gets relocated', profile.date_of_birth)
                             try:
-                                sub = Tournament.objects.get(name=t.name.replace('20', '15'))
+                                sub = Tournament.objects.get(id=71) #name=t.name.replace('Under 20', 'Under 15'))
                                 participant.tournament = sub
                                 participant.save()
                             except Tournament.DoesNotExist:
