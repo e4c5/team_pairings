@@ -25,6 +25,7 @@ urlpatterns = [
     path('profile/', include('profiles.urls')),
     path('admin/', admin.site.urls),
     path('api/', include(urls.urlpatterns)),
+    path('api/ai/', include('ai_chat.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('register/', include('tournament.urls')),
     re_path('^', views.redirect_view)

@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.discord',
     'allauth.socialaccount.providers.facebook',
-    'profiles', 'ratings'
+    'profiles', 'ratings', 'ai_chat'
 ]
 
 MIDDLEWARE = [
@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'api.middleware.TournamentMiddleware'
     
 ]
@@ -174,6 +175,14 @@ logging.config.dictConfig({
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+# AI Chat Configuration
+# Configure your LLM provider settings
+AI_CHAT_PROVIDER = os.getenv('AI_CHAT_PROVIDER', 'mock')  # 'openai', 'anthropic', or 'mock'
+AI_CHAT_API_KEY = os.getenv('AI_CHAT_API_KEY', None)
+AI_CHAT_MODEL = os.getenv('AI_CHAT_MODEL', 'gpt-3.5-turbo')  # or 'claude-3-sonnet-20240229' for Anthropic
+AI_CHAT_MAX_TOKENS = int(os.getenv('AI_CHAT_MAX_TOKENS', '150'))
+AI_CHAT_TEMPERATURE = float(os.getenv('AI_CHAT_TEMPERATURE', '0.7'))
 
 #ocid1.user.oc1..aaaaaaaam7i3obrcuuo7pluu2nbsv23g26axd7k6x3dmn4ltpgemojqfsn7q@ocid1.tenancy.oc1..aaaaaaaadkv7vbe52c7oxe6fmqwh56u64nsbfsq2uccjze6gwtub4pviisiq.n8.com
 #fiiuFwR1[OJ{.N}Aa&5)
